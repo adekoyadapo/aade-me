@@ -6,11 +6,13 @@ import k8smultitenantImg from "@/public/k8sMultitenant.png";
 import aspirehub from "@/public/aspirehub.png";
 import ragchatbot from "@/public/chatbot.png"
 import llmlocalrag from "@/public/llmlocalrag.png"
+import infraApp from "@/public/infra-app.png"
+import serverless from "@/public/serverless.png"
 import { BiLogoGoogleCloud, BiLogoKubernetes } from "react-icons/bi";
 import { VscAzure, VscAzureDevops } from "react-icons/vsc";
-import { TbApi, TbLoadBalancer } from "react-icons/tb";
-import { FaGolang } from "react-icons/fa6";
-import { SiAnsible, SiBuildkite, SiCilium, SiCircleci, SiCisco, SiCpanel, SiDatadog, SiDell, SiElasticstack, SiGitea, SiGithub, SiGithubactions, SiGnubash, SiGo, SiGrafana, SiHelm, SiHp, SiIbmcloud, SiIstio, SiKibana, SiLogstash, SiMongodb, SiMysql, SiNewrelic, SiNextdotjs, SiOpentelemetry, SiPagerduty, SiPaloaltosoftware, SiPostgresql, SiPowershell, SiPrometheus, SiPulumi, SiSentry, SiSpinnaker, SiTerraform, SiVirtualbox, SiVmware, SiWordpress } from "react-icons/si";
+import { TbApi, TbBrandNextjs, TbLoadBalancer } from "react-icons/tb";
+import { FaBitbucket, FaGolang } from "react-icons/fa6";
+import { SiAnsible, SiApache, SiAqua, SiArtifacthub, SiBuildkite, SiCilium, SiCircleci, SiCisco, SiConsul, SiCpanel, SiDatadog, SiDell, SiDynatrace, SiElasticstack, SiGitea, SiGithub, SiGithubactions, SiGnubash, SiGo, SiGrafana, SiHelm, SiHp, SiIbmcloud, SiIstio, SiKibana, SiLogstash, SiMongodb, SiMysql, SiNewrelic, SiNextdotjs, SiNginx, SiOpentelemetry, SiPagerduty, SiPaloaltosoftware, SiPostgresql, SiPowershell, SiPrisma, SiPrometheus, SiPulumi, SiSentry, SiSnyk, SiSonarqube, SiSpinnaker, SiSplunk, SiTerraform, SiTravisci, SiVagrant, SiVirtualbox, SiVmware, SiWordpress } from "react-icons/si";
 
 export const links = [
   {
@@ -133,6 +135,22 @@ export const experiencesData = [
 ] as const;
 
 export const projectsData = [
+  {
+    title: "Pulumi Infra App",
+    description:
+      "A python based app that allows you to create and destroy storage buckets on AWS and GCP using Pulumi",
+    tags: ["GCP", "AWS", "Pulumi", "Python"],
+    imageUrl: infraApp,
+    projecUrl: "https://github.com/adekoyadapo/python-infra-app",
+  },
+  {
+    title: "Demo - AWS Serverless Deployment",
+    description:
+      "Simple terraform deployment for a REST API with AWS serverless infrastructure, API Gateway, s3 and Lambda",
+    tags: ["AWS", "Serverless", "Lambda", "API-Gatewway", "Terraform"],
+    imageUrl: serverless,
+    projecUrl: "https://github.com/adekoyadapo/aws-serverless",
+  },
   {
     title: "K8s Multitenant App",
     description:
@@ -278,7 +296,7 @@ export const skillsData = [
     icon: React.createElement(SiHelm),
   },
 
-    {
+  {
     name: 'Istio',
     icon: React.createElement(SiIstio),
   },
@@ -294,7 +312,7 @@ export const skillsData = [
     name: 'GithubAction',
     icon: React.createElement(SiGithubactions),
   },
-      {
+    {
     name: 'Gitea',
     icon: React.createElement(SiGitea),
   },
@@ -307,8 +325,32 @@ export const skillsData = [
     icon: React.createElement(SiCircleci),
   },
   {
+    name: 'TravisCI',
+    icon: React.createElement(SiTravisci),
+  },
+  {
     name: 'Jenkins',
     icon: React.createElement(FaJenkins),
+  },
+  {
+    name: 'Sonaqube',
+    icon: React.createElement(SiSonarqube),
+  },
+  {
+    name: 'Synk',
+    icon: React.createElement(SiSnyk),
+  },
+  {
+    name: 'Artifactory',
+    icon: React.createElement(SiArtifacthub),
+  },
+  {
+    name: 'Prisma',
+    icon: React.createElement(SiPrisma),
+  },
+  {
+    name: 'AquaSecurity',
+    icon: React.createElement(SiAqua),
   },
   {
     name: 'Spinnaker',
@@ -319,12 +361,20 @@ export const skillsData = [
     icon: React.createElement(FaGitlab),
   },
 {
+    name: 'BitBucket',
+    icon: React.createElement(FaBitbucket),
+  },
+{
     name: 'Buildkite',
     icon: React.createElement(SiBuildkite),
   },
   {
     name: 'Terraform',
     icon: React.createElement(SiTerraform),
+  },
+  {
+    name: 'Vagrant',
+    icon: React.createElement(SiVagrant),
   },
   {
     name: 'Ansible',
@@ -379,9 +429,25 @@ export const skillsData = [
     name: 'LoadBalancer',
     icon: React.createElement(TbLoadBalancer),
   },
-      {
+  {
+    name: 'Nginx',
+    icon: React.createElement(SiNginx),
+  },
+  {
+    name: 'Apache',
+    icon: React.createElement(SiApache),
+  },
+  {
+    name: 'Consul',
+    icon: React.createElement(SiConsul),
+  },
+  {
     name: 'Dev',
     icon: React.createElement(FaDev),
+  },
+  {
+    name: 'Splunk',
+    icon: React.createElement(SiSplunk),
   },
   {
     name: 'Elastic',
@@ -402,6 +468,10 @@ export const skillsData = [
   {
     name: 'Grafana',
     icon: React.createElement(SiGrafana),
+  },
+  {
+    name: 'DynaTrace',
+    icon: React.createElement(SiDynatrace),
   },
   {
     name: 'NewRelic',

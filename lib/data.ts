@@ -5,6 +5,7 @@ import { LuGraduationCap } from "react-icons/lu";
 import k8smultitenantImg from "@/public/k8sMultitenant.png";
 import aspirehub from "@/public/aspirehub.png";
 import ragchatbot from "@/public/chatbot.png"
+import llmlocalrag from "@/public/llmlocalrag.png"
 import { BiLogoGoogleCloud, BiLogoKubernetes } from "react-icons/bi";
 import { VscAzure, VscAzureDevops } from "react-icons/vsc";
 import { TbApi, TbLoadBalancer } from "react-icons/tb";
@@ -140,8 +141,16 @@ export const projectsData = [
     imageUrl: k8smultitenantImg,
     projecUrl: "https://github.com/adekoyadapo/k8s-multitenant-app",
   },
+  {
+    title: "RAG Local Chat Assistant",
+    description:
+      "Simple Chat interface to implement RAG using a local Vectordb, documents and GPT4AllEmbeddings",
+    tags: ["Python", "AI Chatbot", "LLM", "RAG", "Hugginface", "Embeddings", "VectorDB"],
+    imageUrl: llmlocalrag,
+    projecUrl: "https://github.com/adekoyadapo/llm-rag-local",
+  },
     {
-    title: "RagChatBot",
+    title: "Rag Chat Bot",
     description:
       "React Chat interface to implement RAG using personal documents on AWS Bedrock and perform agent based actions",
     tags: ["React", "AI", "RAG", "AWS Bedrock, lambda"],

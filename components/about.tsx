@@ -21,7 +21,7 @@ export default function About() {
       <p className="mb-3 text-left">
         Experienced Infrastructure Architect with a background in{" "}
         <span className="font-bold">IT infrastructure and networking,{" "}</span>
-        with indept expertise in
+        and indept expertise in{" "}
         <span className="font-bold italic">DevOps, SRE and Platform Engineering{" "}</span>-
         skilled in designing and implementing complex <span className="font-bold">cloud solutions</span> that meets business requirements.
       </p>

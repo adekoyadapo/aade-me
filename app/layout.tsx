@@ -1,4 +1,5 @@
 import Header from "@/components/header";
+import GoogleAnalytics from "@/components/GoogleAnalytics";
 import "./globals.css";
 import { Inter } from "next/font/google";
 import ActiveSectionContextProvider from "@/context/active-section-context";
@@ -28,7 +29,14 @@ export default function RootLayout({
           <ActiveSectionContextProvider>
             <Header />
             {children}
-            <Analytics />
+            {process.env.NODE_ENV === 'production' && (
+              <>
+                <Analytics />
+                {process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS ? (
+                  <GoogleAnalytics ga_id={process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS} />
+                ) : null}
+              </>
+            )}
             <Footer />
             <Toaster position="top-right" />
             <ThemeSwitch />

@@ -9,6 +9,7 @@ import ThemeContextProvider from "@/context/theme-context";
 import { Toaster } from "react-hot-toast";
 import { Analytics } from "@vercel/analytics/react"
 const inter = Inter({ subsets: ["latin"] });
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 export const metadata = {
   title: "Ade A. | Personal Portfolio",
@@ -32,6 +33,7 @@ export default function RootLayout({
             {process.env.NODE_ENV === 'production' && (
               <>
                 <Analytics />
+                <SpeedInsights />
                 {process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS ? (
                   <GoogleAnalytics ga_id={process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS} />
                 ) : null}

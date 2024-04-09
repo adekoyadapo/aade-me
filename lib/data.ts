@@ -8,6 +8,25 @@ import ragchatbot from "@/public/chatbot.png"
 import llmlocalrag from "@/public/llmlocalrag.png"
 import infraApp from "@/public/infra-app.png"
 import serverless from "@/public/serverless.png"
+import aws_csa from "@/public/badges/aws_csa.png"
+import aws_csp from "@/public/badges/aws_csp.png"
+import aws_dva from "@/public/badges/aws_dva.png"
+import aws_dve from "@/public/badges/aws_dve.png"
+import ccnpe from "@/public/badges/ccnpe.png"
+import ccsec from "@/public/badges/ccsec.png"
+import lpi from "@/public/badges/lpi.png"
+import mcaa from "@/public/badges/mcaa.png"
+import mcasa from "@/public/badges/mcasa.png"
+import mcde from "@/public/badges/mcde.png"
+import vcpdc from "@/public/badges/vcpdc.png"
+import vcpnv from "@/public/badges/vcpnv.png"
+import cka from "@/public/badges/cka.png"
+import ckad from "@/public/badges/ckad.png"
+import vcp from "@/public/badges/vcp.png"
+import pcne from "@/public/badges/pcne.png"
+import pcde from "@/public/badges/pcde.png"
+import pcsp from "@/public/badges/pcsp.png"
+import ibm from "@/public/badges/ibm.png"
 import { BiLogoGoogleCloud, BiLogoKubernetes } from "react-icons/bi";
 import { VscAzure, VscAzureDevops } from "react-icons/vsc";
 import { TbApi, TbBrandNextjs, TbLoadBalancer } from "react-icons/tb";
@@ -34,6 +53,10 @@ export const links = [
   {
     name: "Experience",
     hash: "#experience",
+  },
+  {
+    name: "Certifications",
+    hash: "#certifications",
   },
   {
     name: "Contact",
@@ -182,6 +205,105 @@ export const projectsData = [
     tags: ["Webhosting", "Infrastructure Security", "Security+", "Workspace"],
     imageUrl: aspirehub,
     projecUrl: "https://aspirehub.org",
+  },
+] as const;
+
+
+export const badgesData = [
+  {
+    name: 'Google',
+    imageUrl: pcsp,
+    link: 'https://www.credly.com/badges/e9cc1482-4ce4-4612-ae49-57a4274a187f/public_url'
+  },
+  {
+    name: 'Google',
+    imageUrl: pcde,
+    link: 'https://www.credly.com/badges/4655d6b3-45de-4240-b250-2a5256c57ece/public_url'
+  },
+  {
+    name: 'Google',
+    imageUrl: pcne,
+    link: 'https://www.credly.com/badges/2faa9cc1-8f7b-4e79-aaf5-ed1c336dc816/public_url'
+  },
+  {
+    name: 'AWS',
+    imageUrl: aws_csa,
+    link: 'https://www.credly.com/badges/0b76c83a-764c-45d7-af6d-fd988a71d75b/public_url'
+  },
+  {
+    name: 'AWS',
+    imageUrl: aws_csp,
+    link: 'https://www.credly.com/badges/6c7b373a-99b9-4f03-a5d9-7d0bf7bee7ea/public_url'
+  },
+  {
+    name: 'AWS',
+    imageUrl: aws_dva,
+    link: 'https://www.credly.com/badges/4715ed76-850e-4888-a10b-7494b0192631/public_url'
+  },
+  {
+    name: 'AWS',
+    imageUrl: aws_dve,
+    link: 'https://www.credly.com/badges/4b23e5a4-5c6f-48f1-bd4f-a2b200b69aeb/public_url'
+  },
+  {
+    name: 'Cisco',
+    imageUrl: ccnpe,
+    link: 'https://www.credly.com/badges/76f85025-c770-44ce-b9bf-1da6a88721a4/public_url'
+  },
+    {
+    name: 'Cisco',
+    imageUrl: ccsec,
+    link: 'https://www.credly.com/badges/359c27ab-1ffc-49a0-99e4-bc2ebfda2611/public_url'
+  },
+  {
+    name: 'cka',
+    imageUrl: cka,
+    link: 'https://www.credly.com/badges/d3242df6-9f0c-4d8b-8635-de0f6109c3cf/public_url'
+  },
+  {
+    name: 'ckad',
+    imageUrl: ckad,
+    link: 'https://www.credly.com/badges/8302e9f7-271a-4759-8360-a39d8b591e7f/public_url'
+  },
+    {
+    name: 'Azure',
+    imageUrl: mcaa,
+    link: 'https://www.credly.com/badges/d9fab1cf-6ed8-4cb4-b17d-c228576a15a4/public_url'
+  },
+  {
+    name: 'Azure',
+    imageUrl: mcasa,
+    link: 'https://www.credly.com/badges/cc01feb8-cc75-4a1b-b7e9-3de58ae4e5e3/public_url'
+  },
+  {
+    name: 'Azure',
+    imageUrl: mcde,
+    link: 'https://www.credly.com/badges/b972e9c9-2692-46a5-8d5e-ea438e83db8e/public_url'
+  },
+  {
+    name: 'Vmware',
+    imageUrl: vcpdc,
+    link: 'https://www.credly.com/badges/3ba15641-57ee-4450-8f36-165b15be3b33/public_url'
+  },
+  {
+    name: 'Vmware',
+    imageUrl: vcpnv,
+    link: 'https://www.credly.com/badges/b0722524-88fb-4609-85d1-10885aed4316/public_url'
+  },
+  {
+    name: 'Vmware',
+    imageUrl: vcp,
+    link: 'https://www.credly.com/badges/b44d184a-b5fe-42bc-ab76-5fbbfc9ca162/public_url'
+  },
+  {
+    name: 'LPI',
+    imageUrl: lpi,
+    link: 'https://www.credly.com/badges/189800d9-c526-454c-842a-737cbf6241a6/public_url'
+  },
+  {
+    name: 'IBM',
+    imageUrl: ibm,
+    link: 'https://www.credly.com/badges/a7c4be24-c6f8-4b92-98fe-adac902bb53d/public_url'
   },
 ] as const;
 

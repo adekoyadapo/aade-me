@@ -27,6 +27,10 @@ import pcne from "@/public/badges/pcne.png"
 import pcde from "@/public/badges/pcde.png"
 import pcsp from "@/public/badges/pcsp.png"
 import ibm from "@/public/badges/ibm.png"
+import archchat from "@/public/archchat.png"
+import eca from "@/public//badges/eca.png"
+import ecp from "@/public//badges/ecp.png"
+import egp from "@/public//badges/egp.png"
 import { BiLogoGoogleCloud, BiLogoKubernetes } from "react-icons/bi";
 import { VscAzure, VscAzureDevops } from "react-icons/vsc";
 import { TbApi, TbBrandNextjs, TbLoadBalancer } from "react-icons/tb";
@@ -191,10 +195,18 @@ export const projectsData = [
     projecUrl: "https://github.com/adekoyadapo/llm-rag-local",
   },
     {
+    title: "Arch Chat Bot",
+    description:
+      "A Streamlit Chat interface that uses RAG to create architectural diagrams from python diagram module",
+    tags: ["Python", "AI", "RAG", "OpenAI", "Streamlit"],
+    imageUrl: archchat,
+    projecUrl: "https://github.com/adekoyadapo/arch-gpt.git",
+  },
+    {
     title: "Rag Chat Bot",
     description:
       "React Chat interface to implement RAG using personal documents on AWS Bedrock and perform agent based actions",
-    tags: ["React", "AI", "RAG", "AWS Bedrock, lambda"],
+    tags: ["React", "AI", "RAG", "AWS Bedrock", "lambda"],
     imageUrl: ragchatbot,
     projecUrl: "https://github.com/adekoyadapo/react-bedrock-rag-agent",
   },
@@ -304,6 +316,21 @@ export const badgesData = [
     name: 'IBM',
     imageUrl: ibm,
     link: 'https://www.credly.com/badges/a7c4be24-c6f8-4b92-98fe-adac902bb53d/public_url'
+  },
+  {
+    name: 'ECA',
+    imageUrl: eca,
+    link: 'https://api.accredible.com/v1/frontend/credential_website_embed_image/certificate/112635855'
+  },
+  {
+    name: 'ECP',
+    imageUrl: ecp,
+    link: 'https://api.accredible.com/v1/frontend/credential_website_embed_image/certificate/112843115'
+  },
+  {
+    name: 'EGP',
+    imageUrl: egp,
+    link: 'https://api.accredible.com/v1/frontend/credential_website_embed_image/certificate/117018699'
   },
 ] as const;
 

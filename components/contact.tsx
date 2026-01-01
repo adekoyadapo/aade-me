@@ -1,28 +1,26 @@
 "use client";
 
 import React, { useState } from "react";
+import Script from "next/script";
 import SectionHeading from "./section-heading";
 import { motion } from "framer-motion";
 import { useSectionInView } from "@/lib/hooks";
 import { sendEmail } from "@/actions/sendEmail";
 import SubmitBtn from "./submit-btn";
 import toast from "react-hot-toast";
-import ReCAPTCHA from "react-google-recaptcha";
+// reCAPTCHA removed; using lightweight anti-bot techniques instead
 
 export default function Contact() {
   const { ref } = useSectionInView("Contact");
-
-  const [captcha, setCaptcha] = useState<string | null>(null);
+  // capture when the form rendered to measure human interaction time
+  const [formTs] = useState<string>(() => Date.now().toString());
 
   const handleFormSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (!captcha) {
-      toast.error("Please complete the CAPTCHA");
-      return;
-    }
-
     const formData = new FormData(event.currentTarget);
+    // Add a JS-only flag to help detect non-JS bots on the server.
+    formData.set("js_only", "1");
 
     const { data, error } = await sendEmail(formData);
 
@@ -68,9 +66,11 @@ export default function Contact() {
           className="hidden"
           type="text"
           name="honeytrap"
-          autoComplete="off"
-        // onChange={handleChange}
+          autoComplete="new-password"
+          tabIndex={-1}
+          aria-hidden="true"
         />
+        <input type="hidden" name="form_ts" value={formTs} />
 
         <input
           className="h-14 px-4 rounded-lg borderBlack dark:bg-white dark:bg-opacity-80 dark:focus:bg-opacity-100 transition-all dark:outline-none"
@@ -87,8 +87,14 @@ export default function Contact() {
           required
           maxLength={5000}
         />
-        <ReCAPTCHA className="pt-5 pb-5 flex justify-center mx-auto" sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY!} onChange={setCaptcha} />
-
+        {/* Cloudflare Turnstile */}
+        <Script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer />
+        <div
+          className="cf-turnstile pt-5 pb-5 flex justify-center mx-auto"
+          data-sitekey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
+          data-theme="auto"
+          data-size="flexible"
+        />
         <SubmitBtn />
       </form>
     </motion.section>

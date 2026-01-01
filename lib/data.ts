@@ -1,6 +1,6 @@
 import React from "react";
 import { CgOrganisation, CgWorkAlt } from "react-icons/cg";
-import { FaGit, FaReact, FaAws, FaGitAlt, FaLinux, FaWindows, FaServer, FaNetworkWired, FaPython, FaNodeJs, FaDev, FaDatabase, FaJava, FaDocker, FaGithub, FaGitlab, FaUbuntu, FaApple, FaJenkins, FaPhp, FaLock } from "react-icons/fa";
+import { FaGit, FaReact, FaAws, FaGitAlt, FaLinux, FaWindows, FaServer, FaNetworkWired, FaPython, FaNodeJs, FaDev, FaDatabase, FaJava, FaDocker, FaGithub, FaGitlab, FaUbuntu, FaApple, FaJenkins, FaPhp, FaLock, FaCloud, FaTerminal } from "react-icons/fa";
 import { LuGraduationCap } from "react-icons/lu";
 import k8smultitenantImg from "@/public/k8sMultitenant.png";
 import aspirehub from "@/public/aspirehub.png";
@@ -35,7 +35,7 @@ import { BiLogoGoogleCloud, BiLogoKubernetes } from "react-icons/bi";
 import { VscAzure, VscAzureDevops } from "react-icons/vsc";
 import { TbApi, TbBrandNextjs, TbLoadBalancer } from "react-icons/tb";
 import { FaBitbucket, FaGolang } from "react-icons/fa6";
-import { SiAnsible, SiApache, SiAqua, SiArtifacthub, SiBuildkite, SiCilium, SiCircleci, SiCisco, SiConsul, SiCpanel, SiDatadog, SiDell, SiDynatrace, SiElasticstack, SiGitea, SiGithub, SiGithubactions, SiGnubash, SiGo, SiGrafana, SiHelm, SiHp, SiIbmcloud, SiIstio, SiKibana, SiLogstash, SiMongodb, SiMysql, SiNewrelic, SiNextdotjs, SiNginx, SiOpentelemetry, SiPagerduty, SiPaloaltosoftware, SiPostgresql, SiPowershell, SiPrisma, SiPrometheus, SiPulumi, SiSentry, SiSnyk, SiSonarqube, SiSpinnaker, SiSplunk, SiTerraform, SiTravisci, SiVagrant, SiVirtualbox, SiVmware, SiWordpress } from "react-icons/si";
+import { SiAnsible, SiApache, SiAqua, SiArtifacthub, SiBuildkite, SiCilium, SiCircleci, SiCisco, SiConsul, SiCpanel, SiDatadog, SiDell, SiDynatrace, SiElasticstack, SiGitea, SiGithub, SiGithubactions, SiGnubash, SiGo, SiGrafana, SiHelm, SiHp, SiIstio, SiKibana, SiLogstash, SiMongodb, SiMysql, SiNewrelic, SiNextdotjs, SiNginx, SiOpentelemetry, SiPagerduty, SiPaloaltosoftware, SiPostgresql, SiPrisma, SiPrometheus, SiPulumi, SiSentry, SiSnyk, SiSonarqube, SiSpinnaker, SiSplunk, SiTerraform, SiTravisci, SiVagrant, SiVirtualbox, SiVmware, SiWordpress } from "react-icons/si";
 
 export const links = [
   {
@@ -350,7 +350,7 @@ export const skillsData = [
   },
   {
     name: 'IBM',
-    icon: React.createElement(SiIbmcloud),
+    icon: React.createElement(FaCloud),
   },
     {
     name: 'Git',
@@ -543,7 +543,7 @@ export const skillsData = [
   },
   {
     name: 'Powershell',
-    icon: React.createElement(SiPowershell),
+    icon: React.createElement(FaTerminal),
   },
   {
     name: 'go',

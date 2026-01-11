@@ -1,4 +1,5 @@
 import Header from "@/components/header";
+import MobileMenu from "@/components/mobile-menu";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
 import "./globals.css";
 import { Inter } from "next/font/google";
@@ -25,10 +26,12 @@ export default function RootLayout({
     <html lang="en" className="!scroll-smooth">
       <body
         className={`${inter.className} bg-zinc-50 text-zinc-950 relative pt-28 sm:pt-36 dark:bg-zinc-900 dark:text-zinc-50 dark:text-opacity-90`}
+        suppressHydrationWarning
       >
         <ThemeContextProvider>
           <ActiveSectionContextProvider>
             <Header />
+            <MobileMenu />
             {children}
             {process.env.NODE_ENV === 'production' && (
               <>

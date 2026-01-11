@@ -1,4 +1,4 @@
-import { BlogPost, BlogTag, blogPosts } from "./blog-data";
+import { BlogPost } from "./blog-types";
 
 /**
  * Filter blog posts by tag
@@ -7,7 +7,7 @@ export function filterPostsByTag(posts: readonly BlogPost[], tag: string | null)
   if (!tag || tag === "All") {
     return posts;
   }
-  return posts.filter((post) => post.tags.includes(tag as BlogTag));
+  return posts.filter((post) => post.tags.includes(tag));
 }
 
 /**
@@ -36,34 +36,10 @@ export function sortPostsByDate(posts: readonly BlogPost[]): readonly BlogPost[]
   );
 }
 
-/**
- * Get previous and next posts for navigation
- */
-export function getAdjacentPosts(currentSlug: string) {
-  const sortedPosts = sortPostsByDate(blogPosts);
-  const currentIndex = sortedPosts.findIndex(post => post.slug === currentSlug);
-
-  return {
-    previous: currentIndex > 0 ? sortedPosts[currentIndex - 1] : null,
-    next: currentIndex < sortedPosts.length - 1 ? sortedPosts[currentIndex + 1] : null,
-  };
-}
-
-/**
- * Get post by slug
- */
-export function getPostBySlug(slug: string): BlogPost | undefined {
-  return blogPosts.find(post => post.slug === slug);
-}
-
-/**
- * Get all unique tags from all posts
- */
-export function getAllTags(): string[] {
+// For server-side tag loading use lib/blog-repo.getAllTags().
+export function extractAllTags(posts: readonly BlogPost[]): string[] {
   const tags = new Set<string>();
-  blogPosts.forEach(post => {
-    post.tags.forEach(tag => tags.add(tag));
-  });
+  posts.forEach(post => post.tags.forEach(tag => tags.add(tag)));
   return Array.from(tags).sort();
 }
 

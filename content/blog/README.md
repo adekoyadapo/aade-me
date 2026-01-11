@@ -1,103 +1,116 @@
-# Blog Content Management
+# Blog Content Guide
 
-This directory contains all blog post content as individual Markdown files. Each file represents a single blog post with frontmatter metadata.
+This folder contains all blog articles as individual Markdown files. Add a new `.md` file here and it will automatically appear on the site.
 
-## File Structure
+## Quick Start
 
-Each blog post is stored as a `.md` file with the following format:
+1) Create a file: `content/blog/my-post-slug.md`
+2) Add frontmatter, then your Markdown content:
 
-```markdown
+```md
 ---
-slug: "post-slug"
-title: "Post Title"
-excerpt: "Brief description of the post"
-date: "YYYY-MM-DD"
-readTime: "X min read"
-tags: ["Tag1", "Tag2", "Tag3"]
-author: "Author Name"
-imageUrl: "https://..."
-imageAlt: "Image description"
+slug: "my-post-slug"           # lowercase, dash-separated; must be unique
+title: "My Post Title"
+excerpt: "Optional short summary (auto-generated if omitted)."
+date: "2026-01-15"             # ISO format: YYYY-MM-DD
+tags: ["Cloud", "Architecture"]
+author: "Ade A."
+imageUrl: "https://…/hero.jpg"  # hero image at the top of the post + cards
+imageAlt: "Short description of the image for accessibility"
 ---
 
-# Post Title
+# Heading 1
 
-Your markdown content here...
+Your article content in Markdown…
 ```
 
-## How to Update Blog Content
+That’s all — the site discovers new posts automatically.
 
-### Option 1: Edit Markdown Files (Recommended for Content Only)
+## Frontmatter Fields
 
-1. Edit the `.md` file in this directory
-2. Update the content below the frontmatter
-3. Copy the updated content (excluding the frontmatter section)
-4. Open `/lib/blog-data.ts`
-5. Find the corresponding blog post object
-6. Replace the `content` field with your updated markdown
+- slug: unique identifier and URL path (`/blog/slug`). The filename usually matches it.
+- title: human-readable title shown on cards and the post page.
+- excerpt (optional): if omitted, an excerpt is computed from the content.
+- date: publication date in `YYYY-MM-DD`.
+- tags: array of strings; used for the tag filter on the blog page.
+- author: author’s display name.
+- imageUrl: the hero image used in the list card and post header.
+- imageAlt: short, descriptive alternative text for accessibility.
 
-### Option 2: Edit blog-data.ts Directly
+Read time is auto-computed; you can override via `readTime: "X min read"` if needed.
 
-1. Open `/lib/blog-data.ts`
-2. Find the blog post you want to update
-3. Edit the `content` field directly
-4. Optionally sync changes back to the markdown file
+## Images
 
-## Why Two Locations?
+There are two kinds of images you might use:
 
-The markdown files in this directory serve as the **source of truth** for content, making it easy to:
-- Edit blog posts in a clean, readable format
-- Version control content changes
-- Use markdown editors with preview
-- Keep content separate from code
+1) Hero image (frontmatter `imageUrl`)
+   - This uses Next.js image optimization and must be from an allowed domain or a local file.
+   - Allowed remote hosts are configured in `next.config.js` under `images.remotePatterns`.
+   - Currently allowed: `images.unsplash.com` and `images.contentstack.io`.
+   - To use a different host for `imageUrl`, add it to `next.config.js`.
 
-However, because the Next.js app uses client components for interactivity (search, filters), we can't dynamically read files at runtime. The content must be included in `/lib/blog-data.ts` for the build process.
+2) Inline images (inside your Markdown content)
+   - Use standard Markdown syntax: `![alt text](/blog/my-image.png)`.
+   - Local images: place files under `public/blog/` and reference with `/blog/<file>`.
+   - Remote images: any URL is fine (these render as regular `<img>` tags).
 
-## Adding a New Blog Post
+### Local Image Tips
 
-1. **Create Markdown File**: Create a new `.md` file in this directory with frontmatter
-2. **Update blog-data.ts**: Add a new object to the `blogPosts` array in `/lib/blog-data.ts` with all metadata and content
-3. **Update Tags** (if needed): Add any new tags to the `blogTags` array in `/lib/blog-data.ts`
+- Put images in `public/blog/` (or a subfolder):
+  - Example: `public/blog/my-post/diagram.png` → `![diagram](/blog/my-post/diagram.png)`
+- Keep reasonable dimensions for performance (e.g., ~1200×600 for hero-like visuals).
+- Always supply meaningful `alt` text in Markdown for accessibility.
 
-## Content Guidelines
+### Downloaded Images (Local) — Step‑by‑Step
 
-- **Headings**: Use `#` for H1 (title), `##` for H2 (sections), `###` for H3 (subsections)
-- **Bold**: Use `**text**` for bold
-- **Italic**: Use `*text*` for italic
-- **Code blocks**: Use triple backticks with language identifier:
-  ````markdown
-  ```bash
-  command here
-  ```
-  ````
-- **Inline code**: Use single backticks: \`code\`
-- **Lists**: Use `-` or `*` for bullets, `1.` for numbered lists
-- **Links**: Use `[text](url)` format
-- **Images**: Hosted externally (Unsplash recommended)
+Use this if you downloaded an image and want to store it in the repo.
 
-## Formatting Features
+1) Save the file under `public/blog/<your-slug>/` (create the folder if needed)
+   - Example path: `public/blog/getting-started-elasticsearch/hero.png`
+2) Reference it:
+   - As the hero image (frontmatter):
+     ```md
+     imageUrl: "/blog/getting-started-elasticsearch/hero.png"
+     imageAlt: "Concise description"
+     ```
+   - Inline in Markdown:
+     ```md
+     ![Concise description](/blog/getting-started-elasticsearch/diagram.png)
+     ```
+3) Tips for local files
+   - No `next.config.js` change is needed for local images.
+   - Prefer `.webp` or optimized `.jpg` when possible; keep sizes modest.
+   - Use lowercase names, no spaces: `diagram-architecture.webp`.
+   - Hero images (from `imageUrl`) are optimized with next/image.
+   - Inline images render as standard `<img>` via Markdown.
 
-The blog uses `react-markdown` with GitHub Flavored Markdown (GFM) support, providing:
-- Proper heading hierarchy and spacing
-- Syntax-highlighted code blocks
-- Styled lists and blockquotes
-- Responsive typography
-- Dark mode support
-- Clean, readable layout
+## Markdown & Formatting
 
-## Image Guidelines
+- GitHub Flavored Markdown (GFM) is supported (tables, task lists, strikethrough, etc.).
+- Headings (`#`, `##`, `###`), lists, code blocks (```) and blockquotes are styled.
+- Stick to Markdown; avoid raw HTML in posts.
 
-- Use high-quality images from Unsplash or similar sources
-- Image URLs should be in format: `https://images.unsplash.com/photo-{id}?w=1200&h=600&fit=crop`
-- Provide descriptive alt text for accessibility
-- Images appear as hero images at the top of each post
+## Pagination & Discovery
 
-## Tags
+- Posts are auto-sorted by date (newest first) and paginated on the blog list.
+- No manual index — dropping a valid Markdown file here is enough.
 
-Current available tags (can be extended):
-- Cloud, AWS, Azure, GCP, Architecture
-- AI, RAG, Vector Databases
-- Distributed Systems, Microservices
-- Elasticsearch, Search, Database
-- Observability, MLOps, LLMOps
-- Agentic AI, Automation, Workflows
-- History, Trends
+## Adding a New Remote Image Host (for hero images)
+
+Edit `next.config.js` and add a `remotePatterns` entry:
+
+```js
+images: {
+  remotePatterns: [
+    { protocol: 'https', hostname: 'images.unsplash.com', pathname: '/**' },
+    { protocol: 'https', hostname: 'images.contentstack.io', pathname: '/**' },
+    // Add your host here
+  ],
+}
+```
+
+## Local Testing
+
+- Run `npm run dev` and open `http://localhost:3000/blog` to verify your article.
+
+Happy writing!

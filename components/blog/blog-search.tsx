@@ -7,10 +7,11 @@ import { debounce } from "@/lib/blog-utils";
 
 type BlogSearchProps = {
   onSearch: (query: string) => void;
+  defaultValue?: string;
 };
 
-export default function BlogSearch({ onSearch }: BlogSearchProps) {
-  const [query, setQuery] = useState("");
+export default function BlogSearch({ onSearch, defaultValue = "" }: BlogSearchProps) {
+  const [query, setQuery] = useState(defaultValue);
 
   // Debounced search
   useEffect(() => {

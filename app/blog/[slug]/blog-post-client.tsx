@@ -3,7 +3,7 @@
 import React from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { BlogPost } from "@/lib/blog-data";
+import { BlogPost } from "@/lib/blog-types";
 import { formatDate } from "@/lib/blog-utils";
 import BlogNavigation from "@/components/blog/blog-navigation";
 import ShareButtons from "@/components/blog/share-buttons";
@@ -26,7 +26,7 @@ export default function BlogPostClient({
   postUrl,
 }: BlogPostClientProps) {
   return (
-    <main className="min-h-screen bg-zinc-50 dark:bg-zinc-900 pt-28 sm:pt-36 pb-20">
+    <main className="min-h-screen bg-zinc-50 dark:bg-zinc-900 pt-24 sm:pt-28 pb-16">
       <article className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Back Button */}
         <motion.div
@@ -131,7 +131,7 @@ export default function BlogPostClient({
             prose-blockquote:text-zinc-600 dark:prose-blockquote:text-zinc-400
             prose-hr:border-zinc-200 dark:prose-hr:border-zinc-800 prose-hr:my-8"
         >
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+          <ReactMarkdown remarkPlugins={[remarkGfm]} skipHtml>
             {post.content}
           </ReactMarkdown>
         </motion.div>

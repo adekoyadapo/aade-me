@@ -1,20 +1,13 @@
 import React from "react";
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
-import { motion } from "framer-motion";
-import { blogPosts } from "@/lib/blog-data";
-import { getPostBySlug, formatDate, getAdjacentPosts } from "@/lib/blog-utils";
-import BlogNavigation from "@/components/blog/blog-navigation";
-import ShareButtons from "@/components/blog/share-buttons";
-import Link from "next/link";
-import { HiArrowLeft, HiClock, HiCalendar, HiUser } from "react-icons/hi";
+import { getAllSlugs, getPostBySlug, getAdjacentPosts } from "@/lib/blog-repo";
 import BlogPostClient from "./blog-post-client";
 
 // Generate static params for all blog posts
 export async function generateStaticParams() {
-  return blogPosts.map((post) => ({
-    slug: post.slug,
-  }));
+  const slugs = await getAllSlugs();
+  return slugs.map((slug) => ({ slug }));
 }
 
 // Generate metadata for SEO
@@ -24,7 +17,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const post = getPostBySlug(slug);
+  const post = await getPostBySlug(slug);
 
   if (!post) {
     return {
@@ -53,13 +46,13 @@ export async function generateMetadata({
 
 export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const post = getPostBySlug(slug);
+  const post = await getPostBySlug(slug);
 
   if (!post) {
     notFound();
   }
 
-  const { previous, next } = getAdjacentPosts(slug);
+  const { previous, next } = await getAdjacentPosts(slug);
   const postUrl = `https://aade.me/blog/${post.slug}`;
 
   return (

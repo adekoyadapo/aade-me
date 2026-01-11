@@ -2,15 +2,16 @@ import Header from "@/components/header";
 import MobileMenu from "@/components/mobile-menu";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
 import "./globals.css";
-import { Inter } from "next/font/google";
 import ActiveSectionContextProvider from "@/context/active-section-context";
 import Footer from "@/components/footer";
 import ThemeSwitch from "@/components/theme-switch";
 import ThemeContextProvider from "@/context/theme-context";
 import { Toaster } from "react-hot-toast";
 import { Analytics } from "@vercel/analytics/react"
-const inter = Inter({ subsets: ["latin"] });
 import { SpeedInsights } from "@vercel/speed-insights/next"
+import { Inter } from "next/font/google";
+
+const inter = Inter({ subsets: ["latin"], display: "swap" });
 
 export const metadata = {
   title: "Ade A. | Personal Portfolio",

@@ -4,7 +4,7 @@ import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { BlogPost } from "@/lib/blog-data";
+import { BlogPost } from "@/lib/blog-types";
 import { formatDate } from "@/lib/blog-utils";
 import { HiClock, HiCalendar } from "react-icons/hi";
 

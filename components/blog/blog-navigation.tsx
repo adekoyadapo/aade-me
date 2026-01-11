@@ -4,7 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { HiArrowLeft, HiArrowRight } from "react-icons/hi";
-import { BlogPost } from "@/lib/blog-data";
+import { BlogPost } from "@/lib/blog-types";
 
 type BlogNavigationProps = {
   previous: BlogPost | null;

@@ -86,7 +86,7 @@ export default function MobileMenu() {
                     transition={{ delay: index * 0.05 }}
                   >
                     <Link
-                      href={link.hash}
+                      href={link.hash.startsWith("/") ? link.hash : `/${link.hash}`}
                       onClick={() => handleLinkClick(link.name, link.hash)}
                       className={`flex items-center gap-4 px-4 py-4 rounded-xl transition-all ${
                         activeSection === link.name && !link.hash.startsWith("/")

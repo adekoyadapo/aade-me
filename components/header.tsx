@@ -36,7 +36,7 @@ export default function Header() {
                       activeSection === link.name,
                   }
                 )}
-                href={link.hash}
+                href={link.hash.startsWith("/") ? link.hash : `/${link.hash}`}
                 onClick={() => {
                   if (link.hash.startsWith("/")) {
                     // For routes like /blog, don't update active section

@@ -1,3 +1,18 @@
+/**
+ * Blog Posts Data
+ *
+ * CONTENT MANAGEMENT:
+ * - Blog content is stored in markdown files at: content/blog/
+ * - Each blog post has its own .md file with frontmatter
+ * - To update blog content: edit the markdown files in content/blog/
+ * - The markdown files are the source of truth for content
+ *
+ * UPDATING INSTRUCTIONS:
+ * 1. Edit the markdown file in content/blog/[slug].md
+ * 2. Copy the content (without frontmatter) and update the corresponding post below
+ * 3. The frontmatter metadata should match the BlogPost properties
+ */
+
 export interface BlogPost {
   slug: string;
   title: string;
@@ -22,8 +37,7 @@ export const blogPosts: readonly BlogPost[] = [
     author: "Ade A.",
     imageUrl: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1200&h=600&fit=crop",
     imageAlt: "Cloud architecture diagram showing multi-cloud infrastructure",
-    content: `
-# Architecturing to Scale: Cloud Architecture in 2026
+    content: `# Architecturing to Scale: Cloud Architecture in 2026
 
 Building scalable cloud architectures has never been more critical. As organizations continue migrating to the cloud, understanding the nuances of AWS, Azure, and GCP becomes essential for making informed decisions.
 
@@ -56,8 +70,7 @@ Cloud strategy today is about reversibility and fit. Don't get locked into a sin
 
 ---
 
-*Architecture training today focuses on designing secure, reliable, and scalable systems across all three major clouds—because the future is multi-cloud.*
-    `,
+*Architecture training today focuses on designing secure, reliable, and scalable systems across all three major clouds—because the future is multi-cloud.*`,
   },
   {
     slug: "distributed-computing-fundamentals",
@@ -69,8 +82,7 @@ Cloud strategy today is about reversibility and fit. Don't get locked into a sin
     author: "Ade A.",
     imageUrl: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=1200&h=600&fit=crop",
     imageAlt: "Distributed computing network diagram",
-    content: `
-# Distributed Computing: Architecture Patterns That Matter
+    content: `# Distributed Computing: Architecture Patterns That Matter
 
 Distributed systems are everywhere, yet they remain one of the most challenging aspects of modern software engineering. Let's demystify the core patterns that make distributed systems work.
 
@@ -123,8 +135,7 @@ As organizations continue adopting distributed architectures for scalability, pe
 
 ---
 
-*Remember: Distributed systems are all about trade-offs. There's no perfect architecture, only informed decisions.*
-    `,
+*Remember: Distributed systems are all about trade-offs. There's no perfect architecture, only informed decisions.*`,
   },
   {
     slug: "getting-started-elasticsearch",
@@ -136,8 +147,7 @@ As organizations continue adopting distributed architectures for scalability, pe
     author: "Ade A.",
     imageUrl: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1200&h=600&fit=crop",
     imageAlt: "Elasticsearch cluster setup diagram",
-    content: `
-# Getting Started with Elasticsearch: Installation and Use Cases
+    content: `# Getting Started with Elasticsearch: Installation and Use Cases
 
 Elasticsearch is a distributed, RESTful search and analytics engine that has become the backbone of modern search experiences. As the heart of the Elastic Stack (formerly ELK), it securely stores your data for lightning-fast search, fine-tuned relevancy, and powerful analytics that scale with ease.
 
@@ -204,8 +214,7 @@ In production, run Elasticsearch on dedicated hosts or as a primary service. It'
 
 ---
 
-*Elasticsearch isn't just a search engine—it's a data analytics platform that happens to be really good at search.*
-    `,
+*Elasticsearch isn't just a search engine—it's a data analytics platform that happens to be really good at search.*`,
   },
   {
     slug: "search-and-ai",
@@ -217,8 +226,7 @@ In production, run Elasticsearch on dedicated hosts or as a primary service. It'
     author: "Ade A.",
     imageUrl: "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=1200&h=600&fit=crop",
     imageAlt: "AI-powered semantic search visualization",
-    content: `
-# Search and AI: The Evolution of RAG and Vector Databases
+    content: `# Search and AI: The Evolution of RAG and Vector Databases
 
 The intersection of search and AI has exploded in the past few years. Vector databases, RAG (Retrieval Augmented Generation), and semantic search have transformed how we think about information retrieval.
 
@@ -278,8 +286,7 @@ The winning pattern emerging in 2026? Hybrid search combining:
 
 ---
 
-*Vector databases and RAG aren't replacing traditional search—they're augmenting it with AI superpowers.*
-    `,
+*Vector databases and RAG aren't replacing traditional search—they're augmenting it with AI superpowers.*`,
   },
   {
     slug: "cloud-computing-evolution",
@@ -291,8 +298,7 @@ The winning pattern emerging in 2026? Hybrid search combining:
     author: "Ade A.",
     imageUrl: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=1200&h=600&fit=crop",
     imageAlt: "Cloud computing evolution timeline",
-    content: `
-# Cloud Computing Over 10 Years: A 2015-2025 Review
+    content: `# Cloud Computing Over 10 Years: A 2015-2025 Review
 
 A lot can change in a decade. Looking back at cloud computing from 2015 to 2025, the transformation is nothing short of remarkable. What was once a risky bet has become the default way we build software.
 
@@ -349,8 +355,7 @@ That shift from *if* to *how* represents a matured industry. The cloud isn't the
 
 ---
 
-*The cloud revolution is over. The cloud evolution continues.*
-    `,
+*The cloud revolution is over. The cloud evolution continues.*`,
   },
   {
     slug: "ai-observability-trends",
@@ -362,8 +367,7 @@ That shift from *if* to *how* represents a matured industry. The cloud isn't the
     author: "Ade A.",
     imageUrl: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1200&h=600&fit=crop&sat=-100",
     imageAlt: "AI observability dashboard",
-    content: `
-# AI and Observability: Trends in MLOps and LLMOps for 2026
+    content: `# AI and Observability: Trends in MLOps and LLMOps for 2026
 
 Observability is undergoing a fundamental transformation. The rise of Large Language Models (LLMs) and agentic AI systems has exposed the limitations of traditional MLOps practices. Welcome to the era of LLMOps.
 
@@ -445,8 +449,7 @@ AI adoption is rising, but production maturity is rare. Most organizations are s
 
 ---
 
-*LLMOps isn't just MLOps with fancier models. It's a fundamental rethinking of how we observe, debug, and optimize AI systems.*
-    `,
+*LLMOps isn't just MLOps with fancier models. It's a fundamental rethinking of how we observe, debug, and optimize AI systems.*`,
   },
   {
     slug: "agentic-ai-workflows",
@@ -458,8 +461,7 @@ AI adoption is rising, but production maturity is rare. Most organizations are s
     author: "Ade A.",
     imageUrl: "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=1200&h=600&fit=crop",
     imageAlt: "Agentic AI workflow diagram",
-    content: `
-# What's New: Agentic AI Workflows in 2026
+    content: `# What's New: Agentic AI Workflows in 2026
 
 Agentic AI is dominating headlines in 2026, and for good reason. These aren't your grandfather's chatbots—we're talking about autonomous AI systems capable of executing complex, multi-step tasks with minimal human intervention.
 
@@ -555,8 +557,7 @@ The transition from experimental to operational agentic AI is happening now. The
 
 ---
 
-*Agentic AI workflows aren't science fiction anymore. They're Friday's production deployment.*
-    `,
+*Agentic AI workflows aren't science fiction anymore. They're Friday's production deployment.*`,
   },
 ] as const;
 

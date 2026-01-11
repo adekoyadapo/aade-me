@@ -9,6 +9,8 @@ import BlogNavigation from "@/components/blog/blog-navigation";
 import ShareButtons from "@/components/blog/share-buttons";
 import Link from "next/link";
 import { HiArrowLeft, HiClock, HiCalendar, HiUser } from "react-icons/hi";
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 type BlogPostClientProps = {
   post: BlogPost;
@@ -106,9 +108,33 @@ export default function BlogPostClient({
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.3 }}
-          className="prose prose-zinc dark:prose-invert max-w-none prose-headings:font-bold prose-h1:text-4xl prose-h2:text-3xl prose-h3:text-2xl prose-p:text-zinc-700 dark:prose-p:text-zinc-300 prose-a:text-blue-600 dark:prose-a:text-blue-400 prose-code:text-pink-600 dark:prose-code:text-pink-400 prose-code:bg-zinc-100 dark:prose-code:bg-zinc-800 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-pre:bg-zinc-100 dark:prose-pre:bg-zinc-800 prose-pre:border prose-pre:border-zinc-200 dark:prose-pre:border-zinc-700"
-          dangerouslySetInnerHTML={{ __html: formatMarkdown(post.content) }}
-        />
+          className="prose prose-zinc dark:prose-invert max-w-none
+            prose-headings:font-bold prose-headings:text-zinc-900 dark:prose-headings:text-zinc-100
+            prose-h1:text-4xl prose-h1:mb-6 prose-h1:mt-8
+            prose-h2:text-3xl prose-h2:mb-4 prose-h2:mt-8 prose-h2:pb-2 prose-h2:border-b prose-h2:border-zinc-200 dark:prose-h2:border-zinc-800
+            prose-h3:text-2xl prose-h3:mb-3 prose-h3:mt-6
+            prose-p:text-zinc-700 dark:prose-p:text-zinc-300 prose-p:leading-relaxed prose-p:mb-4
+            prose-a:text-blue-600 dark:prose-a:text-blue-400 prose-a:no-underline hover:prose-a:underline
+            prose-strong:text-zinc-900 dark:prose-strong:text-zinc-100 prose-strong:font-semibold
+            prose-code:text-pink-600 dark:prose-code:text-pink-400
+            prose-code:bg-zinc-100 dark:prose-code:bg-zinc-800
+            prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-sm
+            prose-code:before:content-none prose-code:after:content-none
+            prose-pre:bg-zinc-900 dark:prose-pre:bg-zinc-950
+            prose-pre:border prose-pre:border-zinc-200 dark:prose-pre:border-zinc-800
+            prose-pre:rounded-lg prose-pre:p-4 prose-pre:overflow-x-auto
+            prose-ul:my-4 prose-ul:list-disc prose-ul:pl-6
+            prose-ol:my-4 prose-ol:list-decimal prose-ol:pl-6
+            prose-li:text-zinc-700 dark:prose-li:text-zinc-300 prose-li:my-2
+            prose-blockquote:border-l-4 prose-blockquote:border-blue-500
+            prose-blockquote:pl-4 prose-blockquote:italic
+            prose-blockquote:text-zinc-600 dark:prose-blockquote:text-zinc-400
+            prose-hr:border-zinc-200 dark:prose-hr:border-zinc-800 prose-hr:my-8"
+        >
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+            {post.content}
+          </ReactMarkdown>
+        </motion.div>
 
         {/* Navigation */}
         <BlogNavigation previous={previous} next={next} />
@@ -134,43 +160,4 @@ export default function BlogPostClient({
       </article>
     </main>
   );
-}
-
-// Simple markdown-to-HTML converter (for basic formatting)
-function formatMarkdown(content: string): string {
-  let html = content;
-
-  // Headers
-  html = html.replace(/^# (.*$)/gim, "<h1>$1</h1>");
-  html = html.replace(/^## (.*$)/gim, "<h2>$1</h2>");
-  html = html.replace(/^### (.*$)/gim, "<h3>$1</h3>");
-
-  // Bold
-  html = html.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
-
-  // Italic
-  html = html.replace(/\*(.*?)\*/g, "<em>$1</em>");
-
-  // Code blocks
-  html = html.replace(/```(\w+)?\n([\s\S]*?)```/g, (match, lang, code) => {
-    return `<pre><code class="language-${lang || "plaintext"}">${code.trim()}</code></pre>`;
-  });
-
-  // Inline code
-  html = html.replace(/`([^`]+)`/g, "<code>$1</code>");
-
-  // Links
-  html = html.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
-
-  // Lists
-  html = html.replace(/^\* (.*$)/gim, "<li>$1</li>");
-  html = html.replace(/(<li>[\s\S]*?<\/li>)/gim, "<ul>$1</ul>");
-
-  // Paragraphs
-  html = html.replace(/^(?!<[hul]|```)(.*$)/gim, "<p>$1</p>");
-
-  // Clean up empty paragraphs
-  html = html.replace(/<p>\s*<\/p>/g, "");
-
-  return html;
 }

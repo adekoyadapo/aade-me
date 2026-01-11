@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { BlogPost } from "@/lib/blog-data";
 import { formatDate } from "@/lib/blog-utils";
@@ -26,8 +27,18 @@ export default function BlogCard({ post, index }: BlogCardProps) {
     >
       <Link href={`/blog/${post.slug}`} className="block">
         <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-zinc-200 dark:border-zinc-800 hover:scale-[1.02]">
-          {/* Colored header based on primary tag */}
-          <div className={`h-2 ${getTagColor(post.tags[0])}`} />
+          {/* Image */}
+          <div className="relative w-full h-48 overflow-hidden">
+            <Image
+              src={post.imageUrl}
+              alt={post.imageAlt}
+              fill
+              className="object-cover group-hover:scale-105 transition-transform duration-300"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            />
+            {/* Colored overlay based on primary tag */}
+            <div className={`absolute inset-0 ${getTagColor(post.tags[0])} opacity-10`} />
+          </div>
 
           <div className="p-6">
             {/* Title */}

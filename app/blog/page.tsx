@@ -9,7 +9,7 @@ import BlogSearch from "@/components/blog/blog-search";
 import BlogTags from "@/components/blog/blog-tags";
 import LoadMoreButton from "@/components/blog/load-more-button";
 import Link from "next/link";
-import { HiArrowLeft } from "react-icons/hi";
+import { HiArrowLeft, HiHome } from "react-icons/hi";
 
 const INITIAL_POSTS_COUNT = 6;
 
@@ -62,13 +62,17 @@ export default function BlogPage() {
           transition={{ duration: 0.5 }}
           className="mb-8"
         >
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors mb-4"
-          >
-            <HiArrowLeft className="w-4 h-4" />
-            Back to Home
-          </Link>
+          <div className="flex items-center gap-4 mb-4">
+            <Link
+              href="/"
+              className="inline-flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
+            >
+              <HiHome className="w-4 h-4" />
+              Home
+            </Link>
+            <span className="text-zinc-300 dark:text-zinc-700">/</span>
+            <span className="text-sm text-zinc-900 dark:text-zinc-100 font-medium">Blog</span>
+          </div>
           <h1 className="text-4xl sm:text-5xl font-bold text-zinc-900 dark:text-zinc-100 mb-4">
             Blog
           </h1>

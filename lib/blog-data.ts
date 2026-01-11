@@ -1,6 +1,3 @@
-import { StaticImageData } from "next/image";
-
-// Placeholder - we'll add actual images later
 export interface BlogPost {
   slug: string;
   title: string;
@@ -10,6 +7,7 @@ export interface BlogPost {
   tags: readonly string[];
   content: string;
   author: string;
+  imageUrl: string;
   imageAlt: string;
 }
 
@@ -22,6 +20,7 @@ export const blogPosts: readonly BlogPost[] = [
     readTime: "5 min read",
     tags: ["Cloud", "AWS", "Azure", "GCP", "Architecture"],
     author: "Ade A.",
+    imageUrl: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1200&h=600&fit=crop",
     imageAlt: "Cloud architecture diagram showing multi-cloud infrastructure",
     content: `
 # Architecturing to Scale: Cloud Architecture in 2026
@@ -68,6 +67,7 @@ Cloud strategy today is about reversibility and fit. Don't get locked into a sin
     readTime: "6 min read",
     tags: ["Distributed Systems", "Architecture", "Microservices"],
     author: "Ade A.",
+    imageUrl: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=1200&h=600&fit=crop",
     imageAlt: "Distributed computing network diagram",
     content: `
 # Distributed Computing: Architecture Patterns That Matter
@@ -134,6 +134,7 @@ As organizations continue adopting distributed architectures for scalability, pe
     readTime: "5 min read",
     tags: ["Elasticsearch", "Search", "Database"],
     author: "Ade A.",
+    imageUrl: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1200&h=600&fit=crop",
     imageAlt: "Elasticsearch cluster setup diagram",
     content: `
 # Getting Started with Elasticsearch: Installation and Use Cases
@@ -214,6 +215,7 @@ In production, run Elasticsearch on dedicated hosts or as a primary service. It'
     readTime: "5 min read",
     tags: ["AI", "Search", "RAG", "Vector Databases"],
     author: "Ade A.",
+    imageUrl: "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=1200&h=600&fit=crop",
     imageAlt: "AI-powered semantic search visualization",
     content: `
 # Search and AI: The Evolution of RAG and Vector Databases
@@ -287,6 +289,7 @@ The winning pattern emerging in 2026? Hybrid search combining:
     readTime: "6 min read",
     tags: ["Cloud", "History", "Trends"],
     author: "Ade A.",
+    imageUrl: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=1200&h=600&fit=crop",
     imageAlt: "Cloud computing evolution timeline",
     content: `
 # Cloud Computing Over 10 Years: A 2015-2025 Review
@@ -357,6 +360,7 @@ That shift from *if* to *how* represents a matured industry. The cloud isn't the
     readTime: "5 min read",
     tags: ["AI", "Observability", "MLOps", "LLMOps"],
     author: "Ade A.",
+    imageUrl: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1200&h=600&fit=crop&sat=-100",
     imageAlt: "AI observability dashboard",
     content: `
 # AI and Observability: Trends in MLOps and LLMOps for 2026
@@ -452,6 +456,7 @@ AI adoption is rising, but production maturity is rare. Most organizations are s
     readTime: "6 min read",
     tags: ["AI", "Agentic AI", "Automation", "Workflows"],
     author: "Ade A.",
+    imageUrl: "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=1200&h=600&fit=crop",
     imageAlt: "Agentic AI workflow diagram",
     content: `
 # What's New: Agentic AI Workflows in 2026

@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { BlogPost } from "@/lib/blog-data";
 import { formatDate } from "@/lib/blog-utils";
@@ -40,11 +41,28 @@ export default function BlogPostClient({
           </Link>
         </motion.div>
 
+        {/* Hero Image */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+          className="relative w-full h-[400px] rounded-xl overflow-hidden mb-8"
+        >
+          <Image
+            src={post.imageUrl}
+            alt={post.imageAlt}
+            fill
+            className="object-cover"
+            priority
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1200px"
+          />
+        </motion.div>
+
         {/* Header */}
         <motion.header
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
           className="mb-8"
         >
           <h1 className="text-4xl sm:text-5xl font-bold text-zinc-900 dark:text-zinc-100 mb-6 leading-tight">
@@ -87,7 +105,7 @@ export default function BlogPostClient({
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
           className="prose prose-zinc dark:prose-invert max-w-none prose-headings:font-bold prose-h1:text-4xl prose-h2:text-3xl prose-h3:text-2xl prose-p:text-zinc-700 dark:prose-p:text-zinc-300 prose-a:text-blue-600 dark:prose-a:text-blue-400 prose-code:text-pink-600 dark:prose-code:text-pink-400 prose-code:bg-zinc-100 dark:prose-code:bg-zinc-800 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-pre:bg-zinc-100 dark:prose-pre:bg-zinc-800 prose-pre:border prose-pre:border-zinc-200 dark:prose-pre:border-zinc-700"
           dangerouslySetInnerHTML={{ __html: formatMarkdown(post.content) }}
         />

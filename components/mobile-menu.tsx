@@ -6,7 +6,7 @@ import { links } from "@/lib/data";
 import Link from "next/link";
 import { useActiveSectionContext } from "@/context/active-section-context";
 import type { SectionName } from "@/lib/types";
-import { HiHome, HiUser, HiFolder, HiCog, HiBriefcase, HiAcademicCap, HiMail, HiMenu, HiX } from "react-icons/hi";
+import { HiHome, HiUser, HiFolder, HiCog, HiBriefcase, HiAcademicCap, HiMail, HiMenu, HiX, HiDocumentText } from "react-icons/hi";
 
 const iconMap: { [key: string]: React.ReactElement } = {
   Home: <HiHome />,
@@ -15,6 +15,7 @@ const iconMap: { [key: string]: React.ReactElement } = {
   Skills: <HiCog />,
   Experience: <HiBriefcase />,
   Certifications: <HiAcademicCap />,
+  Blog: <HiDocumentText />,
   Contact: <HiMail />,
 };
 
@@ -25,9 +26,12 @@ export default function MobileMenu() {
 
   const toggleMenu = () => setIsOpen(!isOpen);
 
-  const handleLinkClick = (name: SectionName) => {
-    setActiveSection(name);
-    setTimeOfLastClick(Date.now());
+  const handleLinkClick = (name: SectionName, hash: string) => {
+    if (!hash.startsWith("/")) {
+      // Only update active section for hash links, not routes
+      setActiveSection(name);
+      setTimeOfLastClick(Date.now());
+    }
     setIsOpen(false);
   };
 
@@ -83,9 +87,9 @@ export default function MobileMenu() {
                   >
                     <Link
                       href={link.hash}
-                      onClick={() => handleLinkClick(link.name)}
+                      onClick={() => handleLinkClick(link.name, link.hash)}
                       className={`flex items-center gap-4 px-4 py-4 rounded-xl transition-all ${
-                        activeSection === link.name
+                        activeSection === link.name && !link.hash.startsWith("/")
                           ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-950 dark:text-zinc-100 shadow-md"
                           : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-900 hover:text-zinc-950 dark:hover:text-zinc-200"
                       }`}

@@ -38,13 +38,17 @@ export default function Header() {
                 )}
                 href={link.hash}
                 onClick={() => {
+                  if (link.hash.startsWith("/")) {
+                    // For routes like /blog, don't update active section
+                    return;
+                  }
                   setActiveSection(link.name);
                   setTimeOfLastClick(Date.now());
                 }}
               >
                 {link.name}
 
-                {link.name === activeSection && (
+                {link.name === activeSection && !link.hash.startsWith("/") && (
                   <motion.span
                     className="bg-zinc-100 rounded-full absolute inset-0 -z-10 dark:bg-zinc-800"
                     layoutId="activeSection"

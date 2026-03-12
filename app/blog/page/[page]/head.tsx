@@ -12,10 +12,13 @@ export default async function Head({ params }: { params: Promise<{ page: string 
   const prevHref = currentPage > 2 ? `/blog/page/${currentPage - 1}` : currentPage === 2 ? `/blog` : null;
   const nextHref = currentPage < totalPages ? `/blog/page/${currentPage + 1}` : null;
 
+  const canonical = `https://aade.me/blog/page/${currentPage}`;
+
   return (
     <>
-      {prevHref ? <link rel="prev" href={prevHref} /> : null}
-      {nextHref ? <link rel="next" href={nextHref} /> : null}
+      <link rel="canonical" href={canonical} />
+      {prevHref ? <link rel="prev" href={`https://aade.me${prevHref}`} /> : null}
+      {nextHref ? <link rel="next" href={`https://aade.me${nextHref}`} /> : null}
     </>
   );
 }

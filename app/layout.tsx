@@ -14,8 +14,36 @@ import { Inter } from "next/font/google";
 const inter = Inter({ subsets: ["latin"], display: "swap" });
 
 export const metadata = {
-  title: "Ade A. | Personal Portfolio",
-  description: "Ade is a IT Infrastructure Architect with 13 years of experience.",
+  metadataBase: new URL("https://aade.me"),
+  title: {
+    default: "Ade A. | IT Infrastructure Architect",
+    template: "%s | Ade A.",
+  },
+  description: "IT Infrastructure Architect with 13 years of experience in cloud architecture, distributed systems, and modern software engineering.",
+  keywords: ["IT Infrastructure", "Cloud Architecture", "Distributed Systems", "Software Engineering", "AI"],
+  authors: [{ name: "Ade A.", url: "https://aade.me" }],
+  creator: "Ade A.",
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "https://aade.me",
+    siteName: "Ade A.",
+    title: "Ade A. | IT Infrastructure Architect",
+    description: "IT Infrastructure Architect with 13 years of experience in cloud architecture, distributed systems, and modern software engineering.",
+    images: [{ url: "/og-image.jpg", width: 1200, height: 630, alt: "Ade A. — IT Infrastructure Architect" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Ade A. | IT Infrastructure Architect",
+    description: "IT Infrastructure Architect with 13 years of experience in cloud architecture, distributed systems, and modern software engineering.",
+    images: ["/og-image.jpg"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1 },
+  },
+  alternates: { canonical: "https://aade.me" },
 };
 
 export default function RootLayout({

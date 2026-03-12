@@ -148,11 +148,21 @@ export default function BlogPostClient({
               "@type": "BlogPosting",
               headline: post.title,
               description: post.excerpt,
+              url: postUrl,
+              image: post.imageUrl,
               author: {
                 "@type": "Person",
                 name: post.author,
+                url: "https://aade.me",
+              },
+              publisher: {
+                "@type": "Person",
+                name: "Ade A.",
+                url: "https://aade.me",
               },
               datePublished: post.date,
+              dateModified: post.date,
+              mainEntityOfPage: { "@type": "WebPage", "@id": postUrl },
               keywords: post.tags.join(", "),
             }),
           }}

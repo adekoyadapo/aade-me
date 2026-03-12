@@ -25,22 +25,31 @@ export async function generateMetadata({
     };
   }
 
+  const postUrl = `https://aade.me/blog/${post.slug}`;
+  const imageUrl = post.imageUrl.startsWith("http") ? post.imageUrl : `https://aade.me${post.imageUrl}`;
+
   return {
-    title: `${post.title} | Ade A. Blog`,
+    title: post.title,
     description: post.excerpt,
+    alternates: { canonical: postUrl },
     openGraph: {
       title: post.title,
       description: post.excerpt,
       type: "article",
+      url: postUrl,
       publishedTime: post.date,
+      modifiedTime: post.date,
       authors: [post.author],
       tags: post.tags as string[],
+      images: [{ url: imageUrl, width: 1200, height: 630, alt: post.imageAlt }],
     },
     twitter: {
       card: "summary_large_image",
       title: post.title,
       description: post.excerpt,
+      images: [imageUrl],
     },
+    robots: { index: true, follow: true },
   };
 }
 

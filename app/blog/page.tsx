@@ -27,9 +27,10 @@ export async function generateMetadata() {
   } as const;
 }
 
-export default async function BlogPage({ searchParams }: { searchParams: { page?: string; q?: string; tag?: string } }) {
-  const initialSearchQuery = searchParams?.q ?? "";
-  const initialTag = (searchParams?.tag as string | undefined) ?? null;
+export default async function BlogPage({ searchParams }: { searchParams: Promise<{ page?: string; q?: string; tag?: string }> }) {
+  const resolvedSearchParams = await searchParams;
+  const initialSearchQuery = resolvedSearchParams?.q ?? "";
+  const initialTag = (resolvedSearchParams?.tag as string | undefined) ?? null;
   const currentPage = 1;
 
   const POSTS_PER_PAGE = 6;

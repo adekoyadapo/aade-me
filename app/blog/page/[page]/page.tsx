@@ -30,15 +30,14 @@ export async function generateMetadata({ params }: { params: Promise<{ page: str
   } as const;
 }
 
-export default async function BlogPageNumber({ params, searchParams }: { params: Promise<{ page: string }>, searchParams: { q?: string; tag?: string } }) {
-  const { page } = await params;
+export default async function BlogPageNumber({ params, searchParams }: { params: Promise<{ page: string }>, searchParams: Promise<{ q?: string; tag?: string }> }) {
+  const [{ page }, resolvedSearchParams] = await Promise.all([params, searchParams]);
   const currentPage = Math.max(1, Number(page) || 1);
   const posts = await getAllPosts();
 
   return (
-    <Suspense fallback={<main className="min-h-screen bg-zinc-50 dark:bg-zinc-900 pt-20 sm:pt-24 pb-16" />}> 
-      <BlogListClient initialSearchQuery={searchParams?.q ?? ""} initialTag={(searchParams?.tag as string | undefined) ?? null} posts={posts} currentPage={currentPage} />
+    <Suspense fallback={<main className="min-h-screen bg-zinc-50 dark:bg-zinc-900 pt-20 sm:pt-24 pb-16" />}>
+      <BlogListClient initialSearchQuery={resolvedSearchParams?.q ?? ""} initialTag={(resolvedSearchParams?.tag as string | undefined) ?? null} posts={posts} currentPage={currentPage} />
     </Suspense>
   );
 }
-

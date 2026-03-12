@@ -10,7 +10,7 @@ import BlogTags from "@/components/blog/blog-tags";
 import Pagination from "@/components/blog/pagination";
 import Link from "next/link";
 import { HiHome } from "react-icons/hi";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams, useParams } from "next/navigation";
 
 const POSTS_PER_PAGE = 6;
 
@@ -21,9 +21,12 @@ type Props = {
   currentPage: number;
 };
 
-export default function BlogListClient({ initialSearchQuery = "", initialTag = null, posts, currentPage }: Props) {
+export default function BlogListClient({ initialSearchQuery = "", initialTag = null, posts, currentPage: serverPage }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const params = useParams();
+  // Use URL param reactively so client-side navigation updates the page immediately
+  const currentPage = Number(params?.page) || serverPage || 1;
   const [searchQuery, setSearchQuery] = useState(initialSearchQuery);
   const [activeTag, setActiveTag] = useState<string | null>(initialTag);
 
@@ -55,9 +58,8 @@ export default function BlogListClient({ initialSearchQuery = "", initialTag = n
   };
 
   const handleSearch = (query: string) => {
-    if (query === searchQuery) return; // prevent resetting page on mount/no-op
+    if (query === searchQuery) return;
     setSearchQuery(query);
-    // Reset to page 1 path with updated query params
     pushWithParams({ q: query }, 1);
   };
 

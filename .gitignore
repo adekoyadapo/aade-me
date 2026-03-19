@@ -34,6 +34,11 @@ yarn-error.log*
 # editors
 .vscode/
 
+# Claude Code
+CLAUDE.md
+.claude/
+/outlines
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

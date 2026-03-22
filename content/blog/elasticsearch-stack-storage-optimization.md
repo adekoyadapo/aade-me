@@ -2,7 +2,7 @@
 slug: "elasticsearch-stack-storage-optimization"
 title: "Elasticsearch Storage Optimization: ILM, Mapping, pattern_text"
 excerpt: "Cut Elasticsearch storage by up to 95% using mapping discipline, ILM tiering, LogsDB, and pattern_text — a practical guide for platform engineers."
-date: "2026-03-26"
+date: "2026-03-21"
 tags: ["Elasticsearch", "Elastic Stack", "Platform Engineering", "ILM", "Storage Optimization"]
 author: "Ade A."
 readTime: "22 min read"

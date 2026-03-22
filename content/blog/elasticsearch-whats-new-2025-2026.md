@@ -2,7 +2,7 @@
 slug: "elasticsearch-whats-new-2025-2026"
 title: "What's New with Elasticsearch: Key Updates"
 excerpt: "Elasticsearch 9.1–9.3 cut vector memory 95%, landed DiskBBQ sub-20ms search, made ES|QL production-ready, and acquired Jina AI. Here's what changed operationally."
-date: "2026-03-21"
+date: "2026-03-19"
 tags: ["Elasticsearch", "Elastic Stack", "Vector Search", "Observability", "Platform Engineering"]
 author: "Ade A."
 imageUrl: "/blog/elasticsearch-whats-new-2025-2026/hero.webp"

@@ -108,10 +108,9 @@ export const experiencesData = [
     title: "Customer Engineer, Reliability Engineer",
     location: "Tetrate, Milpitas, US",
     description:
-      "Implemented SRE solutions for customers across multiple cloud platforms for day-2 operations of Tetrate service bridge and Istio solutions.\
-      Implemented Office 365 integrations and migration of internal services to cloud platforms on AWS and Azure. \
-      Designed, implemented, and managed SDDC (virtualization, storage, networking) solutions. \
-      Implemented application modernization solutions with dockerized workloads and Kubernetes across the enterprise.",
+      "Implemented application modernization solutions with dockerized workloads and Kubernetes across large scale enterprise, \
+      leveraging istio service mesh for network security and traffic management, with Otel, for trace visibility and logging, and Elasticsearch for search and analytics.\
+      Implemented SRE solutions for customers across multiple cloud platforms for day-2 operations of Tetrate service bridge and Istio solutions.",
     icon: React.createElement(CgWorkAlt),
     date: "2021 - 2021",
   },

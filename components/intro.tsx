@@ -53,9 +53,10 @@ export default function Intro() {
         animate={{ opacity: 1, y: 0 }}
       >
         <span className="font-bold">Hello, I am Ade,{" "}</span>an{" "}
-        <span className="font-bold">IT, Cloud and DevOps Architect.</span>{" "} I enjoy designing, developing and implementing
-        <span className="italic">{" "}IT & Cloud solutions</span> - with core competencies in {" "}
-        <span className="underline">Application and Infrastructure Modernization</span>.
+        <span className="font-bold">Enterprise Solutions Architect</span>{" "}focused on{" "}
+        <span className="italic">AI, Application and Infrastructure solutions.</span>{" "}I design and deliver{" "}
+        <span className="underline">cloud-native platforms, AI/ML systems, and scalable enterprise architectures</span>{" "}
+        that turn complex technical problems into measurable business outcomes.
       </motion.h1>
 
       <motion.div

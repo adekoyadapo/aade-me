@@ -73,14 +73,26 @@ export const links = [
 ] as const;
 
 export const experiencesData = [
-    {
+  {
+    title: "Customer Architect",
+    location: "Elastic, CA, US",
+    description:
+      "Serve as a Trusted Technical Advisor, driving adoption and expansion of Elastic solutions across Search, Observability, and Security. \
+      Design and deliver AI-powered architectures leveraging Elasticsearch enterprise-grade features. \
+      Architect enterprise-grade observability platforms using defined solutions for petabyte-scale log analytics. \
+      Lead Security use-case deployments integrating SIEM, threat detection, and Attack Discovery for Fortune 500 customers. \
+      Define Technical Success Plans aligned to customer business outcomes, translating complex Elastic capabilities into measurable ROI.",
+    icon: React.createElement(CgOrganisation),
+    date: "2024 - Present",
+  },
+  {
     title: "Lead Cloud Solutions Architect",
     location: "360ace Tech, AB, CA",
-    description: 
-      "As a consultant and owner of 360ace Tech, I have helped multiple small and large-scale customers in their cloud adoption journey, \
-      implementing foundation, migration, security, and integration solutions for customers based on their business requirements.",
+    description:
+      "As a consultant and owner of 360ace Tech, I helped multiple small and large-scale customers in their cloud adoption journey, \
+      implementing foundation, migration, security, and integration solutions based on their business requirements.",
     icon: React.createElement(CgOrganisation),
-    date: "2021 - Present",
+    date: "2021 - 2024",
   },
   {
     title: "Cloud Architect",

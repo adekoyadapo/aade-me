@@ -2,11 +2,11 @@
 slug: "kubernetes-autoscaling-hpa-vs-keda"
 title: "Kubernetes Autoscaling: HPA vs KEDA — A Platform Engineer's Guide"
 excerpt: "Kubernetes autoscaling with HPA covers CPU-bound services well. KEDA extends it with 72+ scalers and scale-to-zero. Here's when to use each in production."
-date: "2026-03-18"
+date: "2026-02-20"
 tags: ["Kubernetes", "Platform Engineering", "Autoscaling", "KEDA"]
 author: "Ade A."
-imageUrl: "https://images.unsplash.com/photo-1667372393119-3d4c48d07fc9?w=1200&q=80"
-imageAlt: "Abstract infrastructure visualization representing Kubernetes cluster autoscaling"
+imageUrl: "/blog/kubernetes-autoscaling-hpa-vs-keda/hero.webp"
+imageAlt: "Hand-drawn whiteboard diagram comparing HPA and KEDA: left side shows kube-controller-manager with CPU gauge at 70%, pod scaling, ContainerResource annotations, and Fluentd sidecar; right side shows keda-operator with Kafka, SQS, PromQL, and Cron event sources, ScaledObject, and scale-to-zero pods managing HPA internally"
 ---
 
 # Kubernetes Autoscaling: HPA vs KEDA — A Platform Engineer's Guide
@@ -72,7 +72,7 @@ Three scenarios break the CPU-as-load-proxy assumption.
 
 ## What Changed in Kubernetes 1.27–1.30?
 
-Two HPA features have graduated to stable in recent releases and most teams still aren't using them in production: ContainerResource metrics and configurable scaling behavior ([Kubernetes autoscaling docs](https://kubernetes.io/docs/concepts/workloads/autoscaling/), 2026). Both address the failure modes above without reaching for KEDA.
+Two HPA features reached stable in recent releases that solve the sidecar and oscillation problems without adding KEDA. They're underused — probably because they graduated quietly without much ceremony ([Kubernetes autoscaling docs](https://kubernetes.io/docs/concepts/workloads/autoscaling/), 2026). Both address the failure modes above without reaching for KEDA.
 
 ### ContainerResource Metrics — Stable in 1.30
 
@@ -322,7 +322,7 @@ For a broader perspective on how containerised infrastructure has evolved to sup
 
 ## HPA vs KEDA — When to Use Which
 
-The decision isn't binary. Most production clusters end up using both — HPA for user-facing services, KEDA for async consumers.
+Running both is the normal outcome on mature clusters. HPA handles user-facing HTTP services where CPU tracks load reasonably well. KEDA handles the queue consumers and batch jobs that should idle at zero overnight.
 
 <!-- [UNIQUE INSIGHT] A common mistake is treating this as an either/or choice and defaulting to KEDA for everything. KEDA adds operational complexity: you're managing an additional control plane component, CRDs, and admission webhooks. For a simple HTTP service with no sidecars, plain HPA with ContainerResource metrics is strictly less moving parts and equally effective. -->
 
@@ -350,13 +350,13 @@ kubectl get validatingwebhookconfigurations | grep keda
 
 Most autoscaling failures in production trace back to four issues.
 
-**1. Cold start latency from zero.** Scaling from `minReplicaCount: 0` means KEDA has to schedule a new pod, pull the image, and wait for the app to start. For latency-sensitive paths, that gap is unacceptable. Set `minReplicaCount: 1` for anything with a user-facing SLA. Reserve scale-to-zero for background workers and batch jobs.
+**Cold start from zero.** Scaling from `minReplicaCount: 0` means KEDA schedules a pod, pulls the image, and waits for the app to start. That gap — often 30-90 seconds depending on image size and init containers — is invisible in local testing and painfully visible in production during the first real burst. Set `minReplicaCount: 1` for anything with a user-facing SLA. Scale-to-zero is for background workers and overnight batch jobs where cold start doesn't matter.
 
-**2. Polling interval vs cooldown mismatch.** `pollingInterval` is how often KEDA checks the trigger (default 30s). `cooldownPeriod` is how long KEDA waits before scaling to zero after events stop (default 300s). Set `pollingInterval` too high and you react slowly to bursts. Set `cooldownPeriod` too low and you oscillate — scaling to zero, then immediately back up when the next batch arrives.
+**Polling interval versus cooldown mismatch.** `pollingInterval` controls how often KEDA checks the trigger (default 30s). `cooldownPeriod` controls how long it waits before scaling to zero after events stop (default 300s). Too high a polling interval means you react slowly to bursts. Too low a cooldown means you oscillate: scale to zero, immediately back to one when the next batch arrives, repeat. The oscillation pattern is easy to miss until you look at replica count graphs over a 24-hour window.
 
-**3. Missing resource requests.** HPA (including the HPA that KEDA manages) can't compute utilization-based metrics if containers don't have `resources.requests` set. This is a silent failure — HPA just won't scale on those metrics. Always set resource requests on every container.
+**Missing `resources.requests`.** This one is a silent failure. HPA — including the HPA KEDA creates — cannot compute utilization-based metrics if containers don't declare resource requests. It simply won't scale on those metrics and produces no error. Check every container in every pod you're autoscaling. `kubectl describe hpa` will show `<unknown>` in the current metrics column when requests are missing.
 
-**4. Noisy metrics causing thrashing.** Without a `stabilizationWindowSeconds` in `behavior.scaleDown`, HPA will scale down as soon as metrics dip — and scale right back up when they spike again. Set a stabilization window. Even 60 seconds makes a meaningful difference.
+**Noisy metrics and scale-down thrashing.** Without `stabilizationWindowSeconds` in `behavior.scaleDown`, HPA scales down as soon as metrics dip below target — then immediately back up when they spike again. Sixty seconds of stabilization avoids most of this. The conservative 300-second default exists for a reason on high-traffic services; the aggressive default is fine for development environments where you want fast feedback.
 
 Debug flow:
 
@@ -382,7 +382,7 @@ The `describe scaledobject` output includes the current metric value, target, an
 
 ## Where Is Kubernetes Autoscaling Heading?
 
-Two developments worth tracking.
+Before closing, two things worth watching in the next 12 months.
 
 **Predictkube (KEDA v2.6+)** is an AI-based predictive scaler built on Prometheus metrics and the Dysnix SaaS backend. Instead of reacting to current queue depth, it predicts future demand and pre-scales. It requires their external service, so there's a dependency to evaluate — but the approach is sound for workloads with cyclical patterns where reactive scaling always lags by a control loop interval or two.
 

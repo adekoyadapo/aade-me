@@ -9,19 +9,19 @@ import Skills from "@/components/skills";
 import Badges from "@/components/badges";
 
 export const metadata: Metadata = {
-  title: "Ade A. | IT Infrastructure Architect",
-  description: "IT Infrastructure Architect with 13 years of experience in cloud architecture, distributed systems, AI, and modern software engineering practices.",
+  title: "Ade A. | Enterprise Architect",
+  description: "Enterprise Architect specializing in AI/ML platforms, cloud-native infrastructure, Elasticsearch, observability, and large-scale distributed systems.",
   alternates: { canonical: "https://aade.me" },
   openGraph: {
-    title: "Ade A. | IT Infrastructure Architect",
-    description: "IT Infrastructure Architect with 13 years of experience in cloud architecture, distributed systems, AI, and modern software engineering practices.",
+    title: "Ade A. | Enterprise Architect",
+    description: "Enterprise Architect specializing in AI/ML platforms, cloud-native infrastructure, Elasticsearch, observability, and large-scale distributed systems.",
     url: "https://aade.me",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Ade A. | IT Infrastructure Architect",
-    description: "IT Infrastructure Architect with 13 years of experience in cloud architecture, distributed systems, AI, and modern software engineering practices.",
+    title: "Ade A. | Enterprise Architect",
+    description: "Enterprise Architect specializing in AI/ML platforms, cloud-native infrastructure, Elasticsearch, observability, and large-scale distributed systems.",
   },
 };
 

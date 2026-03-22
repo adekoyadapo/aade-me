@@ -19,18 +19,16 @@ export default function About() {
     >
       <SectionHeading>About me</SectionHeading>
       <p className="mb-3 text-left">
-        Experienced Infrastructure Architect with a background in{" "}
-        <span className="font-bold">IT infrastructure and networking,{" "}</span>
-        and indept expertise in{" "}
-        <span className="font-bold italic">DevOps, SRE and Platform Engineering{" "}</span>-
-        skilled in designing and implementing complex <span className="font-bold">cloud solutions</span> that meets business requirements.
+        I have spent 15+ years at the intersection of infrastructure, cloud, and software — starting with physical data centres and routing tables in Lagos, and working my way through DevOps, SRE, platform engineering, and now{" "}
+        <span className="font-bold">Enterprise Solutions Architecture</span>. Each role taught me that the best technical decisions are the ones grounded in real-world constraints, not just what looks clean on a whiteboard.
       </p>
       <p className="mb-3 text-left">
-        <span>I am passionate about using technology and years of experience to improve operational efficiency and deliver measurable business value.</span>
+        Today I work as a <span className="font-bold italic">Customer Architect at Elastic</span>, helping enterprise teams unlock the full potential of the Elastic Stack across{" "}
+        <span className="font-bold">Search, Observability, and Security</span>. That means designing AI-powered search pipelines with vector embeddings and ELSER, building petabyte-scale log analytics platforms with OpenTelemetry and LogsDB, and architecting SIEM and threat-detection solutions for Fortune 500 environments.
       </p>
       <p className="mb-3 text-left">
-        I currently expanding my skills and knowledge into designing and implementing infrastructure geared towards{" "}<span className="font-bold italic">Big Data, Machine Learning and AI based solutions{" "}</span>
-        in the cloud to improve on exisiting solutions and ensure optimal business value.
+        The thread running through all of it is the same: I like hard problems. Whether it is shaving 65% off Elasticsearch storage costs, wiring up an{" "}
+        <span className="font-bold italic">AI/ML inference pipeline</span>{" "}in the cloud, or helping a platform team get their first real SLO in place — I get satisfaction from making complex systems simpler and more reliable for the people who depend on them.
       </p>
 
     </motion.section>

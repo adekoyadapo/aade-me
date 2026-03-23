@@ -3,7 +3,7 @@ slug: "agentic-ai-workflows"
 title: "Agentic AI in Production: Architecture, Orchestration, and Governance"
 excerpt: "Agentic AI systems that loop, call tools, and manage state are in production at scale. Here's how the orchestration frameworks compare and what governance actually requires."
 date: "2026-01-05"
-tags: ["AI", "Agentic AI", "Automation", "Platform Engineering"]
+tags: ["AI/ML", "Platform Engineering"]
 author: "Ade A."
 imageUrl: "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=1200&h=600&fit=crop"
 imageAlt: "Abstract circuit board visualization representing AI agent orchestration and multi-step workflow execution"

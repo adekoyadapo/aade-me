@@ -3,7 +3,7 @@ slug: "elasticsearch-at-scale"
 title: "Elasticsearch at Scale: Search, Logs, Security, and Vector AI"
 excerpt: "Elasticsearch at scale — from 500B-document clusters to 95% vector memory reduction with BBQ — covering Search, Observability, Security, and AI/ML with a hosting model comparison."
 date: "2026-03-03"
-tags: ["Elasticsearch", "Elastic Stack", "Platform Engineering", "Observability", "Vector Search", "Serverless"]
+tags: ["Elasticsearch", "Observability", "AI/ML"]
 author: "Ade A."
 imageUrl: "/blog/elasticsearch-at-scale/hero.webp"
 imageAlt: "Elasticsearch at scale: four workload panels for Search, Observability, Security, and Vector AI with stat badges showing 500B docs, 95% memory savings, 1895 detection rules, and sub-20ms vectors"

@@ -3,7 +3,7 @@ slug: "ai-observability-trends"
 title: "AI and Observability: Trends in MLOps and LLMOps for 2026"
 excerpt: "How observability is evolving from traditional MLOps to LLMOps, addressing the unique challenges of monitoring AI systems."
 date: "2026-01-06"
-tags: ["AI", "Observability", "MLOps", "LLMOps"]
+tags: ["AI/ML", "Observability"]
 author: "Ade A."
 imageUrl: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1200&h=600&fit=crop&sat=-100"
 imageAlt: "AI observability dashboard"

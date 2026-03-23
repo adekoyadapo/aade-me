@@ -3,7 +3,7 @@ slug: "observability-with-elasticsearch-edot"
 title: "Observability with EDOT — Streams, Gateways, and Scale"
 excerpt: "EDOT went GA in April 2025. Three-tier Kubernetes collectors, Elastic Streams, OpAMP remote config, and automated SLO breach workflows for platform teams."
 date: "2026-03-05"
-tags: ["Elasticsearch", "Observability", "OpenTelemetry", "Platform Engineering", "SRE"]
+tags: ["Elasticsearch", "Observability", "Platform Engineering"]
 author: "Ade A."
 imageUrl: "/blog/observability-with-elasticsearch-edot/hero.webp"
 imageAlt: "Engineer viewing Elastic Observability dashboard with distributed tracing timeline, JVM memory chart, and log stream on a dark monitor with Elastic logo visible"

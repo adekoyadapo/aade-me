@@ -4,7 +4,7 @@ title: "Elasticsearch Data Ingestion: All Methods and Use Cases"
 excerpt: "Bulk API caps at 100MB; Elastic Agent GA since v7.14. Maps all five Elasticsearch ingestion paths to the right use case, with working code for each."
 date: "2026-02-17"
 readTime: "14 min read"
-tags: ["Elasticsearch", "Data Ingestion", "Platform Engineering", "Observability", "AI/ML"]
+tags: ["Elasticsearch", "Platform Engineering", "Observability"]
 author: "Ade A."
 imageUrl: "/blog/getting-data-into-elasticsearch/hero.webp"
 imageAlt: "Abstract data visualization showing glowing teal particle streams converging into a central node, representing Elasticsearch data ingestion pipelines"

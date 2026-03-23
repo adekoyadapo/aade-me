@@ -3,7 +3,7 @@ slug: "kubernetes-autoscaling-hpa-vs-keda"
 title: "Kubernetes Autoscaling: HPA vs KEDA — A Platform Engineer's Guide"
 excerpt: "Kubernetes autoscaling with HPA covers CPU-bound services well. KEDA extends it with 72+ scalers and scale-to-zero. Here's when to use each in production."
 date: "2026-02-20"
-tags: ["Kubernetes", "Platform Engineering", "Autoscaling", "KEDA"]
+tags: ["Kubernetes", "Platform Engineering"]
 author: "Ade A."
 imageUrl: "/blog/kubernetes-autoscaling-hpa-vs-keda/hero.webp"
 imageAlt: "Hand-drawn whiteboard diagram comparing HPA and KEDA: left side shows kube-controller-manager with CPU gauge at 70%, pod scaling, ContainerResource annotations, and Fluentd sidecar; right side shows keda-operator with Kafka, SQS, PromQL, and Cron event sources, ScaledObject, and scale-to-zero pods managing HPA internally"

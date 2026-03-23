@@ -3,7 +3,7 @@ slug: "getting-started-elasticsearch"
 title: "Getting Started with Elasticsearch"
 excerpt: "Five proven ways to try Elasticsearch today: Elastic Cloud (hosted or serverless), Docker Compose, Kubernetes with ECK, direct packages, and the official startlocal script for quick local development."
 date: "2026-01-09"
-tags: ["Elasticsearch", "Search", "Database"]
+tags: ["Elasticsearch", "Search"]
 author: "Ade A."
 imageUrl: "https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt699be4f2f795c5e9/681d43fddf716cd621bfd8f2/illustration-versatile-data-use-case-flexibility.png"
 imageAlt: "Elastic illustration: versatile data use case flexibility"

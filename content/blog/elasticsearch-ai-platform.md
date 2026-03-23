@@ -4,7 +4,7 @@ title: "Elasticsearch AI: Vector Search, RAG, and Agent Builder"
 excerpt: "ELSER v2 beats BM25 by 18% NDCG@10. Inference endpoints, Jina models, GPU indexing, and Agent Builder make Elasticsearch a full production AI platform."
 date: "2026-02-14"
 readTime: "12 min read"
-tags: ["Elasticsearch", "AI/ML", "Vector Search", "Platform Engineering", "Agentic AI"]
+tags: ["Elasticsearch", "AI/ML", "Platform Engineering"]
 author: "Ade A."
 imageUrl: "https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=1200&q=80"
 imageAlt: "Abstract neural network visualization with glowing blue and teal connection nodes on a dark background representing AI vector embedding space"

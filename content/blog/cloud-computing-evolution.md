@@ -3,7 +3,7 @@ slug: "cloud-computing-evolution"
 title: "Cloud Computing Over 10 Years: A 2015-2025 Review"
 excerpt: "Reflecting on the dramatic evolution of cloud computing over the past decade, from 30% to 60% cloud adoption and beyond."
 date: "2026-01-07"
-tags: ["Cloud", "History", "Trends"]
+tags: ["Cloud", "Architecture"]
 author: "Ade A."
 imageUrl: "/blog/cloud-computing-evolution/hero.jpg"
 imageAlt: "Cloud computing evolution timeline"

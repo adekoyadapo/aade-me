@@ -4,7 +4,7 @@ title: "Elasticsearch Stack Monitoring, A Production Guide"
 excerpt: "Cluster health is green until it isn't. Stack Monitoring surfaces JVM pressure, thread pool rejections, disk headroom, and CCR lag — nine default alert rules before incidents."
 date: "2026-02-24"
 readTime: "13 min read"
-tags: ["Elasticsearch", "Platform Engineering", "Observability", "SRE", "Monitoring"]
+tags: ["Elasticsearch", "Observability", "Platform Engineering"]
 author: "Ade A."
 imageUrl: "/blog/elasticsearch-stack-monitoring/hero.webp"
 imageAlt: "Hand-drawn architecture sketch of the full Elastic Stack: Filebeat, Metricbeat, Heartbeat, APM Agent, and Fleet-managed Elastic Agent feeding through Logstash and ingest pipelines into an Elasticsearch cluster, with Kibana monitoring panel showing cluster health, JVM heap, thread pools, and 9 alert rules"

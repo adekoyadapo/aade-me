@@ -1,7 +1,7 @@
 ---
 slug: "elasticsearch-ldap-authentication-eck"
-title: "LDAP Authentication with Elasticsearch on ECK: OpenLDAP, Active Directory, and Entra ID"
-excerpt: "Wire LDAP authentication into Elasticsearch running on ECK — covering OpenLDAP, Active Directory, and Entra ID via Azure AD DS, with full TLS, role mapping, and a reproducible lab reference."
+title: "Elasticsearch LDAP Auth on ECK: OpenLDAP, AD, and Entra ID"
+excerpt: "Configure LDAP auth in Elasticsearch on ECK across OpenLDAP, Active Directory, and Entra ID via Azure AD DS — with TLS, role mapping, and a working lab."
 date: "2026-02-18"
 readTime: "14 min read"
 tags: ["Elasticsearch", "Platform Engineering", "Observability"]
@@ -10,19 +10,19 @@ imageUrl: "/blog/elasticsearch-ldap-authentication-eck/hero.webp"
 imageAlt: "Hand-drawn architecture diagram showing Elasticsearch LDAP authentication flow with OpenLDAP, Active Directory, and Entra ID on ECK"
 ---
 
-# LDAP Authentication with Elasticsearch on ECK: OpenLDAP, Active Directory, and Entra ID
+# Elasticsearch LDAP Authentication on ECK: OpenLDAP, Active Directory, and Entra ID
 
 Elasticsearch ships with three authentication realms that matter in enterprise environments: `native`, `file`, and `ldap` (plus the dedicated `active_directory` realm). The native realm is fine for small teams. Once you are past a handful of engineers or operating under compliance requirements, you need users and groups to come from the directory your organisation already manages.
 
-This post covers exactly that: how to configure the Elasticsearch LDAP realm on ECK, what changes when your directory source is Active Directory instead of OpenLDAP, and what you need to know about Entra ID (formerly Azure AD). It references a [reproducible lab](https://github.com/adekoyadapo/es-ldap-eck-deployment) that brings up a full k3d cluster — ECK, OpenLDAP over LDAPS, cert-manager PKI, Kibana, and working role mappings — with a single `make up`.
+This post covers exactly that: how to configure the Elasticsearch LDAP realm on ECK, what changes when your directory source is Active Directory instead of OpenLDAP, and what you need to know about Entra ID (formerly Azure AD). It references a [reproducible lab](https://github.com/adekoyadapo/es-ldap-eck-deployment) that brings up a full k3d cluster (ECK, OpenLDAP over LDAPS, cert-manager PKI, Kibana, and working role mappings) with a single `make up`.
 
 > **Key Takeaways**
-> - Elasticsearch LDAP realm (`ldap`) uses user_search mode or DN templates — both work, but user_search is more flexible with heterogeneous directories.
-> - The dedicated `active_directory` realm auto-resolves groups via `tokenGroups` — you do not need `group_search.base_dn`.
+> - Elasticsearch LDAP realm (`ldap`) uses user_search mode or DN templates; both work, but user_search is more flexible with heterogeneous directories.
+> - The dedicated `active_directory` realm auto-resolves groups via `tokenGroups`; you do not need `group_search.base_dn`.
 > - Entra ID (cloud) has no native LDAP endpoint. You need Azure AD Domain Services to expose LDAPS; the Elasticsearch config then mirrors standard LDAP realm settings.
-> - On ECK, bind passwords go into a Kubernetes Secret referenced via `spec.secureSettings` — never in the Elasticsearch config map.
+> - On ECK, bind passwords go into a Kubernetes Secret referenced via `spec.secureSettings`, never in the Elasticsearch config map.
 > - `verification_mode: full` requires the CA cert mounted into the Elasticsearch pod and the LDAP server cert SAN matching the URL hostname exactly.
-> - Role mappings via file (`role_mapping.yml`) are reloaded automatically every 5 seconds and survive API outages — use them for superuser and admin roles.
+> - Role mappings via file (`role_mapping.yml`) are reloaded automatically every 5 seconds and survive API outages; use them for superuser and admin roles.
 
 ---
 
@@ -85,7 +85,7 @@ cn: es-users
 member: uid=jane,ou=people,dc=example,dc=org
 ```
 
-Two OUs — `people` and `groups`. One user (`jane`) in one group (`es-users`). Group membership uses the `groupOfNames` objectClass with `member` attributes pointing to user DNs. This is the standard OpenLDAP pattern.
+Two OUs: `people` and `groups`. One user (`jane`) in one group (`es-users`). Group membership uses the `groupOfNames` objectClass with `member` attributes pointing to user DNs. This is the standard OpenLDAP pattern.
 
 ---
 
@@ -119,9 +119,9 @@ spec:
 
 A few decisions worth noting:
 
-**Realm ordering** (`order: 0/1/2`). Elasticsearch walks realms in order on each authentication request. `file` first ensures the built-in emergency `elastic` user (stored in the file realm) always works even when LDAP is unreachable. `native` second covers any API-created users. `ldap` third handles directory-sourced logins. This ordering is not optional — misconfigured ordering is a common source of authentication fallthrough issues.
+**Realm ordering** (`order: 0/1/2`). Elasticsearch walks realms in order on each authentication request. `file` first ensures the built-in emergency `elastic` user (stored in the file realm) always works even when LDAP is unreachable. `native` second covers any API-created users. `ldap` third handles directory-sourced logins. This ordering is not optional. Misconfigured ordering is a common source of authentication fallthrough issues.
 
-**`user_search.filter: "(uid={0})"`**. The `{0}` placeholder is substituted with the username submitted at login. For OpenLDAP this maps to the `uid` attribute. This is the user_search mode — Elasticsearch first binds as the admin (`bind_dn`), searches for the user, then re-binds as that user to verify the password.
+**`user_search.filter: "(uid={0})"`**. The `{0}` placeholder is substituted with the username submitted at login. For OpenLDAP this maps to the `uid` attribute. This is the user_search mode. Elasticsearch first binds as the admin (`bind_dn`), searches for the user, then re-binds as that user to verify the password.
 
 **`group_search.base_dn`**. Elasticsearch walks the `groups` OU and checks for `member` attributes matching the authenticated user DN. The resolved group DNs are stored in `ldap_groups` metadata on the authentication token, which role mappings then inspect.
 
@@ -144,7 +144,7 @@ stringData:
 ECK reads all Secrets listed under `spec.secureSettings` and injects their keys into the Elasticsearch keystore on each pod before the process starts. If you update the Secret, ECK detects the change and rotates the keystore entry without a rolling restart in most cases ([ECK secure settings docs](https://www.elastic.co/docs/deploy-manage/security/k8s-secure-settings)).
 
 <!-- [UNIQUE INSIGHT] -->
-The secret key name **must exactly match** the `xpack.security.*` keystore setting name — this is the namespace used by ECK to call `elasticsearch-keystore add` internally. A typo here silently uses no bind password and causes every LDAP bind to fail with a generic authentication error that looks unrelated to secrets.
+The secret key name **must exactly match** the `xpack.security.*` keystore setting name; this is the namespace ECK uses to call `elasticsearch-keystore add` internally. A typo here silently uses no bind password and causes every LDAP bind to fail with a generic authentication error that looks unrelated to secrets.
 
 ---
 
@@ -177,7 +177,7 @@ spec:
     - ldap.lab.svc.cluster.local
 ```
 
-The SAN `ldap.lab.svc.cluster.local` must match the hostname in the Elasticsearch realm URL (`ldaps://ldap.lab.svc.cluster.local:636`). A mismatch here causes a TLS handshake failure that Elasticsearch logs as `PKIX path building failed` — not an LDAP error.
+The SAN `ldap.lab.svc.cluster.local` must match the hostname in the Elasticsearch realm URL (`ldaps://ldap.lab.svc.cluster.local:636`). A mismatch here causes a TLS handshake failure. Elasticsearch logs it as `PKIX path building failed`, not an LDAP error.
 
 The `ca.crt` from the `ldap-ldaps-tls` Secret is mounted into each Elasticsearch pod:
 
@@ -257,7 +257,7 @@ stringData:
       - "cn=es-users,ou=groups,dc=example,dc=org"
 ```
 
-File-based mappings have one important advantage over the API: they are reloaded every 5 seconds regardless of cluster health. If your cluster is in a degraded state, the file mapping ensures admin access still works. Use file mappings for `superuser` and critical operational roles. Use the API for everything else.
+File-based mappings have one important advantage over the API: they are reloaded every 5 seconds regardless of cluster health. If your cluster is in a degraded state (see [Elasticsearch Stack Monitoring](/blog/elasticsearch-stack-monitoring) for how to track this), the file mapping ensures admin access still works. Use file mappings for `superuser` and critical operational roles. Use the API for everything else.
 
 The Role Mapping API equivalent for the same rule:
 
@@ -275,7 +275,7 @@ PUT /_security/role_mapping/es-users-admin
 }
 ```
 
-Adding `realm.name` to the rule scopes the mapping specifically to the LDAP realm — useful when you have both `ldap` and `active_directory` realms configured and groups with the same CN in different directories ([role mapping docs](https://www.elastic.co/docs/deploy-manage/users-roles/cluster-or-deployment-auth/mapping-users-groups-to-roles)).
+Adding `realm.name` to the rule scopes the mapping specifically to the LDAP realm, useful when you have both `ldap` and `active_directory` realms configured and groups with the same CN in different directories ([role mapping docs](https://www.elastic.co/docs/deploy-manage/users-roles/cluster-or-deployment-auth/mapping-users-groups-to-roles)).
 
 ---
 
@@ -312,7 +312,7 @@ With the `active_directory` realm, this is handled automatically.
 ### Group Resolution: tokenGroups vs. group_search
 
 <!-- [UNIQUE INSIGHT] -->
-The biggest practical difference. The generic LDAP realm walks the `group_search.base_dn` OU and looks for `member` attributes. Active Directory uses the `tokenGroups` computed attribute, which returns all transitive group memberships (nested groups included) in a single LDAP operation. The `active_directory` realm fetches `tokenGroups` automatically — you do not configure `group_search.base_dn`.
+The biggest practical difference. The generic LDAP realm walks the `group_search.base_dn` OU and looks for `member` attributes. Active Directory uses the `tokenGroups` computed attribute, which returns all transitive group memberships (nested groups included) in a single LDAP operation. The `active_directory` realm fetches `tokenGroups` automatically; you do not configure `group_search.base_dn`.
 
 This matters for environments with nested security groups. If your AD has `ES Admins` → `IT Staff` → `All Staff` and you want to map anyone in `IT Staff` to a Kibana role, `tokenGroups` resolves that transitivity. The generic LDAP `group_search` only returns direct group memberships unless you write a recursive filter.
 
@@ -322,7 +322,7 @@ This matters for environments with nested security groups. If your AD has `ES Ad
 xpack.security.authc.realms.active_directory.ad1.bind_dn: "CN=es-svc,OU=Service Accounts,DC=corp,DC=example,DC=com"
 ```
 
-When a bind user is configured, Elasticsearch maintains a connection pool to AD, reusing authenticated LDAP connections across requests. Without a bind user, each authentication opens and closes a new connection. At production authentication rates this matters — connection pooling reduces AD auth latency significantly.
+When a bind user is configured, Elasticsearch maintains a connection pool to AD, reusing authenticated LDAP connections across requests. Without a bind user, each authentication opens and closes a new connection. At production authentication rates this matters: connection pooling reduces AD auth latency significantly.
 
 The bind password goes into ECK secure settings exactly as with OpenLDAP:
 
@@ -373,14 +373,14 @@ xpack.security.authc.realms.active_directory.ad1.ssl.verification_mode: full
 
 ## Entra ID (Azure AD): LDAP Requires Azure AD Domain Services
 
-Entra ID (formerly Azure Active Directory) is a cloud identity platform — it does not expose a native LDAP endpoint. There is no server you can point `ldap.url` at against a standard Entra ID tenant.
+Entra ID (formerly Azure Active Directory) is a cloud identity platform. It does not expose a native LDAP endpoint. There is no server you can point `ldap.url` at against a standard Entra ID tenant.
 
-To use LDAP authentication against Entra ID, you must deploy **Azure AD Domain Services (Azure AD DS)**. AD DS is a managed domain service that provides a traditional AD-compatible interface — LDAP, LDAPS, Kerberos, NTLM — backed by your Entra ID tenant's users and groups.
+To use LDAP authentication against Entra ID, you must deploy **Azure AD Domain Services (Azure AD DS)**. AD DS is a managed domain service that provides a traditional AD-compatible interface (LDAP, LDAPS, Kerberos, NTLM) backed by your Entra ID tenant's users and groups.
 
 ### Setting Up Azure AD DS
 
 1. Create an Azure AD DS managed domain (e.g., `aadds.corp.example.com`)
-2. Enable **Secure LDAP (LDAPS)** on the managed domain — requires a certificate from a trusted CA
+2. Enable **Secure LDAP (LDAPS)** on the managed domain (requires a certificate from a trusted CA)
 3. Download the LDAPS certificate or its issuing CA cert
 4. Verify your Entra ID users are synchronised into the managed domain (this is automatic for cloud-only users; hybrid users sync via Azure AD Connect)
 
@@ -411,11 +411,11 @@ Key differences from the lab setup:
 | Service account | Simple bind DN | Must be in `AADDC Users` or delegated admin OU |
 
 <!-- [UNIQUE INSIGHT] -->
-Azure AD DS puts **both users and groups** under `OU=AADDC Users` by default. There is no separate `ou=groups` OU. Your `group_search.base_dn` and `user_search.base_dn` often point to the same OU. If you have custom OUs, verify the DN structure in AD DS before copying config from your on-premises AD deployment — the tree layout differs.
+Azure AD DS puts **both users and groups** under `OU=AADDC Users` by default. There is no separate `ou=groups` OU. Your `group_search.base_dn` and `user_search.base_dn` often point to the same OU. If you have custom OUs, verify the DN structure in AD DS before copying config from your on-premises AD deployment; the tree layout differs.
 
 ### Alternative: SAML with Entra ID
 
-For cloud-native Elasticsearch deployments (Elastic Cloud, ECK with internet-accessible Kibana), Elastic officially recommends SAML over LDAP when integrating with Entra ID. The Elastic SAML + Entra ID integration ([docs](https://www.elastic.co/docs/deploy-manage/users-roles/cluster-or-deployment-auth/saml-entra)) uses Entra ID as the identity provider directly — no AD DS required. SAML avoids the operational cost of running a managed domain and handles MFA, Conditional Access, and token refresh more naturally.
+For cloud-native Elasticsearch deployments (Elastic Cloud, ECK with internet-accessible Kibana), Elastic officially recommends SAML over LDAP when integrating with Entra ID. The Elastic SAML + Entra ID integration ([docs](https://www.elastic.co/docs/deploy-manage/users-roles/cluster-or-deployment-auth/saml-entra)) uses Entra ID as the identity provider directly, with no AD DS required. SAML avoids the operational cost of running a managed domain and handles MFA, Conditional Access, and token refresh more naturally.
 
 Use LDAP (via AD DS) when: you already have AD DS deployed, you need compatibility with an existing on-premises LDAP workflow, or your network topology does not allow outbound SAML redirects to Entra ID.
 
@@ -465,7 +465,7 @@ kubectl -n lab exec -it elasticsearch-es-default-0 -- \
   bin/elasticsearch-keystore list | grep ldap
 ```
 
-You should see `xpack.security.authc.realms.ldap.ldap1.secure_bind_password`. If not, the ECK secureSettings reference is mismatched — verify the Secret name and key name match what ECK expects.
+You should see `xpack.security.authc.realms.ldap.ldap1.secure_bind_password`. If not, the ECK secureSettings reference is mismatched; verify the Secret name and key name match what ECK expects.
 
 ### Certificate Expiry
 
@@ -502,7 +502,7 @@ Note: `8.19.12` appears in the Elastic artifacts API but was not available as a 
 ## FAQ
 
 **Does the LDAP realm work without TLS (plain LDAP on port 389)?**
-Yes — change the `url` to `ldap://...` and remove the `ssl.*` settings. Elastic strongly discourages this in production because credentials traverse the network in plaintext. In a Kubernetes cluster where LDAP runs in the same namespace, the risk is lower but still not acceptable for compliance-bound environments.
+Yes: change the `url` to `ldap://...` and remove the `ssl.*` settings. Elastic strongly discourages this in production because credentials traverse the network in plaintext. In a Kubernetes cluster where LDAP runs in the same namespace, the risk is lower but still not acceptable for compliance-bound environments.
 
 **Can I configure multiple LDAP realms (e.g., different OUs or separate LDAP servers)?**
 Yes. Add a second realm block with a different name and a higher `order` value. Elasticsearch tries each realm in order on every authentication request. Useful for multi-tenant or multi-directory environments.
@@ -514,7 +514,79 @@ Yes. Add a second realm block with a different name and a higher `order` value. 
 Security groups created in Entra ID synchronise to AD DS automatically. Microsoft 365 groups (formerly Office 365 groups) do not sync. If your Elasticsearch role mapping targets Microsoft 365 group DNs, they will not resolve. Use SAML with Entra ID if your group structure relies heavily on Microsoft 365 groups.
 
 **Can I use Kibana UI role mappings instead of the file?**
-Yes. The Kibana role mapping UI under Management → Security → Role Mappings calls the Elasticsearch Role Mapping API. The file and API mappings coexist — a user gets the union of roles from both sources. For production, keep `superuser` and `kibana_system` in the file; manage all other roles via the API or Kibana UI.
+Yes. The Kibana role mapping UI under Management → Security → Role Mappings calls the Elasticsearch Role Mapping API. The file and API mappings coexist; a user gets the union of roles from both sources. For production, keep `superuser` and `kibana_system` in the file; manage all other roles via the API or Kibana UI.
+
+---
+
+<script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "BlogPosting",
+      "headline": "Elasticsearch LDAP Auth on ECK: OpenLDAP, AD, and Entra ID",
+      "description": "Configure LDAP auth in Elasticsearch on ECK across OpenLDAP, Active Directory, and Entra ID via Azure AD DS, with TLS, role mapping, and a working lab.",
+      "datePublished": "2026-02-18",
+      "author": {
+        "@type": "Person",
+        "name": "Ade A.",
+        "url": "https://aade.me"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "aade.me",
+        "url": "https://aade.me"
+      },
+      "url": "https://aade.me/blog/elasticsearch-ldap-authentication-eck",
+      "image": "https://aade.me/blog/elasticsearch-ldap-authentication-eck/hero.webp",
+      "keywords": ["Elasticsearch", "LDAP", "ECK", "OpenLDAP", "Active Directory", "Entra ID", "Kubernetes", "Authentication"]
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Does the Elasticsearch LDAP realm work without TLS (plain LDAP on port 389)?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes: change the url to ldap://... and remove the ssl.* settings. Elastic strongly discourages this in production because credentials traverse the network in plaintext."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can I configure multiple LDAP realms in Elasticsearch?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. Add a second realm block with a different name and a higher order value. Elasticsearch tries each realm in order on every authentication request."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What is the difference between user_search mode and user_dn_templates in Elasticsearch LDAP?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "user_search mode binds as the admin first, searches the directory for the user DN, then re-binds as that user. user_dn_templates constructs the DN directly from the username without a search step. Templates are faster but require all users to be in a single, predictable DN structure."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Do Entra ID groups sync correctly into Azure AD DS for Elasticsearch role mapping?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Security groups created in Entra ID synchronise to AD DS automatically. Microsoft 365 groups do not sync. Use SAML with Entra ID if your group structure relies on Microsoft 365 groups."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can I use Kibana UI role mappings instead of the role_mapping.yml file?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. The Kibana role mapping UI calls the Elasticsearch Role Mapping API. File and API mappings coexist; a user gets the union of roles from both sources."
+          }
+        }
+      ]
+    }
+  ]
+}</script>
 
 ---
 

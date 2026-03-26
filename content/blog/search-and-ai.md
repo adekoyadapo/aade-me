@@ -3,7 +3,7 @@ slug: "search-and-ai"
 title: "Search and AI: The Evolution of RAG and Vector Databases"
 excerpt: "Exploring how vector databases and semantic search are revolutionizing AI-powered search with RAG and beyond."
 date: "2026-01-08"
-tags: ["AI", "Search", "RAG", "Vector Databases"]
+tags: ["AI/ML", "Search"]
 author: "Ade A."
 imageUrl: "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=1200&h=600&fit=crop"
 imageAlt: "AI-powered semantic search visualization"

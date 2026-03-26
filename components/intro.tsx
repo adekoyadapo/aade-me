@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { BsArrowRight, BsLinkedin } from "react-icons/bs";
 import { HiDownload } from "react-icons/hi";
+import { HiOutlineDocumentText } from "react-icons/hi";
 import { FaGithubSquare, FaGlobe, FaTwitterSquare } from "react-icons/fa";
 import { useSectionInView } from "@/lib/hooks";
 import { useActiveSectionContext } from "@/context/active-section-context";
@@ -53,9 +54,10 @@ export default function Intro() {
         animate={{ opacity: 1, y: 0 }}
       >
         <span className="font-bold">Hello, I am Ade,{" "}</span>an{" "}
-        <span className="font-bold">IT, Cloud and DevOps Architect.</span>{" "} I enjoy designing, developing and implementing
-        <span className="italic">{" "}IT & Cloud solutions</span> - with core competencies in {" "}
-        <span className="underline">Application and Infrastructure Modernization</span>.
+        <span className="font-bold">Enterprise Solutions Architect</span>{" "}focused on{" "}
+        <span className="italic">AI, Application and Infrastructure solutions.</span>{" "}I design and deliver{" "}
+        <span className="underline">cloud-native platforms, AI/ML systems, and scalable enterprise architectures</span>{" "}
+        that turn complex technical problems into measurable business outcomes.
       </motion.h1>
 
       <motion.div
@@ -78,13 +80,13 @@ export default function Intro() {
             Contact{" "}
             <BsArrowRight className="opacity-90 group-hover:translate-x-1 transition" />
           </Link>
-          <a
+          <Link
             className="group bg-white px-7 py-3 flex items-center gap-2 rounded-full outline-none focus:scale-110 hover:scale-110 active:scale-105 transition cursor-pointer borderBlack dark:bg-white/10"
-            href="/CV.pdf" target="_blank"
+            href="/cv"
           >
             Resume{" "}
-            <HiDownload className="opacity-60 group-hover:translate-y-1 transition" />
-          </a>
+            <HiOutlineDocumentText className="opacity-60 group-hover:scale-110 transition" />
+          </Link>
         </div>
 
         <div className="flex flex-row flex-wrap items-center justify-center gap-2">

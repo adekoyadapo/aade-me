@@ -39,6 +39,9 @@ CLAUDE.md
 .claude/
 /outlines
 
+# Local lab / reference repos (not part of the site)
+/es-ldap-eck-deployment/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

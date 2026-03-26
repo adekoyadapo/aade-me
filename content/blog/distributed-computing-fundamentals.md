@@ -3,7 +3,7 @@ slug: "distributed-computing-fundamentals"
 title: "Distributed Computing: Architecture Patterns That Matter"
 excerpt: "Understanding the fundamental patterns and challenges of distributed systems, from microservices to event-driven architecture."
 date: "2026-01-10"
-tags: ["Distributed Systems", "Architecture", "Microservices"]
+tags: ["Distributed Systems", "Architecture"]
 author: "Ade A."
 imageUrl: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=1200&h=600&fit=crop"
 imageAlt: "Distributed computing network diagram"

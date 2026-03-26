@@ -3,13 +3,13 @@ import BlogListClient from "./blog-list-client";
 import { getAllPosts } from "@/lib/blog-repo";
 
 export async function generateMetadata() {
-  const title = "Blog";
+  const title = "Ade A. | Enterprise Architect";
   const description = "Insights on cloud architecture, distributed systems, AI, and modern software engineering practices.";
   const base = "https://aade.me";
   const canonical = `${base}/blog`;
 
   return {
-    title: `${title} | Ade A.`,
+    title: { absolute: title },
     description,
     alternates: { canonical },
     openGraph: {

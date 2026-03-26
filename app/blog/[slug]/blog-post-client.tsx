@@ -11,6 +11,7 @@ import Link from "next/link";
 import { HiArrowLeft, HiClock, HiCalendar, HiUser } from "react-icons/hi";
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import rehypeRaw from 'rehype-raw';
 
 type BlogPostClientProps = {
   post: BlogPost;
@@ -48,13 +49,13 @@ export default function BlogPostClient({
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
-          className="relative w-full h-[400px] rounded-xl overflow-hidden mb-8"
+          className="relative w-full aspect-video rounded-xl overflow-hidden mb-8 bg-zinc-100 dark:bg-zinc-800"
         >
           <Image
             src={post.imageUrl}
             alt={post.imageAlt}
             fill
-            className="object-cover"
+            className="object-contain"
             priority
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1200px"
           />
@@ -129,9 +130,14 @@ export default function BlogPostClient({
             prose-blockquote:border-l-4 prose-blockquote:border-blue-500
             prose-blockquote:pl-4 prose-blockquote:italic
             prose-blockquote:text-zinc-600 dark:prose-blockquote:text-zinc-400
-            prose-hr:border-zinc-200 dark:prose-hr:border-zinc-800 prose-hr:my-8"
+            prose-hr:border-zinc-200 dark:prose-hr:border-zinc-800 prose-hr:my-8
+            [&_svg]:block [&_svg]:max-w-full [&_svg]:my-6
+            prose-table:w-full prose-table:border-collapse prose-table:my-6
+            prose-th:border prose-th:border-zinc-300 dark:prose-th:border-zinc-700 prose-th:px-3 prose-th:py-2 prose-th:bg-zinc-100 dark:prose-th:bg-zinc-800 prose-th:text-left prose-th:font-semibold prose-th:text-sm
+            prose-td:border prose-td:border-zinc-200 dark:prose-td:border-zinc-700 prose-td:px-3 prose-td:py-2 prose-td:text-sm
+            prose-tr:even:bg-zinc-50 dark:prose-tr:even:bg-zinc-800/40"
         >
-          <ReactMarkdown remarkPlugins={[remarkGfm]} skipHtml>
+          <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>
             {post.content}
           </ReactMarkdown>
         </motion.div>

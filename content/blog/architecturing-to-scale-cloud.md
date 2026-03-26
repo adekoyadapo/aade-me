@@ -3,7 +3,7 @@ slug: "architecturing-to-scale-cloud"
 title: "Architecturing to Scale: Cloud Architecture in 2026"
 excerpt: "Exploring best practices for scalable cloud architecture across AWS, Azure, and GCP with insights into Well-Architected Frameworks and multi-cloud strategies."
 date: "2026-01-11"
-tags: ["Cloud", "AWS", "Azure", "GCP", "Architecture"]
+tags: ["Cloud", "Architecture"]
 author: "Ade A."
 imageUrl: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1200&h=600&fit=crop"
 imageAlt: "Cloud architecture diagram showing multi-cloud infrastructure"

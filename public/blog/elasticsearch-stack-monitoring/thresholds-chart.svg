@@ -1,0 +1,53 @@
+<svg viewBox="0 0 620 310" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Bar chart comparing Elasticsearch Stack Monitoring default alert thresholds for CPU, Disk, JVM, Large Shard, and Thread Pool metrics">
+  <title>Elasticsearch Stack Monitoring — Default Alert Thresholds</title>
+  <defs>
+    <linearGradient id="barGrad1" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#0ea5e9" stop-opacity="0.7"/>
+    </linearGradient>
+    <linearGradient id="barGrad2" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#f97316" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#ea580c" stop-opacity="0.7"/>
+    </linearGradient>
+    <linearGradient id="barGrad3" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#a78bfa" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#8b5cf6" stop-opacity="0.7"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="620" height="310" fill="#0f172a" rx="8"/>
+
+  <!-- Y-axis labels -->
+  <text x="160" y="55" text-anchor="end" fill="#94a3b8" font-size="13" font-family="monospace">CPU Usage</text>
+  <text x="160" y="105" text-anchor="end" fill="#94a3b8" font-size="13" font-family="monospace">Disk Usage</text>
+  <text x="160" y="155" text-anchor="end" fill="#94a3b8" font-size="13" font-family="monospace">JVM Memory</text>
+  <text x="160" y="205" text-anchor="end" fill="#94a3b8" font-size="13" font-family="monospace">Large Shard (GB)</text>
+  <text x="160" y="255" text-anchor="end" fill="#94a3b8" font-size="13" font-family="monospace">Thread Rejections</text>
+
+  <!-- CPU 85% -->
+  <rect x="168" y="36" width="340" height="26" rx="4" fill="url(#barGrad1)"/>
+  <text x="516" y="55" fill="#f1f5f9" font-size="12" font-family="monospace">85%</text>
+
+  <!-- Disk 80% -->
+  <rect x="168" y="86" width="320" height="26" rx="4" fill="url(#barGrad2)"/>
+  <text x="496" y="105" fill="#f1f5f9" font-size="12" font-family="monospace">80%</text>
+
+  <!-- JVM 85% -->
+  <rect x="168" y="136" width="340" height="26" rx="4" fill="url(#barGrad1)"/>
+  <text x="516" y="155" fill="#f1f5f9" font-size="12" font-family="monospace">85%</text>
+
+  <!-- Large shard 55GB -->
+  <rect x="168" y="186" width="220" height="26" rx="4" fill="url(#barGrad3)"/>
+  <text x="396" y="205" fill="#f1f5f9" font-size="12" font-family="monospace">55 GB</text>
+
+  <!-- Thread rejections 300 -->
+  <rect x="168" y="236" width="300" height="26" rx="4" fill="url(#barGrad2)"/>
+  <text x="476" y="255" fill="#f1f5f9" font-size="12" font-family="monospace">300 ops</text>
+
+  <!-- Axis line -->
+  <line x1="168" y1="25" x2="168" y2="272" stroke="#334155" stroke-width="1"/>
+
+  <!-- Source -->
+  <text x="168" y="298" fill="#64748b" font-size="10" font-family="sans-serif">Source: Elastic Stack Monitoring default alert rules (elastic.co/docs)</text>
+</svg>

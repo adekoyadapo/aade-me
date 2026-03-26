@@ -17,15 +17,16 @@ export async function generateMetadata({ params }: { params: Promise<{ page: str
   const { page } = await params;
   const currentPage = Number(page) || 1;
   const base = "https://aade.me";
-  const title = currentPage > 1 ? `Blog — Page ${currentPage}` : "Blog";
+  const title = currentPage > 1 ? `Ade A. | Enterprise Architect — Blog Page ${currentPage}` : "Ade A. | Enterprise Architect";
+  const description = "Insights on cloud architecture, distributed systems, AI, and modern software engineering practices.";
   const canonical = currentPage > 1 ? `${base}/blog/page/${currentPage}` : `${base}/blog`;
 
   return {
-    title: `${title} | Ade A.`,
-    description: "Insights on cloud architecture, distributed systems, AI, and modern software engineering practices.",
+    title: { absolute: title },
+    description,
     alternates: { canonical },
-    openGraph: { title, description: "Insights on cloud architecture, distributed systems, AI, and modern software engineering practices.", type: "website", url: canonical },
-    twitter: { card: "summary_large_image", title, description: "Insights on cloud architecture, distributed systems, AI, and modern software engineering practices." },
+    openGraph: { title, description, type: "website", url: canonical },
+    twitter: { card: "summary_large_image", title, description },
     robots: { index: true, follow: true },
   } as const;
 }

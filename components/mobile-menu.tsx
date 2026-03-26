@@ -6,6 +6,7 @@ import { links } from "@/lib/data";
 import Link from "next/link";
 import { useActiveSectionContext } from "@/context/active-section-context";
 import type { SectionName } from "@/lib/types";
+import { usePathname } from "next/navigation";
 import { HiHome, HiUser, HiFolder, HiCog, HiBriefcase, HiAcademicCap, HiMail, HiMenu, HiX, HiDocumentText } from "react-icons/hi";
 
 const iconMap: { [key: string]: React.ReactElement } = {
@@ -23,6 +24,12 @@ export default function MobileMenu() {
   const [isOpen, setIsOpen] = useState(false);
   const { activeSection, setActiveSection, setTimeOfLastClick } =
     useActiveSectionContext();
+  const pathname = usePathname();
+
+  const isLinkActive = (link: (typeof links)[number]) => {
+    if (link.hash.startsWith("/")) return pathname.startsWith(link.hash);
+    return activeSection === link.name;
+  };
 
   const toggleMenu = () => setIsOpen(!isOpen);
 
@@ -89,7 +96,7 @@ export default function MobileMenu() {
                       href={link.hash.startsWith("/") ? link.hash : `/${link.hash}`}
                       onClick={() => handleLinkClick(link.name, link.hash)}
                       className={`flex items-center gap-4 px-4 py-4 rounded-xl transition-all ${
-                        activeSection === link.name && !link.hash.startsWith("/")
+                        isLinkActive(link)
                           ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-950 dark:text-zinc-100 shadow-md"
                           : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-900 hover:text-zinc-950 dark:hover:text-zinc-200"
                       }`}

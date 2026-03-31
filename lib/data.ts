@@ -31,6 +31,8 @@ import archchat from "@/public/archchat.png"
 import eca from "@/public//badges/eca.png"
 import ecp from "@/public//badges/ecp.png"
 import egp from "@/public//badges/egp.png"
+import ecs from "@/public//badges/ecs.png"
+import ece from "@/public//badges/ece.png"
 import { BiLogoGoogleCloud, BiLogoKubernetes } from "react-icons/bi";
 import { VscAzure, VscAzureDevops } from "react-icons/vsc";
 import { TbApi, TbBrandNextjs, TbLoadBalancer } from "react-icons/tb";
@@ -346,6 +348,16 @@ export const badgesData = [
     name: 'EGP',
     imageUrl: egp,
     link: 'https://api.accredible.com/v1/frontend/credential_website_embed_image/certificate/117018699'
+  },
+  {
+    name: 'ECS',
+    imageUrl: ecs,
+    link: 'https://api.accredible.com/v1/frontend/credential_website_embed_image/certificate/173915287'
+  },
+  {
+    name: 'ECE',
+    imageUrl: ece,
+    link: 'https://api.accredible.com/v1/frontend/credential_website_embed_image/certificate/157686572'
   },
 ] as const;
 

@@ -37,7 +37,12 @@ import { BiLogoGoogleCloud, BiLogoKubernetes } from "react-icons/bi";
 import { VscAzure, VscAzureDevops } from "react-icons/vsc";
 import { TbApi, TbBrandNextjs, TbLoadBalancer } from "react-icons/tb";
 import { FaBitbucket, FaGolang } from "react-icons/fa6";
-import { SiAnsible, SiApache, SiAqua, SiArtifacthub, SiBuildkite, SiCilium, SiCircleci, SiCisco, SiConsul, SiCpanel, SiDatadog, SiDell, SiDynatrace, SiElasticstack, SiGitea, SiGithub, SiGithubactions, SiGnubash, SiGo, SiGrafana, SiHelm, SiHp, SiIstio, SiKibana, SiLogstash, SiMongodb, SiMysql, SiNewrelic, SiNextdotjs, SiNginx, SiOpentelemetry, SiPagerduty, SiPaloaltosoftware, SiPostgresql, SiPrisma, SiPrometheus, SiPulumi, SiSentry, SiSnyk, SiSonarqube, SiSpinnaker, SiSplunk, SiTerraform, SiTravisci, SiVagrant, SiVirtualbox, SiVmware, SiWordpress } from "react-icons/si";
+import { SiAnsible, SiApache, SiAqua, SiArtifacthub, SiBuildkite, 
+  SiCilium, SiCircleci, SiCisco, SiConsul, SiCpanel, SiDatadog, SiDell, SiDynatrace, SiElasticstack, SiClaude, SiElasticsearch, 
+  SiGitea, SiGithub, SiGithubactions, SiGnubash, SiGo, SiGrafana, SiHelm, SiHp, SiIstio, SiKibana, SiLogstash, SiMongodb, SiMysql, SiNewrelic, SiNextdotjs, 
+  SiNginx, SiOpentelemetry, SiPagerduty, SiPaloaltosoftware, SiPostgresql, SiPrisma, SiPrometheus, SiPulumi, SiSentry, SiSnyk, SiSonarqube, SiSpinnaker, SiSplunk, 
+  SiTerraform, SiTravisci, SiVagrant, SiVirtualbox, SiVmware, SiWordpress, SiLangchain, SiOpenai, SiOllama, SiGooglegemini
+} from "react-icons/si";
 
 export const links = [
   {
@@ -630,6 +635,10 @@ export const skillsData = [
     icon: React.createElement(SiElasticstack),
   },
   {
+    name: 'Elasticsearch',
+    icon: React.createElement(SiElasticsearch),
+  },
+  {
     name: 'Logstash',
     icon: React.createElement(SiLogstash),
   },
@@ -668,5 +677,25 @@ export const skillsData = [
   {
     name: 'Opentelemetry',
     icon: React.createElement(SiOpentelemetry),
+  },
+  {
+    name: 'Langchain',
+    icon: React.createElement(SiLangchain),
+  },
+  {
+    name: 'Claude',
+    icon: React.createElement(SiClaude),
+  },
+  {
+    name: 'Gemini',
+    icon: React.createElement(SiGooglegemini),
+  },
+  {
+    name: 'Ollama',
+    icon: React.createElement(SiOllama),
+  },
+  {
+    name: 'OpenAI',
+    icon: React.createElement(SiOpenai),
   },
 ] as const;

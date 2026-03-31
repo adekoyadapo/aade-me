@@ -110,7 +110,7 @@ const experiences = [
 ];
 
 const certifications = [
-  { group: "Elastic", items: ["Elastic Certified Engineer", "Elastic Certified Practitioner", "Elastic Certified Observability Engineer"] },
+  { group: "Elastic", items: ["Elastic Certified Engineer (ECE)", "Elastic Certified Practitioner (ECP)", "Elastic Certified Analyst (ECA)", "Elastic Certified SIEM Analyst (ECS)", "Elastic Certified GenAI Practitioner (EGP)"] },
   { group: "Google Cloud", items: ["Professional Cloud Solutions Architect", "Professional Cloud DevOps Engineer", "Professional Cloud Network Engineer"] },
   { group: "AWS", items: ["Solutions Architect Professional", "DevOps Engineer Professional", "Solutions Architect Associate", "Developer Associate"] },
   { group: "Azure", items: ["Solutions Architect Expert", "Administrator Associate", "DevOps Engineer Expert"] },

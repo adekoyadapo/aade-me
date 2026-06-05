@@ -34,10 +34,13 @@ yarn-error.log*
 # editors
 .vscode/
 
-# Claude Code
+# Claude Code artifacts
 CLAUDE.md
 .claude/
 /outlines
+.agents/
+skills/
+skills-lock.json
 
 # Local lab / reference repos (not part of the site)
 /es-ldap-eck-deployment/

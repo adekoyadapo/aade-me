@@ -5,8 +5,8 @@ excerpt: "Elasticsearch 9.5 ships the semantic field type as GA, auto-calibrated
 date: "2026-08-27"
 tags: ["Elasticsearch", "AI/ML", "Observability", "Security", "Kubernetes"]
 author: "Ade A."
-imageUrl: "/blog/elasticsearch-whats-new-9-5/hero.jpeg"
-imageAlt: "Dark navy tech infographic with elastic wordmark and 9.5 what's new badge, four neon-bordered corner cards: semantic field GA, auto_calibrate DiskBBQ, ES95 codec -30% storage, Attack Discovery 2.0"
+imageUrl: "/blog/elasticsearch-whats-new-9-5/hero.webp"
+imageAlt: "Hand-drawn diagram on graph paper with Elastic logo and four labeled boxes: Search and ES|QL (batched query phase, DEDUP, Data Federation), Vector and Inference (semantic field GA, DiskBBQ auto_calibrate), Observability (ES95 TSDB codec, -30% storage), Security and Platform (Attack Discovery 2.0, 4 Agent Builder skills, ECK hot-reload)"
 ---
 
 Elasticsearch 9.5 lands in the middle of a rapid release cadence. The prior two releases (9.3 and 9.4) added Agent Builder GA, GPU indexing GA, and DiskBBQ as the Enterprise default. 9.5 follows with GA promotions on several features that were previewing since early in the year, meaningful observability additions, and a significant ECK operator release that changes how Kubernetes-managed clusters handle secrets and namespace scoping.

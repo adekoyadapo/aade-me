@@ -2,7 +2,7 @@
 slug: "ai-search-elasticsearch-perspective"
 title: "AI Search: An Elasticsearch Perspective"
 excerpt: "Elasticsearch supports five distinct search layers, from BM25 to Agent Builder. Understanding when to use each layer is the difference between a search that works and one that scales."
-date: "2026-09-14"
+date: "2026-09-13"
 tags: ["Elasticsearch", "AI/ML", "Search", "Agent Builder", "RAG"]
 author: "Ade A."
 imageUrl: "/blog/ai-search-elasticsearch-perspective/hero.jpeg"

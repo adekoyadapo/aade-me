@@ -5,8 +5,8 @@ excerpt: "Better Binary Quantization cuts dense vector memory by 96% and DiskBBQ
 date: "2026-09-10"
 tags: ["Elasticsearch", "Vector Search", "AI/ML", "Performance"]
 author: "Ade A."
-imageUrl: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=1200&q=80"
-imageAlt: "Dense data storage infrastructure representing vector compression in Elasticsearch"
+imageUrl: "/blog/elasticsearch-bbq-diskbbq-vector-search/hero.jpeg"
+imageAlt: "Hand-drawn architecture diagram showing float32 vector compressed via BBQ quantization to 1-bit per dimension, with bbq_hnsw and bbq_disk sub-types and 96% memory reduction annotation"
 ---
 
 Running vector search at scale has always had one expensive constraint: memory. HNSW graphs need their full structure in RAM to serve fast queries. At 100M vectors of 1024 dimensions, a float32 index consumes roughly 400GB of heap. That number rules out most production hardware budgets before you even start tuning.

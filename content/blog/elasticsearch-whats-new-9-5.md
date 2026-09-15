@@ -5,8 +5,8 @@ excerpt: "Elasticsearch 9.5 ships the semantic field type as GA, auto-calibrated
 date: "2026-08-27"
 tags: ["Elasticsearch", "AI/ML", "Observability", "Security", "Kubernetes"]
 author: "Ade A."
-imageUrl: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=1200&q=80"
-imageAlt: "Circuit board infrastructure representing Elasticsearch 9.5 technical improvements across search, AI and platform"
+imageUrl: "/blog/elasticsearch-whats-new-9-5/hero.jpeg"
+imageAlt: "Dark navy tech infographic with elastic wordmark and 9.5 what's new badge, four neon-bordered corner cards: semantic field GA, auto_calibrate DiskBBQ, ES95 codec -30% storage, Attack Discovery 2.0"
 ---
 
 Elasticsearch 9.5 lands in the middle of a rapid release cadence. The prior two releases (9.3 and 9.4) added Agent Builder GA, GPU indexing GA, and DiskBBQ as the Enterprise default. 9.5 follows with GA promotions on several features that were previewing since early in the year, meaningful observability additions, and a significant ECK operator release that changes how Kubernetes-managed clusters handle secrets and namespace scoping.
@@ -165,6 +165,23 @@ For teams querying via PromQL:
 ### DLM Frozen Tier Support
 
 Data stream lifecycle (DLM) now manages the frozen tier. Set `frozen_after` on a data stream's lifecycle configuration and DLM moves aging backing indices to frozen automatically — with the frozen phase visible in the ILM wizard in Kibana. For data streams where cold data needs to remain queryable but RAM cost is a concern, DLM-managed frozen replaces the need for a separate ILM policy alongside a DLM policy ([Elastic release notes](https://www.elastic.co/docs/release-notes/elasticsearch)).
+
+### Columnar Index Modes (Tech Preview)
+
+Two new index modes arrive in 9.5 as Tech Preview: `columnar` and `logsdb_columnar`. Both store all fields as doc values only, skipping the inverted index and row-oriented storage that standard indices use. The result is a significantly smaller storage footprint for write-heavy workloads that do not need full-text search or high-frequency term lookups ([Elastic release notes](https://www.elastic.co/docs/release-notes/elasticsearch)).
+
+`logsdb_columnar` applies the same columnar layout on top of the existing LogsDB defaults — automatic timestamp handling, host and log message extraction, and the ~60% log storage savings that LogsDB already provides. Adding the columnar layer on top targets analytics-heavy log workloads where aggregations dominate over point-in-time doc retrieval.
+
+Both modes support flat mappings, multi-value preservation, and optional single-value or required-value enforcement per field. Because these are Tech Preview, the mapping and API surface may change before GA. Evaluate on non-production indices before committing.
+
+```json
+PUT /analytics-index
+{
+  "settings": {
+    "index": { "mode": "columnar" }
+  }
+}
+```
 
 For storage configuration and ILM best practices, see [Elasticsearch Stack Storage Optimization](/blog/elasticsearch-stack-storage-optimization).
 

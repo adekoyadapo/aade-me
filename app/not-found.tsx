@@ -1,5 +1,6 @@
 "use client";
 import React from 'react';
+import Link from 'next/link';
 import SectionHeading from '@/components/section-heading';
 import { motion } from 'framer-motion';
 import { BsLinkedin } from 'react-icons/bs';
@@ -46,18 +47,18 @@ export default function NotFound() {
                     delay: 0.1,
                 }}
             >
-                <a
+                <Link
                     className="bg-white p-6 text-gray-700 hover:text-gray-950 flex items-center gap-4 rounded-full focus:scale-[1.15] hover:scale-[1.15] active:scale-105 transition cursor-pointer borderBlack dark:bg-white/10 dark:text-white/60 
                     hover:grayscale hover:bg-gray-500 dark:hover:bg-gray-200 hover:opacity-90"
-                    href="/#"
+                    href="/"
                 >
                     <FaHome />
                     <span className="absolute top-0 text-zinc-100 dark:text-zinc-900 text-sm left-0 w-full h-full flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-300">
                         Home
                     </span>
-                </a>
+                </Link>
 
-                <a
+                <Link
                     className="bg-white p-6 text-gray-700 hover:text-gray-950 flex items-center gap-4 rounded-full focus:scale-[1.15] hover:scale-[1.15] active:scale-105 transition cursor-pointer borderBlack dark:bg-white/10 dark:text-white/60 
                     hover:grayscale hover:bg-gray-500 dark:hover:bg-gray-200 hover:opacity-90"
                     href="/#contact"
@@ -66,7 +67,7 @@ export default function NotFound() {
                     <span className="absolute top-0 text-zinc-100 dark:text-zinc-900 text-sm left-0 w-full h-full flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-300">
                         Contact
                     </span>
-                </a>
+                </Link>
             </motion.div>
         </motion.section>
     );

@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { links } from "@/lib/data";
 import Link from "next/link";
 import { useActiveSectionContext } from "@/context/active-section-context";
-import type { SectionName } from "@/lib/types";
 import { usePathname } from "next/navigation";
 import { HiHome, HiUser, HiFolder, HiCog, HiBriefcase, HiAcademicCap, HiMail, HiMenu, HiX, HiDocumentText } from "react-icons/hi";
 
@@ -32,15 +31,6 @@ export default function MobileMenu() {
   };
 
   const toggleMenu = () => setIsOpen(!isOpen);
-
-  const handleLinkClick = (name: SectionName, hash: string) => {
-    if (!hash.startsWith("/")) {
-      // Only update active section for hash links, not routes
-      setActiveSection(name);
-      setTimeOfLastClick(Date.now());
-    }
-    setIsOpen(false);
-  };
 
   return (
     <>
@@ -94,7 +84,13 @@ export default function MobileMenu() {
                   >
                     <Link
                       href={link.hash.startsWith("/") ? link.hash : `/${link.hash}`}
-                      onClick={() => handleLinkClick(link.name, link.hash)}
+                      onClick={() => {
+                        if (!link.hash.startsWith("/")) {
+                          setActiveSection(link.name);
+                          setTimeOfLastClick(Date.now());
+                        }
+                        setIsOpen(false);
+                      }}
                       className={`flex items-center gap-4 px-4 py-4 rounded-xl transition-all ${
                         isLinkActive(link)
                           ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-950 dark:text-zinc-100 shadow-md"

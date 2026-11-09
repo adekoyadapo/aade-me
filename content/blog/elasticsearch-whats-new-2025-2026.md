@@ -11,33 +11,33 @@ imageAlt: "Elasticsearch 9.x key updates: elastic wordmark with HNSW vector grap
 
 # What's New with Elasticsearch: Key Updates
 
-Three releases in six months have changed the cost and capability profile of Elasticsearch. Versions 9.1 through 9.3 shipped BBQ quantization as the default, brought ES|QL to full production readiness, built out a native inference layer from an acquisition, and introduced agentic automation directly in Kibana. Each of those four threads is concrete — not directional. This post covers what actually landed and what it means for teams operating these workloads.
+Three releases in six months have changed the cost and capability profile of Elasticsearch. Versions 9.1 through 9.3 shipped BBQ quantization as the default, brought ES|QL to full production readiness, built out a native inference layer from an acquisition, and introduced agentic automation directly in Kibana. Each of those four threads is concrete, not directional. This post covers what actually landed and what it means for teams operating these workloads.
 
 > **Key Takeaways**
 > - BBQ vector quantization is now the default for new `dense_vector` indices, cutting memory by over 95% versus float32 ([Elastic 9.1](https://www.elastic.co/blog/whats-new-elastic-9-1-0)).
-> - DiskBBQ (GA in 9.2) reads vectors from disk at sub-20ms latency with a 100 MB memory footprint regardless of index size ([Elastic 9.2](https://www.elastic.co/blog/whats-new-elastic-9-2-0)).
-> - Elastic acquired Jina AI in October 2025. Three multilingual models are now GA through Elastic Inference Service — no external API key or ML node required ([Jina acquisition](https://www.businesswire.com/news/home/20251009619654/en/Elastic-Completes-Acquisition-of-Jina-AI-a-Leader-in-Frontier-Models-for-Multimodal-and-Multilingual-Search)).
-> - Managed OTLP Endpoint (GA) accepts standard OTLP directly — no collector, no schema translation ([Managed OTLP](https://www.businesswire.com/news/home/20251020492942/en/Elastic-Announces-Managed-OTLP-Endpoint-for-Easier-Scalable-OpenTelemetry)).
+> - DiskBBQ (GA in 9.2) searches compact clusters from disk, and Elastic's benchmarks show sub-20 ms latency even with 100 MB total memory ([Elastic 9.2](https://www.elastic.co/blog/whats-new-elastic-9-2-0)).
+> - Elastic acquired Jina AI in October 2025. Three multilingual models are now GA through Elastic Inference Service, with no external API key or ML node required ([Jina acquisition](https://www.businesswire.com/news/home/20251009619654/en/Elastic-Completes-Acquisition-of-Jina-AI-a-Leader-in-Frontier-Models-for-Multimodal-and-Multilingual-Search)).
+> - Managed OTLP Endpoint (GA) accepts standard OTLP directly, with no collector and no schema translation ([Managed OTLP](https://www.businesswire.com/news/home/20251020492942/en/Elastic-Announces-Managed-OTLP-Endpoint-for-Easier-Scalable-OpenTelemetry)).
 > - Agent Builder and Elastic Workflows are both in 9.3, making Kibana a functional agentic platform with YAML-defined automation ([Elastic 9.3](https://www.elastic.co/blog/whats-new-elastic-9-3-0)).
 
 ---
 
 ## Elasticsearch Vector Search: 95% Lower Memory, DiskBBQ GA
 
-The RAM cost of running large vector indexes has dropped. BBQ quantization became the default in 9.1 for new `dense_vector` indices, cutting heap requirements by more than 95% over float32 ([Elastic 9.1](https://www.elastic.co/blog/whats-new-elastic-9-1-0)). That translates directly to smaller data nodes and lower cluster cost. Teams that ruled out dense vector workloads due to memory provisioning now have different numbers to work with.
+The RAM cost of running large vector indexes has dropped. BBQ quantization became the default in 9.1 for new `dense_vector` indices, reducing the memory footprint by over 95% ([Elastic 9.1](https://www.elastic.co/blog/whats-new-elastic-9-1-0)). That can mean smaller data nodes and lower cluster cost, depending on your workload. Teams that ruled out dense vector workloads due to memory provisioning now have different numbers to work with.
 
 <!-- [UNIQUE INSIGHT] -->
-The default change is more consequential than the changelog implies. Previously, opting into quantization required explicit configuration and a documented precision tradeoff. Now new indices are efficient by default — but any cluster templates or provisioning playbooks written before 9.1 that assume float32 are now wrong. If you're building on existing automation, check your index settings explicitly before scaling out.
+The default change is more consequential than the changelog implies. Previously, opting into quantization required explicit configuration and a documented precision tradeoff. Now new indices are efficient by default, but any cluster templates or provisioning playbooks written before 9.1 that assume float32 are now wrong. If you're building on existing automation, check your index settings explicitly before scaling out.
 
 For inference endpoint setup and embedding model selection, see [Elasticsearch as an AI Platform](/blog/elasticsearch-ai-platform).
 
 ### ACORN Filtered Search
 
-ACORN, GA in 9.1, fixes a specific retrieval problem. Filtered kNN queries used to fall back to brute-force scans under highly selective filters. ACORN integrates filtering directly into HNSW graph traversal, delivering up to 5x faster filtered vector search — including against OpenSearch's equivalent ([Elastic 9.1](https://www.elastic.co/blog/whats-new-elastic-9-1-0)). Workloads with tenant isolation, date-range filters, or category constraints see the biggest gains.
+ACORN, GA in 9.1, fixes a specific retrieval problem. ACORN integrates filtering directly into HNSW graph traversal, delivering up to 5x faster filtered search with no compromise on accuracy ([Elastic 9.1](https://www.elastic.co/blog/whats-new-elastic-9-1-0)). Workloads with tenant isolation, date-range filters, or category constraints see the biggest gains.
 
 ### DiskBBQ — Sub-20ms at 100 MB Memory
 
-DiskBBQ reached GA in 9.2. It reads quantized vectors from disk rather than holding them in heap. The result: sub-20ms search latency with a total memory footprint of 100 MB, regardless of how large the index is ([Elastic 9.2](https://www.elastic.co/blog/whats-new-elastic-9-2-0)). The target workload is hundreds of millions of vectors where cost-per-query matters more than absolute minimum latency. At that scale, RAM provisioning is no longer the capacity constraint.
+DiskBBQ reached GA in 9.2. It reads quantized vectors from disk rather than holding them in heap. Elastic's benchmarks show sub-20 ms latency even with 100 MB total memory ([Elastic 9.2](https://www.elastic.co/blog/whats-new-elastic-9-2-0)). The target workload is hundreds of millions of vectors where cost-per-query matters more than absolute minimum latency. At that scale, RAM provisioning is no longer the capacity constraint.
 
 ### GPU Vector Indexing (Tech Preview, 9.3)
 
@@ -53,14 +53,14 @@ This is not production-ready. GA is on the roadmap. The use case is large-batch 
 
 ## Did ES|QL Finally Graduate?
 
-Yes — the blockers are gone. LOOKUP JOIN and cross-cluster search both went GA in 9.1, removing the two features that most teams cited as blockers for production adoption ([Elastic 9.1](https://www.elastic.co/blog/whats-new-elastic-9-1-0)). LOOKUP JOIN enriches query results against reference indices at query time. Cross-cluster search lets a single ES|QL query span multiple clusters without moving data.
+Yes. LOOKUP JOIN and ES|QL cross-cluster search both went GA in 9.1 ([Elastic 9.1](https://www.elastic.co/blog/whats-new-elastic-9-1-0)). LOOKUP JOIN enriches query results against a lookup index at query time and removes the need for data denormalization or client-side joins. Cross-cluster search lets a single ES|QL query target data across multiple independent clusters.
 
-Performance followed in 9.2: filter pushdowns run up to 86x faster on certain query shapes, and time-series queries are 10x faster than prior releases ([Elastic 9.2](https://www.elastic.co/blog/whats-new-elastic-9-2-0)). Those are not incremental improvements.
+Performance followed. In 9.1, Elastic reported an 86x improvement for `==` filters pushed down to Lucene ([ES|QL in 8.19 and 9.1](https://www.elastic.co/search-labs/blog/esql-elasticsearch-8-19-9-1)). In 9.2, new time series commands in ES|QL deliver queries up to 10x faster ([Elastic 9.2](https://www.elastic.co/blog/whats-new-elastic-9-2-0)). Both are best-case figures, so test your own query shapes.
 
 <!-- [UNIQUE INSIGHT] -->
 The real value of ES|QL is consolidation, not syntax. One language covering full-text search, log analytics, cross-cluster enrichment, and time-series aggregation means one tool for platform teams to standardise on. Teams currently maintaining Kibana lenses for dashboards, Query DSL for search APIs, and separate cross-cluster tooling can start converging on ES|QL for new work. That shrinks the operational knowledge surface for anyone running Elasticsearch at scale.
 
-A LOOKUP JOIN example — enriching log events with a metadata reference index at query time:
+A LOOKUP JOIN example that enriches log events with a metadata reference index at query time:
 
 ```esql
 FROM logs-*
@@ -92,7 +92,7 @@ The three GA models via EIS in 9.3:
 ELSER (English-only) workloads are unchanged. For multilingual or mixed-language corpora, the Jina models through EIS are now the path with the least operational overhead.
 
 <!-- [UNIQUE INSIGHT] -->
-The acquisition changes the dependency model, not just the model availability. Elastic now owns the roadmap for these embeddings — previously, EIS Jina support ran through a third-party partnership. Going forward, model updates, fine-tuned variants, and new multilingual releases can ship directly into EIS without external coordination. For teams standardising on Elastic's inference layer, that removes a category of external dependency risk.
+The acquisition changes the dependency model, not just the model availability. Elastic now owns the roadmap for these embeddings. Previously, EIS Jina support ran through a third-party partnership. Going forward, model updates, fine-tuned variants, and new multilingual releases can ship directly into EIS without external coordination. For teams standardising on Elastic's inference layer, that removes a category of external dependency risk.
 
 Provision a Jina embedding endpoint via EIS:
 
@@ -114,13 +114,13 @@ For hybrid search patterns and RAG setup, see [Elasticsearch as an AI Platform](
 
 ## How Does the Elasticsearch Observability Story Change in 9.x?
 
-Three additions define the shift: Streams GA, Managed OTLP Endpoint GA, and the `pattern_text` field type GA. Together they address log storage costs, collector sprawl, and parsing overhead — the three most common complaints from teams running large log workloads.
+Three additions define the shift: Streams, the Managed OTLP Endpoint, and the `pattern_text` field type. Together they target log storage costs, collector sprawl, and parsing overhead.
 
-Streams reached GA in 9.2. It adds AI-driven log parsing with automatic field extraction in Kibana. A Significant Events surface highlights anomalies — OOM errors, server failures, startup and shutdown events. ILM configuration is handled automatically; you don't pre-engineer ingest pipelines per source ([Elastic 9.2](https://www.elastic.co/blog/whats-new-elastic-9-2-0)). That matters for teams ingesting ad-hoc log formats from tens of services.
+Streams arrived in 9.2. It adds AI-driven log parsing with automatic field extraction in Kibana. A Significant Events surface highlights anomalies such as OOM errors, server failures, and startup and shutdown events. ILM configuration is handled automatically; you don't pre-engineer ingest pipelines per source ([Elastic 9.2](https://www.elastic.co/blog/whats-new-elastic-9-2-0)). That matters for teams ingesting ad-hoc log formats from tens of services.
 
-The Managed OTLP Endpoint went GA in October 2025. Any OTel SDK or collector can point to it and ship data directly — no local Elastic collector tier, no schema translation, no format changes required ([Managed OTLP](https://www.businesswire.com/news/home/20251020492942/en/Elastic-Announces-Managed-OTLP-Endpoint-for-Easier-Scalable-OpenTelemetry)). It reduces the ingestion path from three hops to one.
+The Managed OTLP Endpoint went GA in October 2025. Any OTel SDK or collector can point to it and ship data directly, with no local Elastic collector tier, no schema translation and no format changes required ([Managed OTLP](https://www.businesswire.com/news/home/20251020492942/en/Elastic-Announces-Managed-OTLP-Endpoint-for-Easier-Scalable-OpenTelemetry)).
 
-The `pattern_text` field type, GA in 9.3, applies dictionary encoding to high-cardinality log text fields and cuts storage by roughly 50% ([Elastic 9.3](https://www.elastic.co/blog/whats-new-elastic-9-3-0)). For indexes where storage dominates the cost line, that's a number worth testing against your own data.
+The `pattern_text` field type, GA in 9.3, applies pattern-based compression to log messages and reduces the storage footprint of message fields by up to 50% ([Elastic 9.3](https://www.elastic.co/blog/whats-new-elastic-9-3-0)). For indexes where storage dominates the cost line, that's a number worth testing against your own data.
 
 EDOT (Elastic Distributions of OpenTelemetry) is now stable across all language SDKs, with OpAMP-based centralised configuration handling remote SDK updates without redeployment. For a deep look at EDOT architecture and gateway patterns, see [Observability with EDOT](/blog/observability-with-elasticsearch-edot).
 
@@ -132,7 +132,7 @@ For a full breakdown of ingestion paths including OTLP, see [Getting Data into E
 
 Agent Builder reached GA in 9.3. It is a visual tool in Kibana for building AI agents that query Elasticsearch indices, call inference endpoints, and chain results into multi-step reasoning flows ([Elastic 9.3](https://www.elastic.co/blog/whats-new-elastic-9-3-0)). Elastic Workflows, also shipping in 9.3 as tech preview, provides YAML-based automation with manual, scheduled, or alert-triggered execution.
 
-The two compose bidirectionally: workflows can invoke agents via the `ai.agent` step type, and agents can trigger workflows as tools. ElasticON London 2026 framed this explicitly as the platform's strategic direction — the future is agentic.
+The two compose bidirectionally: workflows can invoke agents via the `ai.agent` step type, and agents can trigger workflows as tools. ElasticON London 2026 framed this explicitly as the platform's strategic direction: the future is agentic.
 
 A minimal Workflow example using an `ai.agent` step:
 
@@ -184,7 +184,7 @@ For Agent Builder deep-dive and RAG patterns, see [Elasticsearch as an AI Platfo
 Five items are worth tracking:
 
 ### 1. GPU Vector Indexing → GA
-Currently tech preview in 9.3. The benchmarks — 12x indexing throughput, 7x faster force-merges — make this worthwhile for large-batch ingest workloads. Don't rely on it in production until GA.
+Currently tech preview in 9.3. The benchmarks (12x indexing throughput, 7x faster force-merges) make this worthwhile for large-batch ingest workloads. Don't rely on it in production until GA.
 
 ### 2. Elastic Workflows → GA
 The YAML automation layer is functional but the API surface is not stable. Build production automation on it only after GA ships.
@@ -196,7 +196,7 @@ Compute and storage separation is on the roadmap, following the pattern already 
 Each serverless project is currently isolated. Cross-project querying would enable multi-tenant architectures without consolidating data into a single project.
 
 ### 5. BYOK Encryption
-Bring Your Own Key support for data at rest — relevant for regulated industries with key management requirements.
+Bring Your Own Key support for data at rest, relevant for regulated industries with key management requirements.
 
 For cloud architecture patterns that complement these scaling capabilities, see [Architecting to Scale in the Cloud](/blog/architecturing-to-scale-cloud).
 
@@ -206,19 +206,19 @@ For cloud architecture patterns that complement these scaling capabilities, see 
 
 ### Is Elasticsearch 8.x still supported?
 
-8.19 is the final 8.x minor release, shipped in July 2025. Elastic extended the 8.x line with 8.19 for teams not ready to migrate yet. Security patches continue, but the feature roadmap moved to 9.x entirely. The capability gap between 8.19 and 9.3 is now wide — particularly for vector search workloads and ES|QL.
+8.19 is the final 8.x minor release, shipped in July 2025. Elastic extended the 8.x line with 8.19 for teams not ready to migrate yet. Security patches continue, but the feature roadmap moved to 9.x entirely. The capability gap between 8.19 and 9.3 is now wide, particularly for vector search workloads and ES|QL.
 
 ### What is DiskBBQ and why does it matter?
 
-DiskBBQ reads quantized vectors from disk rather than holding them in heap. It delivers sub-20ms search latency with a 100 MB memory footprint, regardless of index size ([Elastic 9.2](https://www.elastic.co/blog/whats-new-elastic-9-2-0)). Teams indexing tens or hundreds of millions of vectors no longer need to provision RAM proportional to the corpus size. The tradeoff is slightly higher p99 latency versus in-memory HNSW — a straightforward call for cost-sensitive workloads where sub-100ms is acceptable.
+DiskBBQ reads quantized vectors from disk rather than holding them in heap. It delivers sub-20ms search latency with a 100 MB memory footprint, regardless of index size ([Elastic 9.2](https://www.elastic.co/blog/whats-new-elastic-9-2-0)). Teams indexing tens or hundreds of millions of vectors no longer need to provision RAM proportional to the corpus size. The tradeoff is slightly higher p99 latency versus in-memory HNSW, a straightforward call for cost-sensitive workloads where sub-100ms is acceptable.
 
 ### Do I need to change my OTel setup for the Managed OTLP Endpoint?
 
-No. The endpoint accepts standard OTLP over gRPC and HTTP. Any existing OTel SDK, EDOT distribution, or collector points to it without modification — no schema translation, no format changes, no Elastic agent required ([Managed OTLP](https://www.businesswire.com/news/home/20251020492942/en/Elastic-Announces-Managed-OTLP-Endpoint-for-Easier-Scalable-OpenTelemetry)). For all ingestion methods including OTLP, see [Getting Data into Elasticsearch](/blog/getting-data-into-elasticsearch).
+No. The endpoint accepts standard OTLP over gRPC and HTTP. Any existing OTel SDK, EDOT distribution, or collector points to it without modification: no schema translation, no format changes, no Elastic agent required ([Managed OTLP](https://www.businesswire.com/news/home/20251020492942/en/Elastic-Announces-Managed-OTLP-Endpoint-for-Easier-Scalable-OpenTelemetry)). For all ingestion methods including OTLP, see [Getting Data into Elasticsearch](/blog/getting-data-into-elasticsearch).
 
 ### What is Elastic Inference Service (EIS)?
 
-EIS provides GPU-accelerated inference — ELSER, Jina AI models, and rerankers — hosted on Elastic's infrastructure and billed per token through your subscription ([EIS launch](https://www.businesswire.com/news/home/20251009383846/en/Elastic-Introduces-Native-Inference-Service-in-Elastic-Cloud)). Self-managed clusters reach it via Cloud Connect, GA in 9.3. For teams on Elastic Cloud without dedicated ML nodes, EIS removes model hosting from the equation entirely.
+EIS provides GPU-accelerated inference (ELSER, Jina AI models, and rerankers) hosted on Elastic's infrastructure and billed per token through your subscription ([EIS launch](https://www.businesswire.com/news/home/20251009383846/en/Elastic-Introduces-Native-Inference-Service-in-Elastic-Cloud)). Self-managed clusters reach it via Cloud Connect, GA in 9.3. For teams on Elastic Cloud without dedicated ML nodes, EIS removes model hosting from the equation entirely.
 
 ### Does BBQ becoming the default break existing indexes?
 
@@ -295,7 +295,7 @@ No. The BBQ default applies to new `dense_vector` indices created after upgradin
       "name": "What is Elastic Inference Service (EIS)?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "EIS provides GPU-accelerated inference — ELSER, Jina AI models, and rerankers — hosted on Elastic's infrastructure and billed per token through your subscription. Self-managed clusters access it via Cloud Connect, GA in 9.3."
+        "text": "EIS provides GPU-accelerated inference (ELSER, Jina AI models, and rerankers) hosted on Elastic's infrastructure and billed per token through your subscription. Self-managed clusters access it via Cloud Connect, GA in 9.3."
       }
     },
     {

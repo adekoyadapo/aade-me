@@ -11,13 +11,13 @@ imageAlt: "Distributed computing network diagram"
 
 # Distributed Computing: Architecture Patterns That Matter
 
-Distributed systems are everywhere, and they're still one of the hardest things to get right in software engineering. You can't just scale up anymore—you have to scale out, which means dealing with all the problems that come with multiple machines, network latency, and things failing at random.
+Distributed systems are everywhere, and they're still one of the hardest things to get right in software engineering. You can't just scale up anymore. You have to scale out, which means dealing with all the problems that come with multiple machines, network latency, and things failing at random.
 
 ## Communication Patterns
 
 Request-response is the foundation. Client sends a request, server processes it, sends back a response. Simple concept, brutal reality once you add network latency, failures, timeouts, retries, and concurrent requests all competing for the same resources.
 
-Streaming processing handles continuous data flows in real-time. You're drinking from a firehose—infinite data streams that need low latency and high throughput. You process events as they arrive instead of batching them up and hoping you can keep up.
+Streaming processing handles continuous data flows in real-time. You're drinking from a firehose: infinite data streams that need low latency and high throughput. You process events as they arrive instead of batching them up and hoping you can keep up.
 
 ## Microservices
 
@@ -33,25 +33,25 @@ This gives you loose coupling and real-time responsiveness. It also makes debugg
 
 ## Shared-Nothing Architecture
 
-Multiple separated nodes that don't share resources. This reduces coupling and eliminates single points of failure, but you need sophisticated data synchronization strategies. Nothing is free—you trade shared state for operational complexity.
+Multiple separated nodes that don't share resources. This reduces coupling and eliminates single points of failure, but you need sophisticated data synchronization strategies. Nothing is free. You trade shared state for operational complexity.
 
 ## The Hard Problems
 
-Distributed systems are difficult to program. That's not marketing speak—it's reality. You're dealing with multiple copies of data that need to stay synchronized, nodes that can fail at any time, network delays that create inconsistencies, and a whole list of fallacies people believe about networks.
+Distributed systems are difficult to program. That's not marketing speak. It's reality. You're dealing with multiple copies of data that need to stay synchronized, nodes that can fail at any time, network delays that create inconsistencies, and a whole list of fallacies people believe about networks.
 
-The network is not reliable. Latency is not zero. Bandwidth is not infinite. These aren't theoretical concerns—they're what crash production systems and wake you up at night.
+The network is not reliable. Latency is not zero. Bandwidth is not infinite. These aren't theoretical concerns. They're what crash production systems and wake you up at night.
 
 ## Patterns That Actually Help
 
-Martin Fowler started collecting distributed system patterns in 2020. They were published in "Patterns of Distributed Systems" in 2023. These are battle-tested solutions to common problems—the kind of patterns you wish you'd known before you built your system the first time.
+Unmesh Joshi and Martin Fowler [began collecting distributed system patterns in 2020](https://martinfowler.com/articles/patterns-of-distributed-systems/). They were published in "Patterns of Distributed Systems" in 2023. These are established solutions to common problems, the kind of patterns you wish you'd known before you built your system the first time.
 
-Microsoft Azure and Google Cloud maintain comprehensive pattern catalogs now. They've seen enough deployments to know what works and what fails spectacularly.
+Microsoft maintains a [cloud design pattern catalog](https://learn.microsoft.com/en-us/azure/architecture/patterns/), and Google Cloud publishes [reference architectures and design guidance](https://docs.cloud.google.com/architecture). Both are worth reading before you design your own.
 
 ## The Reality
 
 There's no perfect distributed architecture. Only informed trade-offs between consistency, availability, and partition tolerance. Pick two, and understand what you're giving up.
 
-As more organizations adopt distributed architectures for scalability, performance, and resilience, understanding these patterns stops being optional. The complexity doesn't go away—you just get better at managing it, or you learn the hard way.
+As more organizations adopt distributed architectures for scalability, performance, and resilience, understanding these patterns stops being optional. The complexity doesn't go away. You just get better at managing it, or you learn the hard way.
 
 ---
 

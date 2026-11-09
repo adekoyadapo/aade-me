@@ -35,13 +35,13 @@ import ecs from "@/public//badges/ecs.png"
 import ece from "@/public//badges/ece.png"
 import { BiLogoGoogleCloud, BiLogoKubernetes } from "react-icons/bi";
 import { VscAzure, VscAzureDevops } from "react-icons/vsc";
-import { TbApi, TbBrandNextjs, TbLoadBalancer } from "react-icons/tb";
+import { TbApi, TbBrandNextjs, TbBrandOpenai, TbLoadBalancer } from "react-icons/tb";
 import { FaBitbucket, FaGolang } from "react-icons/fa6";
 import { SiAnsible, SiApache, SiAqua, SiArtifacthub, SiBuildkite, 
   SiCilium, SiCircleci, SiCisco, SiConsul, SiCpanel, SiDatadog, SiDell, SiDynatrace, SiElasticstack, SiClaude, SiElasticsearch, 
   SiGitea, SiGithub, SiGithubactions, SiGnubash, SiGo, SiGrafana, SiHelm, SiHp, SiIstio, SiKibana, SiLogstash, SiMongodb, SiMysql, SiNewrelic, SiNextdotjs, 
-  SiNginx, SiOpentelemetry, SiPagerduty, SiPaloaltosoftware, SiPostgresql, SiPrisma, SiPrometheus, SiPulumi, SiSentry, SiSnyk, SiSonarqube, SiSpinnaker, SiSplunk, 
-  SiTerraform, SiTravisci, SiVagrant, SiVirtualbox, SiVmware, SiWordpress, SiLangchain, SiOpenai, SiOllama, SiGooglegemini
+  SiNginx, SiOpentelemetry, SiPagerduty, SiPaloaltosoftware, SiPostgresql, SiPrisma, SiPrometheus, SiPulumi, SiSentry, SiSnyk, SiSonarqubeserver, SiSpinnaker, SiSplunk, 
+  SiTerraform, SiTravisci, SiVagrant, SiVirtualbox, SiVmware, SiWordpress, SiLangchain, SiOllama, SiGooglegemini
 } from "react-icons/si";
 
 export const links = [
@@ -514,8 +514,8 @@ export const skillsData = [
     icon: React.createElement(FaJenkins),
   },
   {
-    name: 'Sonaqube',
-    icon: React.createElement(SiSonarqube),
+    name: 'SonarQube',
+    icon: React.createElement(SiSonarqubeserver),
   },
   {
     name: 'Synk',
@@ -696,6 +696,6 @@ export const skillsData = [
   },
   {
     name: 'OpenAI',
-    icon: React.createElement(SiOpenai),
+    icon: React.createElement(TbBrandOpenai),
   },
 ] as const;

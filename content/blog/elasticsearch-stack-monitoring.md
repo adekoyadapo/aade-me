@@ -12,26 +12,26 @@ imageAlt: "Hand-drawn architecture sketch of the full Elastic Stack: Filebeat, M
 
 # Elasticsearch Stack Monitoring, A Production Guide
 
-Stack Monitoring is how you know your Elasticsearch cluster is healthy before your users tell you it isn't. It collects logs and metrics from every component in the Elastic Stack — nodes, indices, Kibana instances, Logstash, Beats, APM Server — stores them as searchable JSON documents, and surfaces them through a purpose-built Kibana UI with pre-wired alerting rules.
+Stack Monitoring is how you know your Elasticsearch cluster is healthy before your users tell you it isn't. It collects logs and metrics from every component in the Elastic Stack (nodes, indices, Kibana instances, Logstash, Beats, APM Server), stores them as searchable JSON documents, and surfaces them through a purpose-built Kibana UI with pre-wired alerting rules.
 
-The default experience without Stack Monitoring is discovery by complaint — someone from the application team files a ticket because queries are slow, and that's your first signal that thread pool rejections started accumulating two hours ago. JVM heap creeps toward the 85% threshold, disk fills to the flood watermark, Elasticsearch stops accepting writes. Shards go unassigned and the cluster turns yellow — a state that can persist for months while teams grow numb to it, all while redundancy erodes.
+The default experience without Stack Monitoring is discovery by complaint. Someone from the application team files a ticket because queries are slow, and that's your first signal that thread pool rejections started accumulating two hours ago. JVM heap creeps toward the 85% threshold, disk fills to the flood watermark, Elasticsearch stops accepting writes. Shards go unassigned and the cluster turns yellow. That state can persist for months while teams grow numb to it, and redundancy erodes the whole time.
 
 This post covers what Stack Monitoring actually measures, the specific failure modes it catches, how to deploy it correctly, and the alerting thresholds that matter in production.
 
 > **Key Takeaways**
 > - Stack Monitoring collects metrics from Elasticsearch, Kibana, Logstash, Beats, and APM Server at a configurable interval (default 10s), stored as JSON in a monitoring cluster ([Stack monitoring docs](https://www.elastic.co/docs/deploy-manage/monitor/stack-monitoring)).
-> - Thread pool rejections are a leading indicator for cluster overload — the default alert fires at 300+ search or write rejections over 5 minutes ([Stack monitoring alerts](https://www.elastic.co/docs/deploy-manage/monitor/monitoring-data/configure-stack-monitoring-alerts)).
+> - Thread pool rejections are a leading indicator for cluster overload. The default alert fires at 300+ search or write rejections over 5 minutes ([Stack monitoring alerts](https://www.elastic.co/docs/deploy-manage/monitor/monitoring-data/configure-stack-monitoring-alerts)).
 > - A cluster stuck at yellow status has real, active data loss risk. Unassigned replicas mean any single-node failure produces a red cluster with missing primary shards.
-> - The monitoring cluster must be separate from the production cluster — if your production cluster is the thing having trouble, you need monitoring data accessible from outside it.
-> - Elastic Agent is the recommended collection method, managed centrally via Fleet — no per-node configuration ([Collecting monitoring data with Elastic Agent](https://www.elastic.co/docs/deploy-manage/monitor/stack-monitoring/collecting-monitoring-data-with-elastic-agent)).
+> - The monitoring cluster must be separate from the production cluster. If your production cluster is the thing having trouble, you need monitoring data accessible from outside it.
+> - Elastic Agent is the recommended collection method, managed centrally via Fleet, with no per-node configuration ([Collecting monitoring data with Elastic Agent](https://www.elastic.co/docs/deploy-manage/monitor/stack-monitoring/collecting-monitoring-data-with-elastic-agent)).
 
-> **TL;DR** — Stack Monitoring watches JVM heap, GC pressure, thread pools, disk watermarks, shard allocation, search and indexing throughput, CCR replication lag, and cluster health status across every node, index, and stack component. Nine pre-built alert rules ship by default. Route monitoring data to a separate cluster. Use Elastic Agent as the collection method.
+> **TL;DR:** Stack Monitoring watches JVM heap, GC pressure, thread pools, disk watermarks, shard allocation, search and indexing throughput, CCR replication lag, and cluster health status across every node, index, and stack component. Nine pre-built alert rules ship by default. Route monitoring data to a separate cluster. Use Elastic Agent as the collection method.
 
 ---
 
 ## What Does Stack Monitoring Actually Cover?
 
-Stack Monitoring watches five product categories in the Elastic Stack: Elasticsearch nodes, Kibana instances, Logstash nodes, Beats agents, and APM Server ([Stack monitoring docs](https://www.elastic.co/docs/deploy-manage/monitor/stack-monitoring)). Each monitored component is identified by a persistent UUID written to the `path.data` directory at first startup — so nodes are tracked across restarts and configuration changes without manual registry management.
+Stack Monitoring watches five product categories in the Elastic Stack: Elasticsearch nodes, Kibana instances, Logstash nodes, Beats agents, and APM Server ([Stack monitoring docs](https://www.elastic.co/docs/deploy-manage/monitor/stack-monitoring)). Each monitored component is identified by a persistent UUID written to the `path.data` directory at first startup, so nodes are tracked across restarts and configuration changes without manual registry management.
 
 Monitoring documents are ordinary JSON records, collected at a configurable interval. The default collection frequency is 10 seconds. Every document lands in Elasticsearch indices on the monitoring cluster, which means you can query the raw monitoring data directly via ES|QL or Query DSL when you need to go deeper than the Kibana UI allows.
 
@@ -41,12 +41,12 @@ The data splits into three categories: cluster-level metrics (health status, sha
 
 ## Cluster Health — Why Yellow Is Often the More Dangerous State
 
-Elasticsearch reports cluster health as green, yellow, or red. Most teams treat red as the priority. Red is the obvious, urgent state — one or more primary shards are unassigned, meaning data is unavailable for those shards. Teams respond immediately.
+Elasticsearch reports cluster health as green, yellow, or red. Most teams treat red as the priority. Red is the obvious, urgent state: one or more primary shards are unassigned, meaning data is unavailable for those shards. Teams respond immediately.
 
 Yellow is more insidious. Yellow means all primary shards are allocated, but one or more replicas are not. The cluster appears functional. Search and writes continue. But the redundancy contract is broken. Every node that holds a yellow-status primary is now a single point of failure for that data.
 
 <!-- [UNIQUE INSIGHT] -->
-A cluster that stays yellow long enough becomes invisible. Alerts fire, the on-call engineer checks and confirms writes are working, and the ticket gets closed. After this happens three times, teams stop reacting to yellow alerts. The cluster stays at yellow for months. Then a node fails for an unrelated reason — disk full, network partition, OOM kill — and the primary shard that had no replica goes missing. That's when yellow becomes red without warning.
+A cluster that stays yellow long enough becomes invisible. Alerts fire, the on-call engineer checks and confirms writes are working, and the ticket gets closed. After this happens three times, teams stop reacting to yellow alerts. The cluster stays at yellow for months. Then a node fails for an unrelated reason (disk full, network partition, OOM kill) and the primary shard that had no replica goes missing. That's when yellow becomes red without warning.
 
 The Stack Monitoring Cluster Overview page shows this directly: health status with a contextual indicator, active shard counts, unassigned shards highlighted in the table, and a recovery panel showing any shards currently being relocated or rebuilt. Anything requiring attention is highlighted in yellow or red. Conditions that need immediate action are pinned to the top of the clusters page ([Elasticsearch metrics](https://www.elastic.co/docs/deploy-manage/monitor/monitoring-data/elasticsearch-metrics)).
 
@@ -70,13 +70,13 @@ GET /_cluster/health
 }
 ```
 
-The newer `GET /_health_report` API goes further — it provides root cause analysis with remediation steps, not just status codes ([Health report API](https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-health-report)):
+The newer `GET /_health_report` API goes further. It provides root cause analysis with remediation steps, not just status codes ([Health report API](https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-health-report)):
 
 ```bash
 GET /_health_report
 ```
 
-Response includes per-indicator health with `diagnosis` objects containing a `cause`, an `action`, and a step-by-step remediation guide. Set `verbose=false` when polling automatically — the root cause analysis is computationally expensive on frequent calls.
+Response includes per-indicator health with `diagnosis` objects containing a `cause`, an `action`, and a step-by-step remediation guide. Set `verbose=false` when polling automatically, because the root cause analysis is computationally expensive on frequent calls.
 
 ---
 
@@ -86,20 +86,20 @@ Node metrics are where production Elasticsearch problems typically originate. Th
 
 ### JVM Heap Pressure and Garbage Collection
 
-Elasticsearch runs on the JVM. The heap is the primary memory pool for all in-flight operations: search queries, aggregation buffers, segment merge operations, and fielddata caches. When heap usage consistently exceeds 75%, GC cycles become more frequent. When it hits 85%, GC pauses become long enough to affect search latency visibly.
+Elasticsearch runs on the JVM. The heap is the primary memory pool for all in-flight operations: search queries, aggregation buffers, segment merge operations, and fielddata caches. When JVM memory pressure reaches 75%, [garbage collection becomes more frequent and can affect cluster performance](https://www.elastic.co/docs/deploy-manage/monitor/ec-memory-pressure). Past that point there is little spare memory capacity, so search latency can degrade.
 
-The default JVM memory alert fires when heap usage reaches **85% averaged over 5 minutes** ([Stack monitoring alerts](https://www.elastic.co/docs/deploy-manage/monitor/monitoring-data/configure-stack-monitoring-alerts)). That threshold is not arbitrary — it's the point at which G1GC's stop-the-world collections start extending into hundreds of milliseconds, causing search timeouts even when the hardware is otherwise healthy.
+The default JVM memory alert fires when heap usage reaches **85% averaged over 5 minutes** ([Stack monitoring alerts](https://www.elastic.co/docs/deploy-manage/monitor/monitoring-data/configure-stack-monitoring-alerts)). The threshold sits above the 75% level where Elastic says garbage collection gets more frequent, so it flags a node with little memory headroom left, even when the hardware is otherwise healthy.
 
-The Node Advanced view shows GC collection counts and durations over time. The pattern to watch for is not individual spikes but rising baseline. A node running 40 young-generation GC cycles per minute, where three weeks ago it ran 8, has a memory pressure trend that will continue until you address the root cause — usually unconstrained fielddata, large aggregations, or undersized heap allocation.
+The Node Advanced view shows GC collection counts and durations over time. The pattern to watch for is not individual spikes but rising baseline. A node running 40 young-generation GC cycles per minute, where three weeks ago it ran 8, has a memory pressure trend that will continue until you address the root cause, usually unconstrained fielddata, large aggregations, or undersized heap allocation.
 
 <!-- [UNIQUE INSIGHT] -->
-JVM heap on Elasticsearch should never be allocated above 30-31GB regardless of available RAM. Beyond that threshold, the JVM loses compressed ordinary object pointers (CompressedOops) — a JVM optimisation that encodes 64-bit heap addresses in 32 bits ([Oracle JVM CompressedOops](https://docs.oracle.com/javase/8/docs/technotes/guides/vm/performance-enhancements-7.html)). Once CompressedOops are disabled, heap pointer sizes double, GC work increases, and the memory benefit of allocating more RAM is negated. Stack Monitoring will show heap pressure even on a node with 64GB RAM if the heap crosses this boundary — the fix is capping the heap correctly, not adding more RAM.
+JVM heap on Elasticsearch should never be allocated above 30-31GB regardless of available RAM. Beyond that threshold, the JVM loses compressed ordinary object pointers (CompressedOops), a JVM optimisation that encodes 64-bit heap addresses in 32 bits ([Oracle JVM CompressedOops](https://docs.oracle.com/javase/8/docs/technotes/guides/vm/performance-enhancements-7.html)). Once CompressedOops are disabled, heap pointer sizes double, GC work increases, and the memory benefit of allocating more RAM is negated. Stack Monitoring will show heap pressure even on a node with 64GB RAM if the heap crosses this boundary. The fix is capping the heap correctly, not adding more RAM.
 
 ### Thread Pool Rejections — The Leading Indicator
 
-Elasticsearch processes requests through typed thread pools: `search`, `write`, `get`, `analyze`, and others. Each pool has a fixed thread count and a queue. When the queue fills and all threads are busy, new requests are rejected — the client receives a 429 or an `EsRejectedExecutionException`.
+Elasticsearch processes requests through typed thread pools: `search`, `write`, `get`, `analyze`, and others. Each pool has a fixed thread count and a queue. When the queue fills and all threads are busy, new requests are rejected, and the client receives a 429 or an `EsRejectedExecutionException`.
 
-Thread pool rejections are the leading indicator for cluster overload, not just a symptom. They start occurring before GC pressure peaks, before search latency spikes, and well before out-of-memory kills. If you catch rejections early, you have time to act — scale out, reduce ingest rate, identify the runaway query — before the cluster degrades.
+Thread pool rejections are the leading indicator for cluster overload, not just a symptom. They start occurring before GC pressure peaks, before search latency spikes, and well before out-of-memory kills. If you catch rejections early, you have time to act (scale out, reduce ingest rate, identify the runaway query) before the cluster degrades.
 
 The default alert threshold is **300 or more rejections over 5 minutes**, checked independently for `search` and `write` pools ([Stack monitoring alerts](https://www.elastic.co/docs/deploy-manage/monitor/monitoring-data/configure-stack-monitoring-alerts)).
 
@@ -117,22 +117,22 @@ node-2          search       4    28      186
 node-2          write        8    12        3
 ```
 
-A non-zero and growing `rejected` column on `search` means queries are being dropped. On `write`, it means indexing requests are being refused — data loss risk if the client isn't handling retries.
+A non-zero and growing `rejected` column on `search` means queries are being dropped. On `write`, it means indexing requests are being refused, which is a data loss risk if the client isn't handling retries.
 
 ---
 
 ## How Does Disk Watermark Monitoring Work?
 
-Disk is the only resource failure in Elasticsearch that produces an immediate hard stop. CPU and memory pressure degrade performance gradually. A full disk triggers the flood watermark and Elasticsearch immediately sets all indices on affected nodes to read-only — no grace period, no warning beyond the alert threshold.
+Disk is the only resource failure in Elasticsearch that produces an immediate hard stop. CPU and memory pressure degrade performance gradually. A full disk triggers the flood watermark and Elasticsearch immediately sets all indices on affected nodes to read-only, with no grace period and no warning beyond the alert threshold.
 
 The three watermarks operate in stages:
 - **Low watermark** (85% by default): Elasticsearch stops allocating new shards to this node.
 - **High watermark** (90% by default): Elasticsearch relocates existing shards away from this node.
 - **Flood stage** (95% by default): Elasticsearch sets all indices on this node to `read_only_allow_delete`.
 
-The Stack Monitoring disk usage alert fires at **80% averaged over 5 minutes** — before the low watermark, giving you a 5-point window to act before shard allocation starts failing ([Stack monitoring alerts](https://www.elastic.co/docs/deploy-manage/monitor/monitoring-data/configure-stack-monitoring-alerts)). At 80%, you still have time to delete old indices, increase storage, or add nodes. At 85%, you're already into degraded shard allocation behaviour.
+The Stack Monitoring disk usage alert fires at **80% averaged over 5 minutes**, before the low watermark, giving you a 5-point window to act before shard allocation starts failing ([Stack monitoring alerts](https://www.elastic.co/docs/deploy-manage/monitor/monitoring-data/configure-stack-monitoring-alerts)). At 80%, you still have time to delete old indices, increase storage, or add nodes. At 85%, you're already into degraded shard allocation behaviour.
 
-Stack Monitoring surfaces disk usage per node in the Nodes table, making it easy to identify which specific node is running low — critical in heterogeneous clusters where data node sizes vary.
+Stack Monitoring surfaces disk usage per node in the Nodes table, making it easy to identify which specific node is running low, which is critical in heterogeneous clusters where data node sizes vary.
 
 ---
 
@@ -145,14 +145,15 @@ The Indices section in Stack Monitoring shows per-index metrics including docume
 The large shard alert fires when **an index's average shard size reaches 55GB** ([Stack monitoring alerts](https://www.elastic.co/docs/deploy-manage/monitor/monitoring-data/configure-stack-monitoring-alerts)). This threshold exists because oversized shards create several compounding problems:
 
 - Segment merges on large shards take longer, creating sustained I/O and CPU load during the merge window.
-- When a node goes down, relocating a 100GB shard takes significantly longer than relocating ten 10GB shards — extending the cluster's degraded window.
+- When a node goes down, relocating a 100GB shard takes significantly longer than relocating ten 10GB shards, which extends the cluster's degraded window.
 - GC pressure increases because large shards accumulate more segment metadata and fielddata in heap.
+- A shard can also grow without holding more live data, because deleted documents stay in segments until a merge. [How segments and deleted documents fragment a shard](/blog/elasticsearch-shards-segments-fragmentation) shows how to check for that.
 
-The correct shard size range is 10GB–50GB per shard. For time-series data using ILM, the rollover policy should target this range. For static indices, the shard count in the index mapping controls average shard size.
+The [recommended shard size range is 10GB to 50GB per shard](https://www.elastic.co/docs/deploy-manage/production-guidance/optimize-performance/size-shards). For time-series data using ILM, the rollover policy should target this range. For static indices, the shard count in the index mapping controls average shard size.
 
 ### Shard Recovery Visibility
 
-The Cluster Overview page includes a shard recovery panel showing active recoveries — shards currently being initialised, relocated, or replicated after a node restart or topology change. Recovery activity creates sustained I/O load that competes with live search and indexing.
+The Cluster Overview page includes a shard recovery panel showing active recoveries: shards currently being initialised, relocated, or replicated after a node restart or topology change. Recovery activity creates sustained I/O load that competes with live search and indexing.
 
 Check active recoveries directly to understand the current recovery queue before triggering further topology changes:
 
@@ -160,20 +161,20 @@ Check active recoveries directly to understand the current recovery queue before
 GET /_cat/recovery?v&h=index,shard,stage,type,source_node,target_node,bytes_percent
 ```
 
-The `bytes_percent` column shows how far each shard recovery has progressed. During a rolling restart, wait for recovery to reach 100% on all shards before restarting the next node. Restarting nodes sequentially without checking recovery state is one of the most common causes of cascading failures in rolling upgrades — the second restart happens while the first node's shards are still relocating, doubling the recovery load and potentially triggering out-of-memory conditions on busy nodes.
+The `bytes_percent` column shows how far each shard recovery has progressed. During a rolling restart, wait for recovery to reach 100% on all shards before restarting the next node. Restarting nodes sequentially without checking recovery state is one of the most common causes of cascading failures in rolling upgrades: the second restart happens while the first node's shards are still relocating, doubling the recovery load and potentially triggering out-of-memory conditions on busy nodes.
 
-The Index Advanced view exposes memory statistics per index — segment memory, fielddata cache size, and document values memory. This is where you diagnose indices consuming disproportionate heap.
+The Index Advanced view exposes memory statistics per index: segment memory, fielddata cache size, and document values memory. This is where you diagnose indices consuming disproportionate heap.
 
 ---
 
 ## Search and Indexing Performance Trending
 
-The Cluster Overview charts show search and indexing performance over time — not just current values but historical trends. Threshold alerts fire at a point in time. Trend data is what you need for capacity planning — you're looking for direction, not just level.
+The Cluster Overview charts show search and indexing performance over time, including historical trends as well as current values. Threshold alerts fire at a point in time. Trend data is what you need for capacity planning, because you're looking for direction as well as level.
 
 Search rate (queries per second) and query latency tell you when search performance degrades. Indexing rate and indexing latency tell you when write throughput is under pressure. The pattern that matters is deviation from baseline: a cluster that normally handles 2,000 queries/second dropping to 800 queries/second is a signal even if latency hasn't crossed a threshold yet.
 
 <!-- [UNIQUE INSIGHT] -->
-Search latency trends are useful for capacity planning in ways that raw throughput numbers aren't. If search latency is gradually increasing over four weeks at constant query volume, the cluster is accumulating segment fragmentation, growing fielddata caches, or both. This trend is invisible without historical monitoring data — you wouldn't notice it on any single day's metrics. With Stack Monitoring, you can pull six weeks of latency data and correlate it with indexing volume, ILM rollover frequency, or deployment changes.
+Search latency trends are useful for capacity planning in ways that raw throughput numbers aren't. If search latency is gradually increasing over four weeks at constant query volume, the cluster is accumulating segment fragmentation, growing fielddata caches, or both. This trend is invisible without historical monitoring data, and you wouldn't notice it on any single day's metrics. With Stack Monitoring, you can pull six weeks of latency data and correlate it with indexing volume, ILM rollover frequency, or deployment changes.
 
 For more detail on how indexing performance is affected by ingestion method, see [Getting Data into Elasticsearch](/blog/getting-data-into-elasticsearch).
 
@@ -201,7 +202,7 @@ Stack Monitoring ships nine preconfigured alerting rules in Kibana. When you ope
 </table>
 
 <!-- [UNIQUE INSIGHT] -->
-The **missing monitoring data** rule is the most underrated of the nine. It fires when a monitored node stops sending metrics for 15 minutes. This catches two different problems: the node itself has gone down (in which case you'll also see a red cluster status), and the monitoring agent — Elastic Agent or Metricbeat — has crashed or been misconfigured. The second scenario is the dangerous one. Without this rule, your monitoring pipeline can silently fail and you won't know until you check Kibana manually and notice the last data point was two days ago.
+The **missing monitoring data** rule is the most underrated of the nine. It fires when a monitored node stops sending metrics for 15 minutes. This catches two different problems: the node itself has gone down (in which case you'll also see a red cluster status), and the monitoring agent (Elastic Agent or Metricbeat) has crashed or been misconfigured. The second scenario is the dangerous one. Without this rule, your monitoring pipeline can silently fail and you won't know until you check Kibana manually and notice the last data point was two days ago.
 
 To receive external notifications, configure a connector (PagerDuty, Slack, email, webhook) and attach it to each rule. On Elastic Cloud Hosted, the `Elastic-Cloud-SMTP` email connector is available by default. Access the rules via **Stack Monitoring → Alerts and rules → Create default rules** or from the global Rules management page.
 
@@ -217,11 +218,11 @@ The recommended production architecture routes monitoring data to a dedicated mo
 
 Resource isolation is part of it, but the real reason is simpler: if your production cluster is the thing melting down, those same conditions affect the monitoring data writes. You may lose precisely the metrics you need most at the moment you need them. A separate cluster decouples the observer from the observed.
 
-The practical setup: the monitoring cluster can be smaller than the production cluster. A 3-node monitoring cluster (hot tier only, moderate hardware) is sufficient for most production deployments. Monitoring documents are compact JSON records; even a busy 20-node production cluster generates modest monitoring data volume.
+The practical setup: the monitoring cluster can be smaller than the production cluster. Elastic's docs do not prescribe a node count for the monitoring cluster, so size it from your own data: monitoring documents are [ordinary JSON documents collected at a configurable interval](https://www.elastic.co/docs/deploy-manage/monitor/stack-monitoring), and volume grows with node, index, and shard counts. Check the monitoring indices' size after a week and size the cluster from that.
 
-If you operate multiple production clusters, Stack Monitoring supports routing all of them to a single monitoring cluster — provided the appropriate license level and the monitoring cluster version is not older than the production cluster versions it monitors. This centralises visibility across environments without requiring a separate monitoring deployment per cluster.
+If you operate multiple production clusters, Stack Monitoring supports routing all of them to a single monitoring cluster, as long as you have the appropriate license level and the monitoring cluster version is not older than the production cluster versions it monitors. This centralises visibility across environments without requiring a separate monitoring deployment per cluster.
 
-For teams running Kubernetes, the equivalent pattern for Elasticsearch on ECK is covered in [Kubernetes Autoscaling: HPA vs KEDA](/blog/kubernetes-autoscaling-hpa-vs-keda) — the same "separate control plane from data plane" principle applies to monitoring topology.
+For teams running Kubernetes, the equivalent pattern for Elasticsearch on ECK is covered in [Kubernetes Autoscaling: HPA vs KEDA](/blog/kubernetes-autoscaling-hpa-vs-keda). The same "separate control plane from data plane" principle applies to monitoring topology.
 
 ---
 
@@ -231,7 +232,7 @@ Three methods collect monitoring data from self-managed deployments. Elastic Age
 
 ### Elastic Agent (Recommended)
 
-Elastic Agent collects both logs and metrics from a single process managed centrally through Fleet. Adding Elasticsearch monitoring is an integration configuration in Kibana — no SSH sessions, no per-node config files.
+Elastic Agent collects both logs and metrics from a single process managed centrally through Fleet. Adding Elasticsearch monitoring is an integration configuration in Kibana, with no SSH sessions and no per-node config files.
 
 The setup requires a user with the `remote_monitoring_collector` built-in role on the production cluster. Two scope options matter:
 
@@ -249,7 +250,7 @@ ssl.certificate_authorities: ["/etc/elasticsearch/certs/ca.crt"]
 
 ### Metricbeat
 
-Metricbeat remains fully supported and is the right choice when you have an existing Beats deployment or prefer file-based configuration over Fleet-managed agents. It ships a dedicated `elasticsearch` module that collects the same metric sets as Elastic Agent — cluster stats, node stats, index stats, shard data, and pending tasks.
+Metricbeat remains fully supported and is the right choice when you have an existing Beats deployment or prefer file-based configuration over Fleet-managed agents. It ships a dedicated `elasticsearch` module that collects the same metric sets as Elastic Agent: cluster stats, node stats, index stats, shard data, and pending tasks.
 
 Enable the module and configure the collection target:
 
@@ -277,7 +278,7 @@ Metricbeat module configuration (`metricbeat.yml`):
   xpack.enabled: true
 ```
 
-Setting `xpack.enabled: true` is required for Stack Monitoring compatibility — it tells Metricbeat to format metrics in the internal monitoring format that Kibana's Stack Monitoring UI expects. Without it, data lands in standard Metricbeat indices and does not appear in the Stack Monitoring dashboard.
+Setting `xpack.enabled: true` is required for Stack Monitoring compatibility. It tells Metricbeat to format metrics in the internal monitoring format that Kibana's Stack Monitoring UI expects. Without it, data lands in standard Metricbeat indices and does not appear in the Stack Monitoring dashboard.
 
 ### Legacy Internal Exporters (Deprecated since 7.16)
 
@@ -291,22 +292,22 @@ Disable legacy collection in `elasticsearch.yml`:
 xpack.monitoring.collection.enabled: false
 ```
 
-After disabling, follow the [Elastic Agent setup](https://www.elastic.co/docs/deploy-manage/monitor/stack-monitoring/collecting-monitoring-data-with-elastic-agent) or [Metricbeat setup](https://www.elastic.co/docs/deploy-manage/monitor/stack-monitoring/collecting-monitoring-data-with-metricbeat) to replace it. Running both collection methods simultaneously results in duplicate monitoring documents — disable the legacy exporter before the new agent starts shipping data.
+After disabling, follow the [Elastic Agent setup](https://www.elastic.co/docs/deploy-manage/monitor/stack-monitoring/collecting-monitoring-data-with-elastic-agent) or [Metricbeat setup](https://www.elastic.co/docs/deploy-manage/monitor/stack-monitoring/collecting-monitoring-data-with-metricbeat) to replace it. Running both collection methods simultaneously results in duplicate monitoring documents, so disable the legacy exporter before the new agent starts shipping data.
 
 ---
 
 ## Cross-Cluster Replication Monitoring
 
-If your deployment uses CCR, Stack Monitoring's CCR tab provides per-follower-index visibility into replication health. The key metric is **sync lag in operations** — how many write operations the follower index is behind the leader ([Elasticsearch metrics](https://www.elastic.co/docs/deploy-manage/monitor/monitoring-data/elasticsearch-metrics)).
+If your deployment uses CCR, Stack Monitoring's CCR tab provides per-follower-index visibility into replication health. The key metric is **sync lag in operations**: how many write operations the follower index is behind the leader ([Elasticsearch metrics](https://www.elastic.co/docs/deploy-manage/monitor/monitoring-data/elasticsearch-metrics)).
 
 Sync lag is calculated by comparing `leader_max_seq_no` (the maximum operation sequence number on the leader) with `follower_global_checkpoint` (the highest sequence number confirmed as replicated on the follower). The difference across all shards, taking the worst case, is the reported lag.
 
 Additional per-follower metrics include:
-- **Last fetch time** — the elapsed time since the last successful fetch from the leader. A growing last fetch time before visible sync lag often indicates network problems between clusters.
-- **Ops synced** — operation count replicated in the selected time window.
-- **Alerts** — any `read_exception` events, which represent hard replication errors requiring intervention.
+- **Last fetch time**: the elapsed time since the last successful fetch from the leader. A growing last fetch time before visible sync lag often indicates network problems between clusters.
+- **Ops synced**: operation count replicated in the selected time window.
+- **Alerts**: any `read_exception` events, which represent hard replication errors requiring intervention.
 
-The CCR read exceptions alert fires on a single exception in the last hour — low tolerance because CCR exceptions typically indicate a configuration problem or a shard-level issue that will not self-resolve.
+The CCR read exceptions alert fires on a single exception in the last hour. That is a low tolerance because CCR exceptions typically indicate a configuration problem or a shard-level issue that will not self-resolve.
 
 For the broader distributed systems patterns around replication consistency, see [Distributed Computing Fundamentals](/blog/distributed-computing-fundamentals).
 
@@ -318,11 +319,11 @@ AutoOps is Elastic's newer monitoring layer, available for Elastic Cloud Hosted,
 
 Where Stack Monitoring provides raw metrics and threshold-based alerts, AutoOps adds:
 
-- **Performance recommendations** — specific, actionable suggestions based on observed cluster behaviour (e.g., "this index has too few shards for its write throughput").
-- **Real-time issue detection** — pattern recognition across multiple metrics simultaneously, catching compound problems that no single threshold catches.
-- **Resolution paths** — step-by-step remediation guidance embedded directly in the detected issue, reducing time-to-resolve for on-call engineers.
+- **Performance recommendations**: specific, actionable suggestions based on observed cluster behaviour (e.g., "this index has too few shards for its write throughput").
+- **Real-time issue detection**: pattern recognition across multiple metrics simultaneously, catching compound problems that no single threshold catches.
+- **Resolution paths**: step-by-step remediation guidance embedded directly in the detected issue, reducing time-to-resolve for on-call engineers.
 
-Stack Monitoring and AutoOps are complementary. Stack Monitoring gives you full metric access, custom alerting flexibility, and works in air-gapped environments. AutoOps provides the expert pattern layer on top — like having a cluster health recommendation engine running continuously against your deployment.
+Stack Monitoring and AutoOps are complementary. Stack Monitoring gives you full metric access, custom alerting flexibility, and works in air-gapped environments. AutoOps provides the expert pattern layer on top, like having a cluster health recommendation engine running continuously against your deployment.
 
 The overlap means you don't need to choose immediately. Most teams run Stack Monitoring first, gain familiarity with their cluster's baseline metrics, and then add AutoOps for the pattern-level insights that raw metrics don't surface on their own.
 
@@ -330,13 +331,13 @@ The overlap means you don't need to choose immediately. Most teams run Stack Mon
 
 ## What Happens Without Stack Monitoring
 
-Each of these plays out the same way in practice: the failure mode was observable weeks before impact, and the signal was there — it just wasn't being collected.
+The scenarios below are illustrative, not reports of specific incidents. Each plays out the same way: the failure mode was observable well before impact, and the signal was there. It just wasn't being collected.
 
-**JVM heap creep.** Search latency increases gradually over weeks. Without node-level JVM trending, the platform team has no signal. The on-call team attributes the P95 climb to query volume growth and creates a ticket to investigate "eventually". When an OOM kill eventually happens, the incident post-mortem reveals weeks of fielddata cache growth that was right there in the heap metrics — which nobody was watching.
+**JVM heap creep.** Search latency increases gradually over weeks. Without node-level JVM trending, the platform team has no signal. The on-call team attributes the P95 climb to query volume growth and creates a ticket to investigate "eventually". When an OOM kill eventually happens, the incident post-mortem reveals weeks of fielddata cache growth that was right there in the heap metrics, which nobody was watching.
 
 **Thread pool saturation.** Write rejections accumulate. Fire-and-forget clients silently drop documents. The application team files a bug about missing records. The platform team finds out second-hand that their write pool has been queuing since Tuesday.
 
-**Disk creep to flood stage.** This one is unambiguous. An index rotation job fails silently for one cycle. Disk crosses 95%. Elasticsearch sets every index on the affected node to `read_only_allow_delete` with no grace period. Recovery means manually clearing the read-only flag on each index after you've added storage — at whatever time of day this happens to surface.
+**Disk creep to flood stage.** This one is unambiguous. An index rotation job fails silently for one cycle. Disk crosses 95%. Elasticsearch sets every index on the affected node to `read_only_allow_delete` with no grace period. Recovery means manually clearing the read-only flag on each index after you've added storage, at whatever time of day this happens to surface.
 
 **Yellow chronic state.** The cluster runs yellow for months. The on-call engineer confirmed writes were working and closed the ticket. This happens a second time, a third time. Everyone stops reacting to yellow. Then a node restarts for an unrelated reason and a primary shard with no replica goes missing. Yellow became red with no warning, and now it's a data recovery scenario rather than a routine topology fix.
 

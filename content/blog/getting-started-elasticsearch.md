@@ -149,7 +149,7 @@ Follow the on-screen instructions. It downloads binaries, starts Elasticsearch, 
 
 ## Why Elasticsearch?
 
-Unlike traditional databases optimized for CRUD, Elasticsearch excels at full-text search and analytics at scale. Relevance tuning, aggregations, time series, geo queries—with near real-time indexing.
+Unlike traditional databases optimized for CRUD, Elasticsearch excels at full-text search and analytics at scale. Relevance tuning, aggregations, time series, geo queries, with near real-time indexing.
 
 ## Real Use Cases
 
@@ -163,7 +163,7 @@ Business intelligence: combine search with aggregations for exploratory analytic
 
 ## Production Considerations
 
-Prefer 3+ nodes for HA. Size JVM heap and storage carefully—half your RAM for heap, leave the rest for the OS file cache.
+Prefer 3+ nodes for HA. Size JVM heap and storage carefully: half your RAM for heap, leave the rest for the OS file cache.
 
 Keep all Elastic Stack components on the same major/minor version. Version mismatches cause weird issues.
 
@@ -171,4 +171,4 @@ Enable TLS and role-based access control. Rotate credentials and API keys. Don't
 
 ---
 
-*Elasticsearch isn't just a search engine—it's a data platform that happens to be really good at search.*
+*Elasticsearch is a data platform that happens to be really good at search.*

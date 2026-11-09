@@ -12,16 +12,16 @@ imageAlt: "Elasticsearch storage optimization diagram showing data tiers, ILM li
 
 # Elasticsearch Storage Optimization: ILM, Mapping, and pattern_text
 
-Storage bloat is the silent cluster killer. Most Elasticsearch clusters start lean and grow expensive, not because data volume is unavoidable, but because defaults compound. Dynamic mappings create double the inverted index overhead. Every shard you over-provision consumes JVM heap. Indices that should have rolled to frozen tier six months ago are still sitting on SSDs. The combination of mapping discipline, codec selection, ILM/SLM lifecycle automation, data tiering, and the new `pattern_text` field type can reduce active storage by 65–95% compared to an unoptimized cluster — with no loss of query capability on production workloads ([Elastic docs](https://www.elastic.co/docs/deploy-manage/production-guidance/optimize-performance/disk-usage), [BusinessWire, Dec 2024](https://www.businesswire.com/news/home/20241213828255/en/Elastic-Announces-Elasticsearch-Logsdb-Index-Mode-to-Reduce-Log-Data-Storage-Footprint-by-Up-to-65)).
+Storage bloat is the silent cluster killer. Most Elasticsearch clusters start lean and grow expensive, not because data volume is unavoidable, but because defaults compound. Dynamic mappings create double the inverted index overhead. Every shard you over-provision consumes JVM heap. Indices that should have rolled to frozen tier six months ago are still sitting on SSDs. The combination of mapping discipline, codec selection, ILM/SLM lifecycle automation, data tiering, and the new `pattern_text` field type can reduce active storage by 65–95% compared to an unoptimized cluster, with no loss of query capability on production workloads ([Elastic docs](https://www.elastic.co/docs/deploy-manage/production-guidance/optimize-performance/disk-usage), [BusinessWire, Dec 2024](https://www.businesswire.com/news/home/20241213828255/en/Elastic-Announces-Elasticsearch-Logsdb-Index-Mode-to-Reduce-Log-Data-Storage-Footprint-by-Up-to-65)).
 
 For background on ingestion pipelines and data stream setup, see [Getting Data into Elasticsearch](/blog/getting-data-into-elasticsearch).
 
-> **TL;DR** — Elasticsearch storage bloat comes from three sources: uncontrolled dynamic mappings, oversized hot-tier shards, and missing ILM lifecycle policies. Disciplined mapping templates, LogsDB with `pattern_text`, and full hot-warm-cold-frozen tiering reduce active storage by 65–95% with no loss of query capability.
+> **TL;DR**: Elasticsearch storage bloat comes from three sources: uncontrolled dynamic mappings, oversized hot-tier shards, and missing ILM lifecycle policies. Disciplined mapping templates, LogsDB with `pattern_text`, and full hot-warm-cold-frozen tiering reduce active storage by 65–95% with no loss of query capability.
 
 > #### Key Takeaways
-> - Dynamic string mappings create both `text` and `keyword` sub-fields by default — double the inverted index storage with no benefit if you only need one ([Elastic disk usage guide](https://www.elastic.co/docs/deploy-manage/production-guidance/optimize-performance/disk-usage)).
+> - Dynamic string mappings create both `text` and `keyword` sub-fields by default. That doubles the inverted index storage with no benefit if you only need one ([Elastic disk usage guide](https://www.elastic.co/docs/deploy-manage/production-guidance/optimize-performance/disk-usage)).
 > - Shard sizing target: 10–50 GB per shard, max 200 million documents. Over-sharding is consistently the most expensive mistake on large clusters ([Elastic shard sizing](https://www.elastic.co/docs/deploy-manage/production-guidance/optimize-performance/size-shards)).
-> - The frozen tier uses partially mounted searchable snapshots — up to 20x storage reduction vs warm tier with replicas ([Elastic data tiers](https://www.elastic.co/docs/manage-data/lifecycle/data-tiers)).
+> - The frozen tier uses partially mounted searchable snapshots, with up to 20x storage reduction vs warm tier with replicas ([Elastic data tiers](https://www.elastic.co/docs/manage-data/lifecycle/data-tiers)).
 > - LogsDB index mode cuts storage by up to 65% vs standard indexing. The new `pattern_text` field (GA in 9.3) adds a further ~50% reduction on `message` field storage specifically ([BusinessWire, Dec 2024](https://www.businesswire.com/news/home/20241213828255/en/Elastic-Announces-Elasticsearch-Logsdb-Index-Mode-to-Reduce-Log-Data-Storage-Footprint-by-Up-to-65)).
 > - ILM `min_age` is relative to rollover time, not index creation time. Most engineers misconfigure this and pay for it in unexpected warm-phase delays.
 > - Always pair ILM delete with SLM `wait_for_snapshot`. Deleting an index without a confirmed snapshot is unrecoverable.
@@ -30,16 +30,16 @@ For background on ingestion pipelines and data stream setup, see [Getting Data i
 
 ## How Does Mapping Discipline Reduce Storage?
 
-Undisciplined dynamic mappings are often the largest single storage cost in a growing cluster. By default, Elasticsearch maps every string field to both a `text` type (for full-text search) and a `keyword` sub-field (for aggregations and sorting) — two inverted index structures where you usually need only one ([Elastic disk usage guide](https://www.elastic.co/docs/deploy-manage/production-guidance/optimize-performance/disk-usage)). On a log pipeline ingesting 100 unique string fields per event, that means 200 index structures per field, compounding with document count.
+Undisciplined dynamic mappings are often the largest single storage cost in a growing cluster. By default, Elasticsearch maps every string field to both a `text` type (for full-text search) and a `keyword` sub-field (for aggregations and sorting): two inverted index structures where you usually need only one ([Elastic disk usage guide](https://www.elastic.co/docs/deploy-manage/production-guidance/optimize-performance/disk-usage)). On a log pipeline ingesting 100 unique string fields per event, that means 200 index structures per field, compounding with document count.
 
-The default field limit is 1,000, controlled by `index.mapping.total_fields.limit`. Some teams raise this to 10,000 or higher when they encounter `mapper_parsing_exception` errors. That is the wrong response. A cluster with 50,000 mapped fields will exhibit JVM heap pressure, slow searches, and put-mapping task backlogs — all of which the Elastic troubleshooting guide classifies as mapping explosion ([Elastic mapping explosion guide](https://www.elastic.co/docs/troubleshoot/elasticsearch/mapping-explosion)).
+The default field limit is 1,000, controlled by `index.mapping.total_fields.limit`. Some teams raise this to 10,000 or higher when they encounter `mapper_parsing_exception` errors. That is the wrong response. A cluster with 50,000 mapped fields will exhibit JVM heap pressure, slow searches, and put-mapping task backlogs. The Elastic troubleshooting guide classifies all of these as mapping explosion ([Elastic mapping explosion guide](https://www.elastic.co/docs/troubleshoot/elasticsearch/mapping-explosion)).
 
 <!-- [UNIQUE INSIGHT] -->
-Mapping explosion is almost always an upstream schema problem, not an Elasticsearch problem. The root cause is typically uncontrolled key generation in application logs — JSON objects where key names include user IDs, request IDs, or timestamps. The fix belongs in the application or ingest pipeline, not in the field limit setting. Raising `total_fields.limit` buys time; it does not fix the architecture.
+Mapping explosion is almost always an upstream schema problem, not an Elasticsearch problem. The root cause is typically uncontrolled key generation in application logs: JSON objects where key names include user IDs, request IDs, or timestamps. The fix belongs in the application or ingest pipeline, not in the field limit setting. Raising `total_fields.limit` buys time; it does not fix the architecture.
 
 For pipeline-level field transformation to prevent mapping explosion at the source, see [Getting Data into Elasticsearch](/blog/getting-data-into-elasticsearch).
 
-The triage option is `index.mapping.total_fields.ignore_dynamic_beyond_limit: true`. This silently drops new fields beyond the limit instead of rejecting the document. It is safe for production if you accept that overflow fields are not indexed. It is not a permanent fix. The permanent fix is a reindex with a corrected mapping. You cannot reduce mapped field count in place — the mapping is append-only once initialized.
+The triage option is `index.mapping.total_fields.ignore_dynamic_beyond_limit: true`. This silently drops new fields beyond the limit instead of rejecting the document. It is safe for production if you accept that overflow fields are not indexed. It is not a permanent fix. The permanent fix is a reindex with a corrected mapping. You cannot reduce mapped field count in place because the mapping is append-only once initialized.
 
 For indices with arbitrary or unpredictable key structures (dynamic alert metadata, Kubernetes labels, cloud provider tags), use the `flattened` field type. It stores the entire object under a single field in a compressed representation, preventing field count explosion while retaining keyword search capability on leaf values.
 
@@ -100,7 +100,7 @@ I've seen a single 200 GB shard reallocation hold a cluster at yellow for 20+ mi
 
 `index.codec: best_compression` is an underused setting. It applies DEFLATE compression to `_source` and stored fields, with minimal CPU overhead on read paths and meaningful storage savings on compressible data like JSON logs ([Elastic disk usage guide](https://www.elastic.co/docs/deploy-manage/production-guidance/optimize-performance/disk-usage)). The default codec (`LZ4`) is faster but less space-efficient. For warm and cold indices that are read infrequently, the tradeoff is obvious.
 
-For log `message` fields, replace `text` with `match_only_text`. The `match_only_text` type drops positional index data and BM25 scoring, which are not used for log search. It retains full-text match capability. The storage reduction is significant because positional data scales with document count — on a high-cardinality log stream, it can exceed the size of the source content itself.
+For log `message` fields, replace `text` with `match_only_text`. The `match_only_text` type drops positional index data and BM25 scoring, which are not used for log search. It retains full-text match capability. The storage reduction is significant because positional data scales with document count. On a high-cardinality log stream, it can exceed the size of the source content itself.
 
 Force merge is the highest-impact single action for read-only indices. Running `forcemerge` with `max_num_segments=1` collapses all Lucene segments into one, reclaims soft-deleted document tombstones, and improves block-level compression. It also enables the index sorting optimization to take full effect. **Only run forcemerge on read-only indices.** On write-active indices, forcing a single segment blocks ingestion and produces segments larger than 5 GB, which cannot be merged further by normal background merging.
 
@@ -245,7 +245,7 @@ PUT _slm/policy/daily-snapshots
 }
 ```
 
-This runs daily at 01:30 UTC, names snapshots with a datestamp, and retains at least 5 snapshots up to 30 days. Store the snapshot repository in S3, GCS, or Azure Blob for cost-efficient long-term retention — object storage costs a fraction of SSD node storage for cold data.
+This runs daily at 01:30 UTC, names snapshots with a datestamp, and retains at least 5 snapshots up to 30 days. Store the snapshot repository in S3, GCS, or Azure Blob for cost-efficient long-term retention, since object storage costs a fraction of SSD node storage for cold data.
 
 For cluster health alerting rules and ILM status monitoring, see [Elasticsearch Stack Monitoring](/blog/elasticsearch-stack-monitoring).
 
@@ -253,9 +253,9 @@ For cluster health alerting rules and ILM status monitoring, see [Elasticsearch 
 
 ## Data Tiering: Storage Reduction Across the Temperature Stack
 
-The frozen tier is the largest single storage optimization available without deleting data. Cold tier indices use fully mounted searchable snapshots — no replicas are needed because the snapshot itself provides durability — which cuts storage roughly in half compared to warm indices with one replica ([Elastic data tiers docs](https://www.elastic.co/docs/manage-data/lifecycle/data-tiers)). Frozen tier indices use partially mounted snapshots, where only a small local cache is maintained on the node. A 10 TB warm-tier index costs approximately 500 GB on frozen.
+The frozen tier is the largest single storage optimization available without deleting data. Cold tier indices use fully mounted searchable snapshots. No replicas are needed because the snapshot itself provides durability, which cuts storage roughly in half compared to warm indices with one replica ([Elastic data tiers docs](https://www.elastic.co/docs/manage-data/lifecycle/data-tiers)). Frozen tier indices use partially mounted snapshots, where only a small local cache is maintained on the node. A 10 TB warm-tier index costs approximately 500 GB on frozen.
 
-The 20x reduction figure comes directly from the architecture: a partially mounted index stores only the cached footprint locally and fetches the rest from the snapshot repository on demand. Search latency is higher on frozen — typically 100–500 ms for a cache miss versus single-digit milliseconds on warm — so frozen is appropriate only for compliance queries and historical analytics, not operational dashboards.
+The 20x reduction figure comes directly from the architecture: a partially mounted index stores only the cached footprint locally and fetches the rest from the snapshot repository on demand. Search latency is higher on frozen (typically 100–500 ms for a cache miss versus single-digit milliseconds on warm), so frozen is appropriate only for compliance queries and historical analytics, not operational dashboards.
 
 | Tier | Storage Footprint | Hardware | Use Case |
 |------|-----------------|----------|----------|
@@ -417,7 +417,7 @@ When `default_sort_on_message_template: true` is set, Elasticsearch sorts the in
 }
 ```
 
-Two limitations to know before deploying. First, `pattern_text` does not support multiple values per document. If your field is multi-valued, use `match_only_text`. Second, span queries are not supported. If you need phrase-proximate search, use interval queries instead — they are more expressive and do not depend on positional index data.
+Two limitations to know before deploying. First, `pattern_text` does not support multiple values per document. If your field is multi-valued, use `match_only_text`. Second, span queries are not supported. If you need phrase-proximate search, use interval queries instead. They are more expressive and do not depend on positional index data.
 
 The `message.template_id` sub-field has direct operational value. Group similar error logs without regex:
 
@@ -435,7 +435,7 @@ GET logs-*/_search
 }
 ```
 
-This aggregation surfaces the 20 most frequent message templates in your log stream — effectively automatic log clustering, without any ML.
+This aggregation surfaces the 20 most frequent message templates in your log stream, effectively automatic log clustering, without any ML.
 
 `pattern_text` requires an active Elastic subscription. Check your license before deploying to production.
 
@@ -491,15 +491,15 @@ The storage freed by these optimizations has a secondary benefit for vector work
 
 ### When should I use `best_compression` vs the default codec?
 
-Use `best_compression` on any index where read frequency is lower than write frequency — warm, cold, and frozen indices are the obvious candidates. The default `LZ4` codec prioritises write throughput. `best_compression` applies DEFLATE to `_source` and stored fields, trading a small CPU overhead on reads for 20–30% smaller stored field sizes ([Elastic disk usage guide](https://www.elastic.co/docs/deploy-manage/production-guidance/optimize-performance/disk-usage)). Hot indices with sustained high ingest rates should stay on the default codec.
+Use `best_compression` on any index where read frequency is lower than write frequency. Warm, cold, and frozen indices are the obvious candidates. The default `LZ4` codec prioritises write throughput. `best_compression` applies DEFLATE to `_source` and stored fields, trading a small CPU overhead on reads for 20–30% smaller stored field sizes ([Elastic disk usage guide](https://www.elastic.co/docs/deploy-manage/production-guidance/optimize-performance/disk-usage)). Hot indices with sustained high ingest rates should stay on the default codec.
 
 ### Is forcemerge safe to run in production?
 
-Only on read-only indices. Forcemerge to `max_num_segments=1` on a write-active index blocks ingestion, saturates I/O, and can produce segments too large for normal background merging ([Elastic disk usage guide](https://www.elastic.co/docs/deploy-manage/production-guidance/optimize-performance/disk-usage)). The ILM `forcemerge` action in hot phase triggers after rollover, when the index is no longer receiving writes. In warm phase, the index is already read-only. Never run forcemerge manually on a live write index.
+Only on read-only indices. Forcemerge to `max_num_segments=1` on a write-active index blocks ingestion, saturates I/O, and can produce segments too large for normal background merging ([Elastic disk usage guide](https://www.elastic.co/docs/deploy-manage/production-guidance/optimize-performance/disk-usage)). The ILM `forcemerge` action in hot phase triggers after rollover, when the index is no longer receiving writes. In warm phase, the index is already read-only. Never run forcemerge manually on a live write index. For a lower-risk way to reclaim space from deleted documents on an index that still takes writes, and a measured example, see [how deleted documents and segments fragment a shard](/blog/elasticsearch-shards-segments-fragmentation).
 
 ### What is the difference between ILM and SLM?
 
-ILM (Index Lifecycle Management) manages index state transitions across hot, warm, cold, frozen, and delete phases based on age, size, and document count ([Elastic ILM docs](https://www.elastic.co/docs/manage-data/lifecycle/index-lifecycle-management/index-lifecycle)). SLM (Snapshot Lifecycle Management) automates snapshot scheduling and retention — it creates point-in-time backups on a cron schedule and removes old snapshots per retention rules ([Elastic SLM docs](https://www.elastic.co/docs/deploy-manage/tools/snapshot-and-restore/create-snapshots)). They are complementary: ILM controls where data lives; SLM ensures copies exist before deletion.
+ILM (Index Lifecycle Management) manages index state transitions across hot, warm, cold, frozen, and delete phases based on age, size, and document count ([Elastic ILM docs](https://www.elastic.co/docs/manage-data/lifecycle/index-lifecycle-management/index-lifecycle)). SLM (Snapshot Lifecycle Management) automates snapshot scheduling and retention. It creates point-in-time backups on a cron schedule and removes old snapshots per retention rules ([Elastic SLM docs](https://www.elastic.co/docs/deploy-manage/tools/snapshot-and-restore/create-snapshots)). They are complementary: ILM controls where data lives; SLM ensures copies exist before deletion.
 
 ### Does pattern_text work with existing LogsDB deployments?
 

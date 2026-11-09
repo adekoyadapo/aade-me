@@ -34,9 +34,9 @@ The reference repo ([`es-ldap-eck-deployment`](https://github.com/adekoyadapo/es
 - **cert-manager** with a self-signed root CA and a `ClusterIssuer`
 - **ECK operator** (tested against ECK 2.16.1)
 - **Elasticsearch** (2-node, tested on 8.19.11 and 9.2.5) with an LDAP realm configured
-- **Kibana** — TLS-terminated through ingress
-- **OpenLDAP** — LDAPS on port 636, seeded with test users and groups
-- **phpLDAPadmin** — browser UI for inspecting the directory
+- **Kibana**: TLS-terminated through ingress
+- **OpenLDAP**: LDAPS on port 636, seeded with test users and groups
+- **phpLDAPadmin**: browser UI for inspecting the directory
 
 The one-shot bring-up is:
 
@@ -375,7 +375,7 @@ xpack.security.authc.realms.active_directory.ad1.ssl.verification_mode: full
 
 Entra ID (formerly Azure Active Directory) is a cloud identity platform. It does not expose a native LDAP endpoint. There is no server you can point `ldap.url` at against a standard Entra ID tenant.
 
-To use LDAP authentication against Entra ID, you must deploy **Azure AD Domain Services (Azure AD DS)**. AD DS is a managed domain service that provides a traditional AD-compatible interface (LDAP, LDAPS, Kerberos, NTLM) backed by your Entra ID tenant's users and groups.
+To use LDAP authentication against Entra ID, you must deploy **Azure AD Domain Services (Azure AD DS)**. AD DS is a managed domain service with a traditional AD-compatible interface (LDAP, LDAPS, Kerberos, NTLM) backed by your Entra ID tenant's users and groups.
 
 ### Setting Up Azure AD DS
 
@@ -493,9 +493,9 @@ Note: `8.19.12` appears in the Elastic artifacts API but was not available as a 
 
 ## Related Posts
 
-- [Getting Data into Elasticsearch](/blog/getting-data-into-elasticsearch) — ingestion patterns that complement authenticated cluster access
-- [Elasticsearch Stack Monitoring](/blog/elasticsearch-stack-monitoring) — monitoring the cluster health alongside your auth infrastructure
-- [Elasticsearch at Scale](/blog/elasticsearch-at-scale) — production architecture patterns for Elasticsearch deployments
+- [Getting Data into Elasticsearch](/blog/getting-data-into-elasticsearch): ingestion patterns that complement authenticated cluster access
+- [Elasticsearch Stack Monitoring](/blog/elasticsearch-stack-monitoring): monitoring the cluster health alongside your auth infrastructure
+- [Elasticsearch at Scale](/blog/elasticsearch-at-scale): production architecture patterns for Elasticsearch deployments
 
 ---
 

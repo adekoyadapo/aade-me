@@ -1,0 +1,37 @@
+<svg viewBox="0 0 800 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="t d">
+  <title id="t">Same live documents, 38 percent less disk after the merge</title>
+  <desc id="d">A fragmented shard takes 1.27 megabytes on disk. After a merge the same live documents take 0.79 megabytes.</desc>
+  <style>
+    text { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    .ttl { fill: #e2e8f0; font-size: 17px; font-weight: 700; }
+    .lbl { fill: #94a3b8; font-size: 13px; }
+    .val { fill: #e2e8f0; font-size: 15px; font-weight: 700; }
+    .bar1 { animation: grow1 7s infinite both; transform-box: fill-box; transform-origin: 0 50%; }
+    .bar2 { animation: grow2 7s infinite both; transform-box: fill-box; transform-origin: 0 50%; }
+    .badge { animation: badge 7s infinite both; }
+    @keyframes grow1 { 0% { transform: scaleX(0); } 25%,92% { transform: scaleX(1); } 100% { transform: scaleX(0); } }
+    @keyframes grow2 { 0%,30% { transform: scaleX(0); } 55%,92% { transform: scaleX(1); } 100% { transform: scaleX(0); } }
+    @keyframes badge { 0%,55% { opacity: 0; } 65%,92% { opacity: 1; } 100% { opacity: 0; } }
+    @media (prefers-reduced-motion: reduce) {
+      .bar1,.bar2 { animation: none; transform: none; }
+      .badge { animation: none; opacity: 1; }
+    }
+  </style>
+  <rect width="800" height="300" rx="12" fill="#0f172a"/>
+  <text x="32" y="40" class="ttl">Same live documents, less disk</text>
+
+  <text x="40" y="92" class="lbl">Fragmented: 8 segments, 18,107 flagged deleted</text>
+  <rect x="40" y="104" width="560" height="38" rx="6" fill="#fb7185" class="bar1"/>
+  <text x="612" y="129" class="val">1.27 MB</text>
+
+  <text x="40" y="188" class="lbl">After a merge: 1 segment, 0 deleted</text>
+  <rect x="40" y="200" width="348" height="38" rx="6" fill="#2dd4bf" class="bar2"/>
+  <text x="400" y="225" class="val">0.79 MB</text>
+
+  <g class="badge">
+    <rect x="620" y="196" width="150" height="46" rx="8" fill="#1e293b" stroke="#2dd4bf" stroke-width="2"/>
+    <text x="695" y="225" text-anchor="middle" style="fill:#2dd4bf;font-size:16px;font-weight:700">-38% on disk</text>
+  </g>
+
+  <text x="40" y="276" class="lbl">Measured on Elasticsearch 9.5.5 with a small test index. The ratio depends on your churn.</text>
+</svg>

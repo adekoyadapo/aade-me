@@ -29,12 +29,12 @@ This post focuses on the changes that matter for teams operating Elasticsearch a
 
 The most impactful query performance change in 9.5 has no configuration required. Searches targeting multiple shards on the same data node now batch those shards into a single round-trip per node, with partial reductions performed on the data node before sending results to the coordinating node. This reduces coordinator-side deserialization overhead for shard-heavy indices and is enabled by default via `search.batched_query_phase` ([Elastic release notes](https://www.elastic.co/docs/release-notes/elasticsearch)).
 
-The gain is most noticeable on clusters where many shards per data node is the norm — dense Observability deployments or indices that have been under-sized relative to node count. No mapping or query changes required.
+The gain is most noticeable on clusters where many shards per data node is the norm, such as dense Observability deployments or indices that have been under-sized relative to node count. No mapping or query changes required.
 
 ### ES|QL Data Federation — Query S3 Directly
 
 <!-- [UNIQUE INSIGHT] -->
-Data Federation is listed as Experimental in 9.5, but it is worth knowing it exists. You can define external data sources backed by Amazon S3 and run ES|QL queries against them through a management UI in Stack Management, without moving data into Elasticsearch first. For ad-hoc analysis on cold data that does not justify a full reindex, this is a useful option — with the caveat that Experimental features are not covered by SLA and the API surface can change.
+Data Federation is listed as Experimental in 9.5, but it is worth knowing it exists. You can define external data sources backed by Amazon S3 and run ES|QL queries against them through a management UI in Stack Management, without moving data into Elasticsearch first. For ad-hoc analysis on cold data that does not justify a full reindex, this is a useful option, with the caveat that Experimental features are not covered by SLA and the API surface can change.
 
 ```esql
 FROM external-s3-source::my_dataset
@@ -50,13 +50,13 @@ The external data source is created in Stack Management under Data Sources befor
 
 Several ES|QL commands graduate or arrive in 9.5:
 
-**FUSE (GA)** — previously Tech Preview. Combines multiple standard queries into a single result stream. Useful when you need results from different query shapes without a union manually coded at the application layer.
+**FUSE (GA)**: previously Tech Preview. Combines multiple standard queries into a single result stream. Useful when you need results from different query shapes without a union manually coded at the application layer.
 
-**DEDUP** — removes duplicate rows from the result set on specified columns, comparable to `SELECT DISTINCT`. This has been one of the more-requested ES|QL additions for log deduplication use cases.
+**DEDUP**: removes duplicate rows from the result set on specified columns, comparable to `SELECT DISTINCT`. This has been one of the more-requested ES|QL additions for log deduplication use cases.
 
-**IP_LOCATION** — enriches IP addresses with geographic metadata at query time, without a separate enrich pipeline.
+**IP_LOCATION**: enriches IP addresses with geographic metadata at query time, without a separate enrich pipeline.
 
-**Flattened field type + FIELD_EXTRACT()** (Tech Preview) — ES|QL can now query `flattened` fields with sub-field expressions via the new `FIELD_EXTRACT()` function. This matters for dynamic-mapping-heavy indices where flattened fields are used to keep mapping growth in check.
+**Flattened field type + FIELD_EXTRACT()** (Tech Preview): ES|QL can now query `flattened` fields with sub-field expressions via the new `FIELD_EXTRACT()` function. This matters for dynamic-mapping-heavy indices where flattened fields are used to keep mapping growth in check.
 
 ```esql
 FROM logs-*
@@ -67,9 +67,9 @@ FROM logs-*
 | SORT errors DESC
 ```
 
-**AI-driven ES|QL completion** (Kibana) — Kibana 9.5 adds inline ghost-text completion for ES|QL queries in Discover and Dev Tools. The assistant proposes the next clause as you type; Tab accepts. This sits on top of the existing AI assistant and requires an LLM connector configured in Kibana.
+**AI-driven ES|QL completion** (Kibana): Kibana 9.5 adds inline ghost-text completion for ES|QL queries in Discover and Dev Tools. The assistant proposes the next clause as you type; Tab accepts. This sits on top of the existing AI assistant and requires an LLM connector configured in Kibana.
 
-**ES|QL Fast Mode** — eligible `STATS` queries in Discover and Dashboards can run in a faster execution path. Toggled per session in the Discover toolbar; not all queries qualify.
+**ES|QL Fast Mode**: eligible `STATS` queries in Discover and Dashboards can run in a faster execution path. Toggled per session in the Discover toolbar; not all queries qualify.
 
 ### Synonym Improvements
 
@@ -81,7 +81,7 @@ Three synonym improvements land together in 9.5: append mode for rule updates (`
 
 ### The `semantic` Field Type Goes GA — Including Multimodal
 
-The `semantic` field type is now GA. It is distinct from `semantic_text`: `semantic` supports only dense vector embeddings and extends to multimodal inputs — text, images, audio, video, and PDF content passed through the Inference API ([Elastic docs](https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/semantic-field)). `semantic_text` supports both dense and sparse vectors (ELSER) and works with text input only.
+The `semantic` field type is now GA. It is distinct from `semantic_text`: `semantic` supports only dense vector embeddings and extends to multimodal inputs (text, images, audio, video, and PDF content) passed through the Inference API ([Elastic docs](https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/semantic-field)). `semantic_text` supports both dense and sparse vectors (ELSER) and works with text input only.
 
 In practice: use `semantic_text` for text-heavy corpora where you want hybrid search to work across the same field. Use `semantic` for multimodal use cases where you need a single embedding space covering text and image inputs together.
 
@@ -103,13 +103,13 @@ PUT /product-catalog
 }
 ```
 
-The semantic field type handles chunking and embedding generation at ingest time — the same model that embeds images can embed query text, returning results where image content is ranked against a text query.
+The semantic field type handles chunking and embedding generation at ingest time. The same model that embeds images can embed query text, returning results where image content is ranked against a text query.
 
 ### DiskBBQ: Auto-Calibrate + 20% AVX-512 Gain
 
 Two additions to DiskBBQ in 9.5:
 
-`auto_calibrate` (GA) — Elasticsearch selects encoding, oversampling, and preconditioning per-segment at merge time to target 90% recall at k=10. Segments with fewer than 10,000 vectors fall back to the configured `bits` value. This is the right default for teams without labelled recall benchmarks ([Elastic docs](https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/bbq)):
+`auto_calibrate` (GA): Elasticsearch selects encoding, oversampling, and preconditioning per-segment at merge time to target 90% recall at k=10. Segments with fewer than 10,000 vectors fall back to the configured `bits` value. This is the right default for teams without labelled recall benchmarks ([Elastic docs](https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/bbq)):
 
 ```json
 "index_options": {
@@ -126,13 +126,13 @@ For the full BBQ and DiskBBQ decision guide, version history, and mapping exampl
 
 The inference API expands in 9.5 with several new integrations:
 
-- **Anthropic chat_completion** — `chat_completion` task type added, enabling Claude models as the LLM backend for Agent Builder tools.
-- **Audio, video, and PDF embedding inputs** — the inference API now accepts these content types for embedding generation. Combined with the `semantic` field GA, this enables indexed retrieval over multimedia content.
-- **OpenAI OAuth2** — OAuth2 authentication for OpenAI inference endpoints, replacing API key authentication where OAuth2 is required.
-- **Jina multimodal input format** — multimodal content support via Jina inference endpoints.
-- **Google Vertex AI global endpoint** — connects to the Vertex AI global endpoint in addition to regional endpoints.
-- **Elastic Service multimodal rerank** — the hosted Elastic Inference Service now supports multimodal reranking via the `rerank` task type.
-- **Jina Embeddings v5** — Kibana's documentation installation now prefers Jina Embeddings v5 over v3. For teams building custom semantic search on Kibana documentation, v5 is the current recommended model.
+- **Anthropic chat_completion**: `chat_completion` task type added, enabling Claude models as the LLM backend for Agent Builder tools.
+- **Audio, video, and PDF embedding inputs**: the inference API now accepts these content types for embedding generation. Combined with the `semantic` field GA, this enables indexed retrieval over multimedia content.
+- **OpenAI OAuth2**: OAuth2 authentication for OpenAI inference endpoints, replacing API key authentication where OAuth2 is required.
+- **Jina multimodal input format**: multimodal content support via Jina inference endpoints.
+- **Google Vertex AI global endpoint**: connects to the Vertex AI global endpoint in addition to regional endpoints.
+- **Elastic Service multimodal rerank**: the hosted Elastic Inference Service now supports multimodal reranking via the `rerank` task type.
+- **Jina Embeddings v5**: Kibana's documentation installation now prefers Jina Embeddings v5 over v3. For teams building custom semantic search on Kibana documentation, v5 is the current recommended model.
 
 Token usage tracking for inference calls arrives in Kibana 9.5 with a dashboard that shows per-endpoint token consumption. Useful for cost attribution on shared Elastic Cloud deployments.
 
@@ -142,14 +142,14 @@ Token usage tracking for inference calls arrives in Kibana 9.5 with a dashboard 
 
 ### ES95 TSDB Codec — 30% Less Storage by Default
 
-The ES95 codec is now the default for new time series data streams. On host metrics data, it reduces total doc values storage by approximately 30% versus ES819, which was the prior default ([Elastic release notes](https://www.elastic.co/docs/release-notes/elasticsearch)). The codec name encodes the version — "ES" for Elasticsearch, "95" for major 9, minor 5. Existing indices keep their prior codec; the 30% reduction applies to newly created backing indices going forward.
+The ES95 codec is now the default for new time series data streams. On host metrics data, it reduces total doc values storage by approximately 30% versus ES819, which was the prior default ([Elastic release notes](https://www.elastic.co/docs/release-notes/elasticsearch)). The codec name encodes the version: "ES" for Elasticsearch, "95" for major 9, minor 5. Existing indices keep their prior codec; the 30% reduction applies to newly created backing indices going forward.
 
 <!-- [UNIQUE INSIGHT] -->
-For teams running large host metrics workloads — infrastructure monitoring at hundreds of hosts — this is one of the highest-leverage changes in 9.5 that requires zero configuration. The compression gain happens at index creation time on new backing indices created after upgrading. Roll your data stream's hot index after upgrading and the next backing index will use ES95.
+For teams running large host metrics workloads, such as infrastructure monitoring at hundreds of hosts, this is one of the biggest wins in 9.5 and requires zero configuration. The compression gain happens at index creation time on new backing indices created after upgrading. Roll your data stream's hot index after upgrading and the next backing index will use ES95.
 
 ### TSDB: Native Metric Temporality and Backfilling
 
-TSDB now handles cumulative and delta metric temporality natively. Counter and histogram metrics ingested through the OTLP endpoint no longer require pre-conversion to delta before ingest — the backend applies the conversion. Combined with OTLP logs and traces being enabled by default, this removes a common configuration step for teams migrating from Prometheus-based collection.
+TSDB now handles cumulative and delta metric temporality natively. Counter and histogram metrics ingested through the OTLP endpoint no longer require pre-conversion to delta before ingest. The backend applies the conversion. Combined with OTLP logs and traces being enabled by default, this removes a common configuration step for teams migrating from Prometheus-based collection.
 
 TSDB backfilling is also addressed in 9.5: bulk requests that create documents with `@timestamp` values outside the boundaries of existing backing indices no longer fail outright. The new `data_stream.past_tsdb_index_creation_enabled` setting controls this behaviour ([Elastic release notes](https://www.elastic.co/docs/release-notes/elasticsearch)).
 
@@ -157,20 +157,20 @@ TSDB backfilling is also addressed in 9.5: bulk requests that create documents w
 
 For teams querying via PromQL:
 
-- **Exponential histogram support** — `increase()`, `sum()`, and `histogram_quantile()` now work over `exponential_histogram` fields with native histogram semantics.
-- **PromQL metadata API** — `GET /_prometheus/api/v1/metadata` endpoint, compatible with Prometheus-standard metadata queries.
-- **UNION set operator** — top-level `or` (union) set operator for combining metric series.
-- **Histogram aggregation functions** — `histogram_count`, `histogram_sum`, `histogram_avg`.
+- **Exponential histogram support**: `increase()`, `sum()`, and `histogram_quantile()` now work over `exponential_histogram` fields with native histogram semantics.
+- **PromQL metadata API**: `GET /_prometheus/api/v1/metadata` endpoint, compatible with Prometheus-standard metadata queries.
+- **UNION set operator**: top-level `or` (union) set operator for combining metric series.
+- **Histogram aggregation functions**: `histogram_count`, `histogram_sum`, `histogram_avg`.
 
 ### DLM Frozen Tier Support
 
-Data stream lifecycle (DLM) now manages the frozen tier. Set `frozen_after` on a data stream's lifecycle configuration and DLM moves aging backing indices to frozen automatically — with the frozen phase visible in the ILM wizard in Kibana. For data streams where cold data needs to remain queryable but RAM cost is a concern, DLM-managed frozen replaces the need for a separate ILM policy alongside a DLM policy ([Elastic release notes](https://www.elastic.co/docs/release-notes/elasticsearch)).
+Data stream lifecycle (DLM) now manages the frozen tier. Set `frozen_after` on a data stream's lifecycle configuration and DLM moves aging backing indices to frozen automatically, with the frozen phase visible in the ILM wizard in Kibana. For data streams where cold data needs to remain queryable but RAM cost is a concern, DLM-managed frozen replaces the need for a separate ILM policy alongside a DLM policy ([Elastic release notes](https://www.elastic.co/docs/release-notes/elasticsearch)).
 
 ### Columnar Index Modes (Tech Preview)
 
 Two new index modes arrive in 9.5 as Tech Preview: `columnar` and `logsdb_columnar`. Both store all fields as doc values only, skipping the inverted index and row-oriented storage that standard indices use. The result is a significantly smaller storage footprint for write-heavy workloads that do not need full-text search or high-frequency term lookups ([Elastic release notes](https://www.elastic.co/docs/release-notes/elasticsearch)).
 
-`logsdb_columnar` applies the same columnar layout on top of the existing LogsDB defaults — automatic timestamp handling, host and log message extraction, and the ~60% log storage savings that LogsDB already provides. Adding the columnar layer on top targets analytics-heavy log workloads where aggregations dominate over point-in-time doc retrieval.
+`logsdb_columnar` applies the same columnar layout on top of the existing LogsDB defaults: automatic timestamp handling, host and log message extraction, and the ~60% log storage savings that LogsDB already provides. Adding the columnar layer on top targets analytics-heavy log workloads where aggregations dominate over point-in-time doc retrieval.
 
 Both modes support flat mappings, multi-value preservation, and optional single-value or required-value enforcement per field. Because these are Tech Preview, the mapping and API surface may change before GA. Evaluate on non-production indices before committing.
 
@@ -206,7 +206,7 @@ These skills extend the Agent Builder with domain-specific reasoning over your s
 
 Attack Discovery moves to a workflow-based generation model in 9.5, integrating with the Alerts framework scheduling. This means Attack Discovery runs on a schedule, not just on demand, and produces findings that can be reviewed asynchronously. Bulk enable, disable, and delete actions for schedules are included.
 
-A new alert analysis managed workflow gathers alert context, sends it to the configured LLM, and writes summaries back as notes and tags on the alerts. This composes with the cases integration — attachments from the workflow analysis land alongside the alert timeline.
+A new alert analysis managed workflow gathers alert context, sends it to the configured LLM, and writes summaries back as notes and tags on the alerts. This composes with the cases integration. Attachments from the workflow analysis land alongside the alert timeline.
 
 ### Detection Rules
 
@@ -217,12 +217,12 @@ Detection rule changes history is now GA. A dedicated changes-history page shows
 ### Elastic Defend
 
 Key Defend additions in 9.5:
-- **PowerShell runscript** — `runscript` response action supports PowerShell scripts on Windows endpoints.
-- **Cancel response action** — pending response actions can be cancelled before execution.
-- **Upload limit raised to 200 MiB** — from the previous default.
-- **CCS support** — Elastic Defend agents can use a remote Elasticsearch output with cross-cluster search.
-- **AI-agent process attribution** — process tree enrichment that attributes process activity to AI agent parents, useful for detecting unexpected execution chains from LLM-driven processes.
-- **macOS 27 experimental** — early support added.
+- **PowerShell runscript**: `runscript` response action supports PowerShell scripts on Windows endpoints.
+- **Cancel response action**: pending response actions can be cancelled before execution.
+- **Upload limit raised to 200 MiB**: from the previous default.
+- **CCS support**: Elastic Defend agents can use a remote Elasticsearch output with cross-cluster search.
+- **AI-agent process attribution**: process tree enrichment that attributes process activity to AI agent parents, useful for detecting unexpected execution chains from LLM-driven processes.
+- **macOS 27 experimental**: early support added.
 
 Osquery gains CSV, JSON, and NDJSON export from query results, and recurrence-based scheduling with Daily or Custom schedule options for Osquery packs.
 
@@ -234,29 +234,29 @@ Osquery gains CSV, JSON, and NDJSON export from query results, and recurrence-ba
 
 Agent Builder in Kibana 9.5 adds three operational improvements:
 
-**Concurrent conversations** — multiple Agent Builder sessions run simultaneously with per-conversation status indicators. Previously, running a second conversation while one was active required a separate browser session.
+**Concurrent conversations**: multiple Agent Builder sessions run simultaneously with per-conversation status indicators. Previously, running a second conversation while one was active required a separate browser session.
 
-**Fast model routing** — low-effort Agent Builder operations (simple lookups, reformatting tasks) can route to a configurable fast model with automatic fallback to the primary model for complex reasoning. This reduces per-query latency and cost on mixed workloads where not every tool call requires the full model.
+**Fast model routing**: low-effort Agent Builder operations (simple lookups, reformatting tasks) can route to a configurable fast model with automatic fallback to the primary model for complex reasoning. This reduces per-query latency and cost on mixed workloads where not every tool call requires the full model.
 
-**Tracing enabled by default** — the trace waterfall for each Agent Builder response is now recorded and viewable without enabling a debug mode. Useful for understanding which tools were called, in what order, and with what inputs.
+**Tracing enabled by default**: the trace waterfall for each Agent Builder response is now recorded and viewable without enabling a debug mode. Useful for understanding which tools were called, in what order, and with what inputs.
 
-**Clarifying questions** — agents can pause a conversation to ask up to five multiple-choice questions before acting on ambiguous input.
+**Clarifying questions**: agents can pause a conversation to ask up to five multiple-choice questions before acting on ambiguous input.
 
-**Skill creation in chat** — skills can now be drafted, previewed as chat attachments, and saved from within a conversation. Previously this required the separate skill editor in the Agent Builder configuration UI.
+**Skill creation in chat**: skills can now be drafted, previewed as chat attachments, and saved from within a conversation. Previously this required the separate skill editor in the Agent Builder configuration UI.
 
 ### Workflows: Human-in-the-Loop and Version History GA
 
 Elastic Workflows adds two significant capabilities in 9.5:
 
-**Human-in-the-loop approval steps** — a workflow step can pause execution and wait for an external approval (via the Kibana UI or via a configured integration). This enables automation where a human review checkpoint is a compliance requirement.
+**Human-in-the-loop approval steps**: a workflow step can pause execution and wait for an external approval (via the Kibana UI or via a configured integration). This enables automation where a human review checkpoint is a compliance requirement.
 
-**Version history GA** — every workflow save is recorded. The version history lets you view the diff between any two versions and restore a previous state. This was a gap that made Workflows awkward for teams using IaC-style workflows; version history closes it.
+**Version history GA**: every workflow save is recorded. The version history lets you view the diff between any two versions and restore a previous state. This was a gap that made Workflows awkward for teams using IaC-style workflows; version history closes it.
 
 Step-level `if` conditions are also added, enabling conditional skip logic per step rather than requiring a separate parallel branch.
 
 ### New Connectors in 9.5
 
-Seven new connectors arrive in Kibana 9.5:
+Kibana 9.5 adds seven connectors: OneDrive, Box, Outlook, Snowflake, Azure Blob, HubSpot and Sublime, each described below with its main capabilities.
 
 | Connector | Key Capabilities |
 |---|---|
@@ -270,15 +270,15 @@ Seven new connectors arrive in Kibana 9.5:
 
 ### Kibana Operational Changes
 
-**Dashboard panel limit** raised from 100 to 1,000 combined panels, sections, and controls — the 100 limit was a genuine blocker for dense NOC-style dashboards.
+**Dashboard panel limit** raised from 100 to 1,000 combined panels, sections, and controls. The 100 limit was a genuine blocker for dense NOC-style dashboards.
 
 **Dashboards and Visualizations APIs** go GA. These APIs have been available in preview for several releases; GA means stable contracts and SLA coverage.
 
-**Cases as Data** is now on by default. Cases data (activity, attachments, notes) is indexed and queryable via ES|QL and standard search. `GET /_prometheus/api/v1/metadata` observable extraction from cases is also automated in 9.5 — observables are extracted when alerts are added to cases via the API, workflows, or Agent Builder.
+**Cases as Data** is now on by default. Cases data (activity, attachments, notes) is indexed and queryable via ES|QL and standard search. Observable extraction from cases is also automated in 9.5: observables are extracted when alerts are added to cases via the API, workflows, or Agent Builder.
 
-**Dev Tools JQ filtering** — Dev Tools Console responses can be filtered with JQ expressions inline, without piping output to a separate terminal.
+**Dev Tools JQ filtering**: Dev Tools Console responses can be filtered with JQ expressions inline, without piping output to a separate terminal.
 
-**Display language selection (Beta)** — Kibana UI language can now be changed per user from the profile menu.
+**Display language selection (Beta)**: Kibana UI language can now be changed per user from the profile menu.
 
 ---
 
@@ -296,7 +296,7 @@ metadata:
     eck.k8s.elastic.co/file-based-secure-settings: "true"
 ```
 
-For clusters where keystore updates are frequent — rotating credentials, updating S3 repository settings — this removes the rolling restart from the change lifecycle.
+For clusters where keystore updates are frequent (rotating credentials, updating S3 repository settings), this removes the rolling restart from the change lifecycle.
 
 ### Dynamic Namespace Scoping (Enterprise)
 
@@ -308,7 +308,7 @@ A new `eck.k8s.elastic.co/pause-orchestration` annotation suspends spec-driven o
 
 ### mTLS Expansion to All Stack Components
 
-All Stack components that connect to Elasticsearch — APM Server, Beats, Enterprise Search, Elastic Maps Server, Logstash, standalone Elastic Agent, and Fleet Server — now automatically receive ECK-managed client certificates. Previously mTLS was limited to a subset of components.
+All Stack components that connect to Elasticsearch (APM Server, Beats, Enterprise Search, Elastic Maps Server, Logstash, standalone Elastic Agent, and Fleet Server) now automatically receive ECK-managed client certificates. Previously mTLS was limited to a subset of components.
 
 Fleet Server mTLS for Elastic Agents is also available in ECK 3.5.0 (Enterprise feature): Fleet Server can require client certificates from connecting Elastic Agents.
 
@@ -331,7 +331,7 @@ spec:
 
 ### Reduced Operator Memory Footprint
 
-ECK's controller-runtime cache is now automatically scoped to ECK-labelled workload resources. An optional `--restrict-watched-resources` flag further narrows the cache for Secrets, Services, and ConfigMaps — useful in large clusters where many non-ECK resources exist.
+ECK's controller-runtime cache is now automatically scoped to ECK-labelled workload resources. An optional `--restrict-watched-resources` flag further narrows the cache for Secrets, Services, and ConfigMaps. This is useful in large clusters where many non-ECK resources exist.
 
 ---
 
@@ -364,7 +364,7 @@ For the full AI platform capabilities, see [Elasticsearch AI Platform](/blog/ela
 
 ### Do I need to reindex to get the ES95 TSDB codec benefits?
 
-No manual reindex is required. The ES95 codec applies automatically to new backing indices created after upgrading to 9.5. To force existing backing indices to use the codec, roll the data stream to create a new active index — the new backing index picks up ES95. Older indices retain their existing codec until they are deleted by ILM or DLM.
+No manual reindex is required. The ES95 codec applies automatically to new backing indices created after upgrading to 9.5. To force existing backing indices to use the codec, roll the data stream to create a new active index. The new backing index picks up ES95. Older indices retain their existing codec until they are deleted by ILM or DLM.
 
 ### Is ES|QL Data Federation production-ready?
 
@@ -372,11 +372,11 @@ No. Data Federation is marked Experimental in 9.5, meaning the API surface can c
 
 ### What is the difference between `semantic` and `semantic_text` fields?
 
-`semantic_text` supports both dense and sparse vector embeddings (including ELSER), handles text input only, and is designed for hybrid search where the same field indexes both BM25 and semantic representations. `semantic` supports only dense vector embeddings but extends to multimodal input — text, images, audio, video, and PDF. Use `semantic_text` for text search. Use `semantic` when your retrieval needs to span multiple content modalities. Both are now GA.
+`semantic_text` supports both dense and sparse vector embeddings (including ELSER), handles text input only, and is designed for hybrid search where the same field indexes both BM25 and semantic representations. `semantic` supports only dense vector embeddings but extends to multimodal input (text, images, audio, video, and PDF). Use `semantic_text` for text search. Use `semantic` when your retrieval needs to span multiple content modalities. Both are now GA.
 
 ### Does the ECK hot-reload secure settings feature require any Elasticsearch config changes?
 
-The annotation (`eck.k8s.elastic.co/file-based-secure-settings: "true"`) is the only required change at the Kubernetes level. Elasticsearch 9.5+ receives the secret via a mounted file and hot-reloads it automatically. No changes to `elasticsearch.yml` are needed. The feature is opt-in — clusters without the annotation continue to use the rolling-restart delivery path.
+The annotation (`eck.k8s.elastic.co/file-based-secure-settings: "true"`) is the only required change at the Kubernetes level. Elasticsearch 9.5+ receives the secret via a mounted file and hot-reloads it automatically. No changes to `elasticsearch.yml` are needed. The feature is opt-in: clusters without the annotation continue to use the rolling-restart delivery path.
 
 ### How does the Attack Discovery 2.0 schedule interact with existing Attack Discovery runs?
 
@@ -384,7 +384,7 @@ Attack Discovery 2.0 converts the on-demand generation into a workflow-based pro
 
 ### Is Elastic Defend's AI-agent process attribution related to Agent Builder?
 
-The feature adds process tree enrichment that marks processes spawned by or attributed to AI agent runtimes (for example, processes started by an LLM-driven application). It is useful for detecting unexpected execution chains from AI applications running on endpoints — not directly related to Agent Builder in Kibana, though the terminology overlaps. It operates at the Elastic Defend host-level monitoring layer.
+The feature adds process tree enrichment that marks processes spawned by or attributed to AI agent runtimes (for example, processes started by an LLM-driven application). It is useful for detecting unexpected execution chains from AI applications running on endpoints. Despite the overlapping terminology, it is not directly related to Agent Builder in Kibana. It operates at the Elastic Defend host-level monitoring layer.
 
 ---
 

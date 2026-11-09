@@ -1,0 +1,62 @@
+<svg viewBox="0 0 800 330" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="t d">
+  <title id="t">Refresh cycle: buffered writes become a searchable segment</title>
+  <desc id="d">Three writes land in an in-memory buffer where search cannot see them. A refresh turns the buffer into a new segment, and the new documents become searchable.</desc>
+  <style>
+    text { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    .ttl { fill: #e2e8f0; font-size: 17px; font-weight: 700; }
+    .lbl { fill: #94a3b8; font-size: 13px; }
+    .cell { fill: #2dd4bf; }
+    .cap { fill: #0f172a; font-size: 13px; font-weight: 700; }
+    .c1 { animation: c1 8s infinite both; }
+    .c2 { animation: c2 8s infinite both; }
+    .c3 { animation: c3 8s infinite both; }
+    .seg12 { animation: s12 8s infinite both; }
+    .arrow { animation: arrow 8s infinite both; }
+    .before { animation: before 8s infinite both; }
+    .after { animation: after 8s infinite both; }
+    @keyframes c1 { 0%,4% { opacity: 0; } 8%,58% { opacity: 1; } 62%,100% { opacity: 0; } }
+    @keyframes c2 { 0%,14% { opacity: 0; } 18%,58% { opacity: 1; } 62%,100% { opacity: 0; } }
+    @keyframes c3 { 0%,24% { opacity: 0; } 28%,58% { opacity: 1; } 62%,100% { opacity: 0; } }
+    @keyframes s12 { 0%,60% { opacity: 0; } 68%,94% { opacity: 1; } 100% { opacity: 0; } }
+    @keyframes arrow { 0%,54% { opacity: 0.15; } 58%,66% { opacity: 1; } 72%,100% { opacity: 0.15; } }
+    @keyframes before { 0%,60% { opacity: 1; } 64%,96% { opacity: 0; } 100% { opacity: 1; } }
+    @keyframes after { 0%,62% { opacity: 0; } 68%,94% { opacity: 1; } 100% { opacity: 0; } }
+    @media (prefers-reduced-motion: reduce) {
+      .c1,.c2,.c3,.seg12,.arrow,.before,.after { animation: none; }
+      .c1,.c2,.c3,.before { opacity: 0; }
+      .seg12,.after,.arrow { opacity: 1; }
+    }
+  </style>
+  <rect width="800" height="330" rx="12" fill="#0f172a"/>
+  <text x="32" y="40" class="ttl">Refresh: when a write becomes searchable</text>
+
+  <text x="40" y="82" class="lbl">In-memory buffer (not searchable)</text>
+  <rect x="40" y="94" width="270" height="130" rx="8" fill="none" stroke="#64748b" stroke-width="2" stroke-dasharray="7 6"/>
+  <g class="c1"><rect class="cell" x="66" y="136" width="60" height="46" rx="5"/><text class="cap" x="96" y="164" text-anchor="middle">42</text></g>
+  <g class="c2"><rect class="cell" x="140" y="136" width="60" height="46" rx="5"/><text class="cap" x="170" y="164" text-anchor="middle">77</text></g>
+  <g class="c3"><rect class="cell" x="214" y="136" width="60" height="46" rx="5"/><text class="cap" x="244" y="164" text-anchor="middle">91</text></g>
+
+  <g class="arrow">
+    <path d="M318 159 H 392" stroke="#38bdf8" stroke-width="3" fill="none"/>
+    <path d="M392 150 L 408 159 L 392 168 Z" fill="#38bdf8"/>
+    <text x="318" y="144" class="lbl" fill="#38bdf8" style="fill:#38bdf8">refresh</text>
+  </g>
+
+  <text x="420" y="82" class="lbl">Segments (searchable)</text>
+  <rect x="420" y="94" width="340" height="130" rx="8" fill="none" stroke="#64748b" stroke-width="2"/>
+  <text x="436" y="120" class="lbl">seg 7</text>
+  <rect class="cell" x="500" y="104" width="48" height="24" rx="4" opacity="0.55"/>
+  <rect class="cell" x="554" y="104" width="48" height="24" rx="4" opacity="0.55"/>
+  <rect class="cell" x="608" y="104" width="48" height="24" rx="4" opacity="0.55"/>
+  <rect class="cell" x="662" y="104" width="48" height="24" rx="4" opacity="0.55"/>
+  <g class="seg12">
+    <text x="436" y="176" class="lbl">seg 12</text>
+    <rect class="cell" x="500" y="156" width="48" height="24" rx="4"/>
+    <rect class="cell" x="554" y="156" width="48" height="24" rx="4"/>
+    <rect class="cell" x="608" y="156" width="48" height="24" rx="4"/>
+  </g>
+
+  <rect x="32" y="252" width="736" height="52" rx="8" fill="#1e293b"/>
+  <g class="before"><text x="52" y="284" font-size="14" style="fill:#fb7185;font-size:14px">search: the 3 new writes are acknowledged but not visible yet</text></g>
+  <g class="after"><text x="52" y="284" font-size="14" style="fill:#2dd4bf;font-size:14px">search: a new segment was opened, the 3 writes are now visible</text></g>
+</svg>

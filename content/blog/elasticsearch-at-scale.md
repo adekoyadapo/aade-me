@@ -11,12 +11,12 @@ imageAlt: "Elasticsearch at scale: four workload panels for Search, Observabilit
 
 # Elasticsearch at Scale: Search, Logs, Security, and Vector AI
 
-Elasticsearch runs at extremes most databases never face. Verizon indexes 500 billion documents ([Elastic customer stories](https://www.elastic.co/customers/verizon)). GitHub serves search across 130 billion lines of code ([GitHub Engineering Blog](https://github.blog/engineering/infrastructure/the-technology-behind-githubs-new-code-search/)). ES|QL (Elasticsearch Query Language) is now active on over 10,000 clusters per week ([Elastic, 2025](https://www.businesswire.com/news/home/20250730200029/en/Elastic-Delivers-New-ESQL-Features-for-Cross-Cluster-Scale-Data-Enrichment-and-Performance)). The question isn't whether it scales — it's how it scales across four distinct workload profiles: Search, Observability, Security, and AI/ML. Each profile has its own bottlenecks, its own tuning levers, and its own hosting story.
+Elasticsearch runs at extremes most databases never face. Verizon indexes 500 billion documents ([Elastic customer stories](https://www.elastic.co/customers/verizon)). GitHub serves search across 130 billion lines of code ([GitHub Engineering Blog](https://github.blog/engineering/infrastructure/the-technology-behind-githubs-new-code-search/)). ES|QL (Elasticsearch Query Language) is now active on over 10,000 clusters per week ([Elastic, 2025](https://www.businesswire.com/news/home/20250730200029/en/Elastic-Delivers-New-ESQL-Features-for-Cross-Cluster-Scale-Data-Enrichment-and-Performance)). The question is how it scales across four distinct workload profiles: Search, Observability, Security, and AI/ML. Each profile has its own bottlenecks, its own tuning levers, and its own hosting story.
 
 > #### Key Takeaways
-> - ES|QL cross-cluster search is GA in 9.1, tested at 250 clusters with logarithmic coordination overhead — not linear ([Elastic Search Labs, 2025](https://www.elastic.co/search-labs/blog/esql-cross-cluster-search)).
+> - ES|QL cross-cluster search is GA in 9.1, tested at 250 clusters with logarithmic coordination overhead, not linear ([Elastic Search Labs, 2025](https://www.elastic.co/search-labs/blog/esql-cross-cluster-search)).
 > - LogsDB cuts storage by up to 65% vs standard index mode, with a further 16% reduction and 19% indexing throughput gain in 8.19/9.1 ([BusinessWire, Dec 2024](https://www.businesswire.com/news/home/20241213828255/en/Elastic-Announces-Elasticsearch-Logsdb-Index-Mode-to-Reduce-Log-Data-Storage-Footprint-by-Up-to-65)).
-> - BBQ achieves 95% memory reduction vs standard HNSW and runs 5x faster than OpenSearch FAISS at Recall@10 — 11.70ms vs 35.59ms ([Elastic Search Labs, 2025](https://www.elastic.co/search-labs/blog/elasticsearch-bbq-vs-opensearch-faiss)).
+> - BBQ achieves 95% memory reduction vs standard HNSW and runs 5x faster than OpenSearch FAISS at Recall@10: 11.70ms vs 35.59ms ([Elastic Search Labs, 2025](https://www.elastic.co/search-labs/blog/elasticsearch-bbq-vs-opensearch-faiss)).
 > - Elastic Serverless is GA across 26 regions on AWS, Azure, and GCP. The January 2026 AWS Graviton upgrade delivered 35% lower average search latency at no extra cost ([Elastic Search Labs, 2026](https://www.elastic.co/search-labs/blog/elasticsearch-serverless-aws-performance-boost)).
 > - Shard sizing: 10-50 GB per shard, max 200 million documents, 1 GB master heap per 3,000 indices ([Elastic docs](https://www.elastic.co/docs/deploy-manage/production-guidance/optimize-performance/size-shards)).
 
@@ -24,13 +24,13 @@ Elasticsearch runs at extremes most databases never face. Verizon indexes 500 bi
 
 ## How Does Elasticsearch Scale for Search?
 
-Cross-cluster ES|QL and shard discipline are what make search scale in 2026 — not just adding nodes. ES|QL cross-cluster search went GA in 9.1, tested against 250 clusters with logarithmic coordination overhead ([Elastic Search Labs, 2025](https://www.elastic.co/search-labs/blog/esql-cross-cluster-search)). Logarithmic overhead means the growth curve flattens at scale. Linear overhead would mean 250 clusters costs 250x a single cluster — which is exactly why the architecture distinction matters for multi-region deployments.
+Cross-cluster ES|QL and shard discipline are what make search scale in 2026 rather than just adding nodes. ES|QL cross-cluster search went GA in 9.1, tested against 250 clusters with logarithmic coordination overhead ([Elastic Search Labs, 2025](https://www.elastic.co/search-labs/blog/esql-cross-cluster-search)). Logarithmic overhead means the growth curve flattens at scale. Linear overhead would mean 250 clusters costs 250x a single cluster, which is why the architecture distinction matters for multi-region deployments.
 
-ES|QL is active on 10,000+ clusters per week, which signals something beyond adoption numbers ([BusinessWire, 2025](https://www.businesswire.com/news/home/20250730200029/en/Elastic-Delivers-New-ESQL-Features-for-Cross-Cluster-Scale-Data-Enrichment-and-Performance)). Teams are consolidating query logic into a single pipe-based language rather than splitting workloads across the query DSL, aggregations API, and transforms. One tool instead of three — and one query plan for any observability or audit tooling that wraps it.
+ES|QL is active on 10,000+ clusters per week, which signals something beyond adoption numbers ([BusinessWire, 2025](https://www.businesswire.com/news/home/20250730200029/en/Elastic-Delivers-New-ESQL-Features-for-Cross-Cluster-Scale-Data-Enrichment-and-Performance)). Teams are consolidating query logic into a single pipe-based language rather than splitting workloads across the query DSL, aggregations API, and transforms. One tool instead of three, and one query plan for any observability or audit tooling that wraps it.
 
 ### Shard Sizing Still Matters
 
-Shard sizing is where most cluster health problems start. Elastic's production guidance is 10-50 GB per shard, hard ceiling at 200 million documents. Master node heap should be sized at 1 GB per 3,000 indices ([Elastic docs](https://www.elastic.co/docs/deploy-manage/production-guidance/optimize-performance/size-shards)). Overshooting these targets causes slow GC pauses on masters, hot shard imbalances, and recovery times that turn a single node loss into an hour-long incident. For time-series workloads, enforce it automatically via ILM:
+Shard sizing is where most cluster health problems start. Elastic's production guidance is 10-50 GB per shard, hard ceiling at 200 million documents. Master node heap should be sized at 1 GB per 3,000 indices ([Elastic docs](https://www.elastic.co/docs/deploy-manage/production-guidance/optimize-performance/size-shards)). Overshooting these targets causes slow GC pauses on masters, hot shard imbalances, and recovery times that turn a single node loss into an hour-long incident. Deleted documents count toward the document limit and inflate a shard without adding data, so check them as well ([segments and deleted documents](/blog/elasticsearch-shards-segments-fragmentation)). For time-series workloads, enforce it automatically via ILM:
 
 ```json
 PUT _ilm/policy/logs-policy
@@ -68,7 +68,7 @@ PUT _ilm/policy/logs-policy
 
 ### ES|QL Filter Pushdown and LOOKUP JOIN
 
-Elasticsearch 9.1 delivered an 86x filter pushdown speedup for query shapes where filters evaluate against segment metadata rather than individual documents ([Elastic blog, 2025](https://www.elastic.co/blog/whats-new-elastic-9-1-0)). For high-cardinality filtered searches, that gap translates to sub-millisecond responses on warm indices. LOOKUP JOIN adds cross-index enrichment at query time — no pre-materialised join index, no extra pipeline step:
+Elasticsearch 9.1 delivered an 86x filter pushdown speedup for query shapes where filters evaluate against segment metadata rather than individual documents ([Elastic blog, 2025](https://www.elastic.co/blog/whats-new-elastic-9-1-0)). For high-cardinality filtered searches, that gap translates to sub-millisecond responses on warm indices. LOOKUP JOIN adds cross-index enrichment at query time, with no pre-materialised join index and no extra pipeline step:
 
 ```esql
 FROM logs-*
@@ -89,7 +89,7 @@ For thread pool metrics, JVM heap, and production alerting rules, see [Elasticse
 
 ## What Does Elasticsearch's Observability Story Look Like at Scale?
 
-LogsDB changed the storage math, and the numbers are large enough to affect infrastructure cost directly. Teams migrating from standard index mode to LogsDB report up to 65% storage reduction ([BusinessWire, Dec 2024](https://www.businesswire.com/news/home/20241213828255/en/Elastic-Announces-Elasticsearch-Logsdb-Index-Mode-to-Reduce-Log-Data-Storage-Footprint-by-Up-to-65)). The 8.19/9.1 enhancements pushed further — 16% additional storage reduction and 19% higher indexing throughput compared to the 8.17 baseline ([Elastic blog, 2025](https://www.elastic.co/blog/business-impact-elastic-logsdb-tsds-enhancements)). A team ingesting 10 TB/day saves the equivalent of running fewer hot nodes. At petabyte scale, that saving flows straight into infrastructure cost.
+LogsDB changed the storage math, and the numbers are large enough to affect infrastructure cost directly. Teams migrating from standard index mode to LogsDB report up to 65% storage reduction ([BusinessWire, Dec 2024](https://www.businesswire.com/news/home/20241213828255/en/Elastic-Announces-Elasticsearch-Logsdb-Index-Mode-to-Reduce-Log-Data-Storage-Footprint-by-Up-to-65)). The 8.19/9.1 enhancements pushed further: 16% additional storage reduction and 19% higher indexing throughput compared to the 8.17 baseline ([Elastic blog, 2025](https://www.elastic.co/blog/business-impact-elastic-logsdb-tsds-enhancements)). Less storage per day of retained logs means fewer or smaller hot nodes for the same retention, and at large volumes that saving flows into infrastructure cost.
 
 <svg xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Horizontal bar chart comparing log storage footprint: standard index mode at 100%, LogsDB 8.17 at 35 percent, and LogsDB 8.19 and 9.1 at approximately 29 percent of standard — lower is better" width="700" height="220" font-family="system-ui, sans-serif">
   <title>LogsDB Storage Footprint — Relative storage vs standard index mode (lower is better)</title>
@@ -112,16 +112,16 @@ LogsDB changed the storage math, and the numbers are large enough to affect infr
 
 ### OTLP at Scale — Kafka-Backed Ingestion
 
-The Managed OTLP Endpoint went GA on Elastic Cloud Hosted in March 2026. Its Kafka-backed architecture absorbs traffic spikes without applying back-pressure to the sending application — there's no static ingest ceiling to size around ([Elastic Observability Labs, 2026](https://www.elastic.co/observability-labs/blog/elastic-managed-otlp-endpoint-ga-elastic-cloud-hosted)). The buffer handles burst, and Elasticsearch catches up asynchronously. EDOT (Elastic Distributions of OpenTelemetry), GA since 9.0, covers all major language SDKs with zero-code instrumentation and centralised config delivery via OpAMP — so teams already on OTel get a direct path in without rewriting instrumentation.
+The Managed OTLP Endpoint went GA on Elastic Cloud Hosted in March 2026. Its Kafka-backed architecture absorbs traffic spikes without applying back-pressure to the sending application, so there's no static ingest ceiling to size around ([Elastic Observability Labs, 2026](https://www.elastic.co/observability-labs/blog/elastic-managed-otlp-endpoint-ga-elastic-cloud-hosted)). The buffer handles burst, and Elasticsearch catches up asynchronously. EDOT (Elastic Distributions of OpenTelemetry), GA since 9.0, covers all major language SDKs with zero-code instrumentation and centralised config delivery via OpAMP, so teams already on OTel get a direct path in without rewriting instrumentation.
 
 ### Streams and AI-Assisted Log Parsing
 
-Streams went GA in 9.2. It's a Kibana-native data stream manager that handles AI-driven field extraction, anomaly surfacing via Significant Events detection, and routing rules — all without pre-engineered ingest pipelines. For teams with unstructured log formats from third-party systems, Streams removes the pipeline engineering step, which in practice often means removing the ongoing maintenance of Logstash configurations built by people who have long since left the team.
+Streams went GA in 9.2. It's a Kibana-native data stream manager that handles AI-driven field extraction, anomaly surfacing via Significant Events detection, and routing rules, all without pre-engineered ingest pipelines. For teams with unstructured log formats from third-party systems, Streams removes the pipeline engineering step, which in practice often means removing the ongoing maintenance of Logstash configurations built by people who have long since left the team.
 
 <!-- [PERSONAL EXPERIENCE] -->
-The teams I've seen struggle most with log scale aren't hitting Elasticsearch's ingest limits — they're drowning in the maintenance burden of Logstash pipelines they didn't write. Streams addresses that directly. You don't need to understand the original pipeline to change the routing.
+The teams I've seen struggle most with log scale aren't hitting Elasticsearch's ingest limits. They're drowning in the maintenance burden of Logstash pipelines they didn't write. Streams addresses that directly. You don't need to understand the original pipeline to change the routing.
 
-Elastic was named a Leader in the 2025 IDC MarketScape for Worldwide Observability Platforms ([BusinessWire, Nov 2025](https://www.businesswire.com/news/home/20251114859815/en/Elastic-Named-a-Leader-in-2025-IDC-MarketScape-for-Worldwide-Observability-Platforms)). That covers the integrated stack — traces, metrics, APM, synthetics, and alerting alongside log storage. For a complete walkthrough of EDOT setup and OTel ingestion, see [Observability with Elasticsearch and EDOT](/blog/observability-with-elasticsearch-edot).
+Elastic was named a Leader in the 2025 IDC MarketScape for Worldwide Observability Platforms ([BusinessWire, Nov 2025](https://www.businesswire.com/news/home/20251114859815/en/Elastic-Named-a-Leader-in-2025-IDC-MarketScape-for-Worldwide-Observability-Platforms)). That covers the integrated stack: traces, metrics, APM, synthetics, and alerting alongside log storage. For a complete walkthrough of EDOT setup and OTel ingestion, see [Observability with Elasticsearch and EDOT](/blog/observability-with-elasticsearch-edot).
 
 ---
 
@@ -130,9 +130,9 @@ Elastic was named a Leader in the 2025 IDC MarketScape for Worldwide Observabili
 Elastic Security ships with 1,895+ prebuilt detection rules mapped across 54+ data sources and 70+ ML jobs ([Elastic Detection Rules Explorer](https://elastic.github.io/detection-rules-explorer/), March 2026). Rule count sets the coverage baseline, but it isn't the scale story. The real problem at scale is what happens when those rules fire across petabytes of event data and three analysts need to triage the output.
 
 <!-- [UNIQUE INSIGHT] -->
-The bottleneck in large SIEM deployments isn't ingestion throughput — it's analyst throughput. Elasticsearch can ingest petabytes per day without issue. The harder constraint is that 1,895 detection rules firing across that volume generates more alerts than any team reviews manually. This is where Elastic's scale story actually differentiates from raw ingest capacity.
+The bottleneck in large SIEM deployments isn't ingestion throughput. It's analyst throughput. Elasticsearch can ingest petabytes per day without issue. The harder constraint is that 1,895 detection rules firing across that volume generates more alerts than any team reviews manually. This is where Elastic's scale story actually differentiates from raw ingest capacity.
 
-That's where Attack Discovery, GA in 9.0, changes the calculus. It uses AI-assisted triage to correlate alerts across SIEM, XDR, and cloud security into discrete attack narratives — collapsing multi-stage kill chains that would otherwise take hours to reconstruct from individual alerts. Alongside it, Automatic Migration handles rule import from Splunk and QRadar, removing the switching friction for teams moving off legacy SIEM platforms. The Threat Hunting Agent, GA in 9.3, then unifies Alerts, Entity Risk Scores, and Attack Discovery into a single investigation surface.
+That's where Attack Discovery, GA in 9.0, changes the calculus. It uses AI-assisted triage to correlate alerts across SIEM, XDR, and cloud security into discrete attack narratives, collapsing multi-stage kill chains that would otherwise take hours to reconstruct from individual alerts. Alongside it, Automatic Migration handles rule import from Splunk and QRadar, removing the switching friction for teams moving off legacy SIEM platforms. The Threat Hunting Agent, GA in 9.3, then unifies Alerts, Entity Risk Scores, and Attack Discovery into a single investigation surface.
 
 Elastic was named a Visionary in the 2025 Gartner Magic Quadrant for SIEM ([Elastic blog, 2025](https://www.elastic.co/blog/elastic-visionary-gartner-magic-quadrant-siem)).
 
@@ -140,9 +140,9 @@ Elastic was named a Visionary in the 2025 Gartner Magic Quadrant for SIEM ([Elas
 
 ## Is Elasticsearch Competitive as a Vector Store at Scale?
 
-The RAM cost of running HNSW at scale dropped by an order of magnitude across two releases. BBQ (Better Binary Quantization), the default quantization in 9.1, achieves 95% memory reduction versus standard HNSW and benchmarks at 5x faster than OpenSearch FAISS at Recall@10 — 11.70ms vs 35.59ms ([Elastic Search Labs, 2025](https://www.elastic.co/search-labs/blog/elasticsearch-bbq-vs-opensearch-faiss)).
+The RAM cost of running HNSW at scale dropped by an order of magnitude across two releases. BBQ (Better Binary Quantization), the default quantization in 9.1, achieves 95% memory reduction versus standard HNSW and benchmarks at 5x faster than OpenSearch FAISS at Recall@10: 11.70ms vs 35.59ms ([Elastic Search Labs, 2025](https://www.elastic.co/search-labs/blog/elasticsearch-bbq-vs-opensearch-faiss)).
 
-ACORN filtered vector search, GA in 9.1, delivers 5x faster results than brute-force at high filter selectivity ([Elastic Search Labs, 2025](https://www.elastic.co/search-labs/blog/elasticsearch-9-1-bbq-acorn-vector-search)). High filter selectivity — searching 10,000 documents from a 100-million-document index — is exactly where naive HNSW implementations fall apart. ACORN handles that by integrating filtering directly into the graph traversal rather than as a post-filter step.
+ACORN filtered vector search, GA in 9.1, delivers 5x faster results than brute-force at high filter selectivity ([Elastic Search Labs, 2025](https://www.elastic.co/search-labs/blog/elasticsearch-9-1-bbq-acorn-vector-search)). High filter selectivity (searching 10,000 documents from a 100-million-document index) is exactly where naive HNSW implementations fall apart. ACORN handles that by integrating filtering directly into the graph traversal rather than as a post-filter step.
 
 <svg xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Horizontal bar chart showing relative memory usage at 10 million vectors: float32 HNSW at 100%, BBQ HNSW default in 9.1 at 5%, and DiskBBQ at 2% — lower is better" width="700" height="220" font-family="system-ui, sans-serif">
   <title>BBQ vs HNSW Memory Comparison — Relative memory usage at 10M vectors (lower is better)</title>
@@ -165,7 +165,7 @@ ACORN filtered vector search, GA in 9.1, delivers 5x faster results than brute-f
 
 ### DiskBBQ — Sub-20ms at 101 MB RAM
 
-DiskBBQ, GA in 9.2, changes the economics further. At a 101 MB RAM budget: 15.83ms latency. At 150 MB: 12.13ms (DiskBBQ) vs 289.7ms (HNSW) — a 24x difference at that memory constraint ([Elastic Search Labs, 2025](https://www.elastic.co/search-labs/blog/elasticsearch-latency-low-memory-diskbbq-hnswbbq-benchmark)). For teams running large vector indices on memory-constrained nodes, this opens configurations that weren't previously viable:
+DiskBBQ, GA in 9.2, changes the economics further. At a 101 MB RAM budget: 15.83ms latency. At 150 MB: 12.13ms (DiskBBQ) vs 289.7ms (HNSW), a 24x difference at that memory constraint ([Elastic Search Labs, 2025](https://www.elastic.co/search-labs/blog/elasticsearch-latency-low-memory-diskbbq-hnswbbq-benchmark)). For teams running large vector indices on memory-constrained nodes, this opens configurations that weren't previously viable:
 
 ```json
 PUT /product-search
@@ -223,9 +223,9 @@ The Elastic Inference Service (EIS) delivers up to 10x GPU inference throughput 
 
 ### Elasticsearch vs Dedicated Vector Databases
 
-The primary argument for dedicated vector databases (Pinecone, Weaviate) is depth: richer filtering APIs and native multi-tenancy isolation. The argument against is operational complexity. Co-locating dense vectors, sparse ELSER embeddings, and full-text data in one index eliminates dual-write pipelines — no data sync, no eventual consistency window between your search index and your vector index. One index serves hybrid BM25 + semantic queries in a single request.
+The primary argument for dedicated vector databases (Pinecone, Weaviate) is depth: richer filtering APIs and native multi-tenancy isolation. The argument against is operational complexity. Co-locating dense vectors, sparse ELSER embeddings, and full-text data in one index eliminates dual-write pipelines: no data sync and no eventual consistency window between your search index and your vector index. One index serves hybrid BM25 + semantic queries in a single request.
 
-For teams already running Elasticsearch, the question is whether dedicated vector DB isolation primitives are worth operating a second cluster and a sync pipeline. For most teams, the co-location tradeoff is the better operational call.
+Teams already running Elasticsearch have to decide whether dedicated vector DB isolation primitives are worth operating a second cluster and a sync pipeline. Most teams are better served by co-location. It is the better operational call.
 
 For the full vector search and RAG setup, see [Elasticsearch AI Platform](/blog/elasticsearch-ai-platform).
 
@@ -237,22 +237,22 @@ The hosting choice shapes your scaling model more than any single configuration 
 
 ### On-Premises (Self-Managed)
 
-Self-managed gives full hardware control and no egress costs between Elasticsearch and co-located data sources. The operational burden is real: node management, major version upgrades, capacity planning, ILM tuning, and JVM sizing are yours to own. AutoOps, available for self-managed Enterprise clusters on 7.17+, provides automated recommendations for thread pools, JVM settings, and shard rebalancing — it surfaces the right interventions before they become incidents, though it doesn't eliminate the underlying ownership.
+Self-managed gives full hardware control and no egress costs between Elasticsearch and co-located data sources. The operational burden is real: node management, major version upgrades, capacity planning, ILM tuning, and JVM sizing are yours to own. AutoOps, available for self-managed Enterprise clusters on 7.17+, provides automated recommendations for thread pools, JVM settings, and shard rebalancing. It surfaces the right interventions before they become incidents, though it doesn't eliminate the underlying ownership.
 
 Best fit: data sovereignty requirements, regulated industries with specific residency rules, or teams with dedicated platform engineering capacity that need full configuration depth.
 
 ### Elastic Cloud Hosted (ECH)
 
-ECH manages the control plane with autoscaling across node tiers. You keep full configuration control — custom analyzers, allocation filters, specific index settings, custom JVM flags. Upgrades are assisted rather than automatic. Best fit: stable, predictable workloads where the team wants managed infrastructure without giving up configuration depth.
+ECH manages the control plane with autoscaling across node tiers. You keep full configuration control: custom analyzers, allocation filters, specific index settings, custom JVM flags. Upgrades are assisted rather than automatic. Best fit: stable, predictable workloads where the team wants managed infrastructure without giving up configuration depth.
 
 ### Elastic Cloud Serverless
 
-Serverless abstracts capacity planning entirely. No node management, no ILM tuning, no JVM sizing. Cluster management disappears as an operational category. The AWS Graviton upgrade in January 2026 delivered 35% lower average search latency and 26% higher ingest throughput ([Elastic Search Labs, 2026](https://www.elastic.co/search-labs/blog/elasticsearch-serverless-aws-performance-boost); [BusinessWire, 2026](https://www.businesswire.com/news/home/20260120864382/en/Elastic-Supercharges-Performance-for-Serverless-Offering-on-AWS)). Peak measurements hit 52% higher search throughput and 37% lower P99 latency — at no additional cost. Infrastructure improvements ship as platform updates, not user upgrades.
+Serverless abstracts capacity planning entirely. No node management, no ILM tuning, no JVM sizing. Cluster management disappears as an operational category. The AWS Graviton upgrade in January 2026 delivered 35% lower average search latency and 26% higher ingest throughput ([Elastic Search Labs, 2026](https://www.elastic.co/search-labs/blog/elasticsearch-serverless-aws-performance-boost); [BusinessWire, 2026](https://www.businesswire.com/news/home/20260120864382/en/Elastic-Supercharges-Performance-for-Serverless-Offering-on-AWS)). Peak measurements hit 52% higher search throughput and 37% lower P99 latency, at no additional cost. Infrastructure improvements ship as platform updates, not user upgrades.
 
-Serverless is GA across 26 regions: 8 AWS, 8 Azure, 10 GCP ([Elastic docs](https://www.elastic.co/docs/deploy-manage/deploy/elastic-cloud/regions)). LogsDB is on by default. Scale-to-zero applies to non-production workloads. EIS for vector search and inference is co-managed — no separate ML node tier to provision.
+Serverless is GA across 26 regions: 8 AWS, 8 Azure, 10 GCP ([Elastic docs](https://www.elastic.co/docs/deploy-manage/deploy/elastic-cloud/regions)). LogsDB is on by default. Scale-to-zero applies to non-production workloads. EIS for vector search and inference is co-managed, with no separate ML node tier to provision.
 
 <!-- [UNIQUE INSIGHT] -->
-Serverless suits teams where operational overhead is the constraint, not hardware cost. If your team spends more than 20% of cycles on Elasticsearch cluster operations — version upgrades, shard rebalancing, JVM tuning, node recovery — serverless pays for itself before the infrastructure bill enters the comparison.
+Serverless suits teams where operational overhead is the constraint, not hardware cost. If your team spends more than 20% of cycles on Elasticsearch cluster operations (version upgrades, shard rebalancing, JVM tuning, node recovery), serverless pays for itself before the infrastructure bill enters the comparison.
 
 | | On-Prem | Cloud Hosted | Serverless |
 |---|---|---|---|
@@ -267,11 +267,11 @@ Serverless suits teams where operational overhead is the constraint, not hardwar
 
 ## When Does Serverless Become the Right Hosting Choice?
 
-All three major CSPs reached GA between December 2024 and June 2025 — AWS first, then GCP in April, then Azure in June. That compressed timeline reflects production readiness, not phased rollout. The 26-region footprint covers most enterprise data residency requirements without going self-managed.
+All three major CSPs reached GA between December 2024 and June 2025: AWS first, then GCP in April, then Azure in June. That compressed timeline reflects production readiness, not phased rollout. Check the current region list against your data residency requirements before ruling out self-managed.
 
 The configuration defaults reinforce that. LogsDB on by default means storage costs are lower from day one without touching a setting. Scale-to-zero means dev and staging environments cost nothing at idle. Per-consumption billing aligns the infrastructure bill with actual usage rather than reserved capacity sitting at minimum replicas overnight.
 
-For AI workloads specifically, EIS is available on serverless — vector search and inference infrastructure are co-managed with the cluster. There's no separate ML node tier to size or maintain, so the operational simplification extends to the inference layer too.
+For AI workloads specifically, EIS is available on serverless. Vector search and inference infrastructure are co-managed with the cluster. There's no separate ML node tier to size or maintain, so the operational simplification extends to the inference layer too.
 
 Where serverless doesn't fit: teams that need custom JVM flags, specific allocation filters, or strict on-prem data residency. Those requirements belong on self-managed clusters, which is still a fully supported, actively developed path. The two deployment models serve different operational profiles, not different quality tiers.
 
@@ -283,11 +283,11 @@ For the full feature release picture, see [What's New in Elasticsearch](/blog/el
 
 ### What is the recommended shard size for Elasticsearch at scale?
 
-10-50 GB per shard, with a maximum of 200 million documents per shard. Master node heap should be sized at 1 GB per 3,000 indices. For log workloads, enforce sizing automatically via ILM rollover with `max_primary_shard_size: 50gb` — this prevents oversized shards from forming as data accumulates ([Elastic docs](https://www.elastic.co/docs/deploy-manage/production-guidance/optimize-performance/size-shards)).
+10-50 GB per shard, with a maximum of 200 million documents per shard. Master node heap should be sized at 1 GB per 3,000 indices. For log workloads, enforce sizing automatically via ILM rollover with `max_primary_shard_size: 50gb`, which prevents oversized shards from forming as data accumulates ([Elastic docs](https://www.elastic.co/docs/deploy-manage/production-guidance/optimize-performance/size-shards)).
 
 ### Is Elasticsearch competitive as a vector store versus Pinecone or Weaviate?
 
-For teams already on Elasticsearch, the advantage is co-location: dense vectors, sparse ELSER embeddings, and full-text data live in one index. BBQ reduces memory to near-parity with purpose-built vector databases. DiskBBQ delivers sub-20ms latency at 101 MB RAM. The tradeoff is that dedicated vector databases offer deeper filtering APIs and native multi-tenancy isolation. Whether those primitives justify operating a second cluster and a sync pipeline depends on your access pattern and team size — for most search-centric workloads, they don't.
+For teams already on Elasticsearch, the advantage is co-location: dense vectors, sparse ELSER embeddings, and full-text data live in one index. BBQ reduces memory to near-parity with purpose-built vector databases. DiskBBQ delivers sub-20ms latency at 101 MB RAM. The tradeoff is that dedicated vector databases offer deeper filtering APIs and native multi-tenancy isolation. Whether those primitives justify operating a second cluster and a sync pipeline depends on your access pattern and team size. For most search-centric workloads, they don't.
 
 ### When should I choose Serverless over Cloud Hosted?
 
@@ -303,19 +303,19 @@ Before cross-cluster ES|QL, querying across clusters required federation logic i
 
 ### How does Elastic Security handle detection at petabyte SIEM scale?
 
-At petabyte scale, 1,895+ prebuilt detection rules run continuously across event data mapped to MITRE ATT&CK. The practical bottleneck is analyst throughput, not ingestion. Attack Discovery, GA in 9.0, uses AI-assisted triage to correlate alerts across SIEM, XDR, and cloud security into discrete attack narratives — collapsing multi-stage kill chains that would otherwise take hours to reconstruct from individual alerts. The Threat Hunting Agent, GA in 9.3, consolidates Alerts, Entity Risk Scores, and Attack Discovery into one investigation surface. For teams migrating from Splunk or QRadar, Automatic Migration handles rule import, removing the friction of manual rule translation ([Elastic blog, 2025](https://www.elastic.co/blog/elastic-visionary-gartner-magic-quadrant-siem)).
+At petabyte scale, 1,895+ prebuilt detection rules run continuously across event data mapped to MITRE ATT&CK. The practical bottleneck is analyst throughput, not ingestion. Attack Discovery, GA in 9.0, uses AI-assisted triage to correlate alerts across SIEM, XDR, and cloud security into discrete attack narratives, collapsing multi-stage kill chains that would otherwise take hours to reconstruct from individual alerts. The Threat Hunting Agent, GA in 9.3, consolidates Alerts, Entity Risk Scores, and Attack Discovery into one investigation surface. For teams migrating from Splunk or QRadar, Automatic Migration handles rule import, removing the friction of manual rule translation ([Elastic blog, 2025](https://www.elastic.co/blog/elastic-visionary-gartner-magic-quadrant-siem)).
 
 ### What is AutoOps and when does it help self-managed clusters?
 
-AutoOps is available for self-managed Enterprise clusters running Elasticsearch 7.17 or later ([Elastic docs](https://www.elastic.co/docs/deploy-manage/monitor/autoops)). It provides automated recommendations for thread pool sizing, JVM heap settings, and shard rebalancing — surfacing interventions before they escalate into incidents. It does not replace cluster ownership: upgrades, capacity planning, and ILM policy design remain your responsibility. It reduces the expert knowledge required to tune production clusters, which matters most for teams without dedicated Elasticsearch platform engineering capacity. For a full monitoring setup alongside AutoOps, see [Elasticsearch Stack Monitoring](/blog/elasticsearch-stack-monitoring).
+AutoOps is available for self-managed Enterprise clusters running Elasticsearch 7.17 or later ([Elastic docs](https://www.elastic.co/docs/deploy-manage/monitor/autoops)). AutoOps provides automated recommendations for thread pool sizing, JVM heap settings, and shard rebalancing, surfacing interventions before they escalate into incidents. It does not replace cluster ownership: upgrades, capacity planning, and ILM policy design remain your responsibility. It reduces the expert knowledge required to tune production clusters, which matters most for teams without dedicated Elasticsearch platform engineering capacity. For a full monitoring setup alongside AutoOps, see [Elasticsearch Stack Monitoring](/blog/elasticsearch-stack-monitoring).
 
 ### What is the difference between LogsDB and TSDS in Elasticsearch?
 
-Both are index modes, not separate products. LogsDB is optimised for log data — unstructured or semi-structured events with a `@timestamp` field. It applies synthetic `_source`, column-store compression for high-cardinality string fields, and automatic mapping for common log field shapes. TSDS (Time Series Data Stream) is optimised for metrics — structured time series with explicit dimensions (such as `host.name` or `kubernetes.pod.name`) and numeric metric fields. TSDS routes related time series to the same shard using a `time_series` routing key, which significantly improves aggregation performance on continuous metric streams. For observability, use LogsDB for logs and TSDS for metrics. They can coexist in the same deployment.
+Both are index modes, not separate products. LogsDB is optimised for log data: unstructured or semi-structured events with a `@timestamp` field. It applies synthetic `_source`, column-store compression for high-cardinality string fields, and automatic mapping for common log field shapes. TSDS (Time Series Data Stream) is optimised for metrics: structured time series with explicit dimensions (such as `host.name` or `kubernetes.pod.name`) and numeric metric fields. TSDS routes related time series to the same shard using a `time_series` routing key, which significantly improves aggregation performance on continuous metric streams. For observability, use LogsDB for logs and TSDS for metrics. They can coexist in the same deployment.
 
 ### How does the Elastic Inference Service work, and is it available for self-managed clusters?
 
-The Elastic Inference Service (EIS) is available on Elastic Cloud — both Serverless and Elastic Cloud Hosted ([BusinessWire, 2025](https://www.businesswire.com/news/home/20251009383846/en/Elastic-Introduces-Native-Inference-Service-in-Elastic-Cloud)). It routes embedding generation through Elastic-managed GPU infrastructure, delivering up to 10x throughput versus CPU-based inference endpoints. For self-managed clusters, inference endpoints using ELSER or third-party models still route through the ML node tier — you provision and size those nodes manually. Teams running high-volume embedding generation on self-managed infrastructure should evaluate the relative cost of sizing ML nodes for inference workloads against moving that tier to Cloud Hosted or Serverless where EIS handles it automatically.
+The Elastic Inference Service (EIS) is available on Elastic Cloud, both Serverless and Elastic Cloud Hosted ([BusinessWire, 2025](https://www.businesswire.com/news/home/20251009383846/en/Elastic-Introduces-Native-Inference-Service-in-Elastic-Cloud)). It routes embedding generation through Elastic-managed GPU infrastructure, delivering up to 10x throughput versus CPU-based inference endpoints. For self-managed clusters, inference endpoints using ELSER or third-party models still route through the ML node tier, and you provision and size those nodes manually. Teams running high-volume embedding generation on self-managed infrastructure should evaluate the relative cost of sizing ML nodes for inference workloads against moving that tier to Cloud Hosted or Serverless where EIS handles it automatically.
 
 ---
 

@@ -12,17 +12,17 @@ imageAlt: "Abstract neural network visualization with glowing blue and teal conn
 
 # Elasticsearch AI: Vector Search, RAG, and Agent Builder
 
-Elasticsearch now ships with a built-in ML model, a unified inference layer covering 20+ providers, GPU-accelerated vector indexing, and a native agentic framework — all in the same cluster.
+Elasticsearch now ships with a built-in ML model, a unified inference layer covering 20+ providers, GPU-accelerated vector indexing, and a native agentic framework, all in the same cluster.
 
-The operational argument for keeping AI workloads here is concrete: document-level RBAC on vector queries, ILM on embeddings, hybrid BM25 + semantic search in a single request, and no second cluster to operate. The teams I've seen pull out a dedicated vector store did it after they realised they were running dual-write pipelines to keep it in sync with Elasticsearch — every document update needed to propagate to two systems, and eventual consistency windows kept causing retrieval mismatches. Consolidating on Elasticsearch removed an entire class of synchronisation bugs.
+The operational argument for keeping AI workloads here is concrete: document-level RBAC on vector queries, ILM on embeddings, hybrid BM25 + semantic search in a single request, and no second cluster to operate. The teams I've seen pull out a dedicated vector store did it after they realised they were running dual-write pipelines to keep it in sync with Elasticsearch: every document update needed to propagate to two systems, and eventual consistency windows kept causing retrieval mismatches. Consolidating on Elasticsearch removed an entire class of synchronisation bugs.
 
 This post covers the full picture: sparse vs dense vector storage, built-in models (ELSER and Jina), the Elastic Inference Service, GPU indexing, and three practical paths to RAG with working code for each.
 
 > **Key Takeaways**
 > - Elasticsearch stores vectors natively with three field types: `dense_vector` (HNSW, float/int8/int4/binary quantization), `sparse_vector` (ELSER inverted index, explainable), and `semantic_text` (recommended default, auto-manages the inference endpoint) ([Vector search in Elasticsearch](https://www.elastic.co/docs/solutions/search/vector)).
-> - Sparse vectors (ELSER) outperform dense vectors on exact-term queries — model numbers, product codes, proper nouns — while dense vectors excel at open-ended natural language questions. Most production workloads benefit from hybrid search combining both.
+> - Sparse vectors (ELSER) outperform dense vectors on exact-term queries (model numbers, product codes, proper nouns), while dense vectors excel at open-ended natural language questions. Most production workloads benefit from hybrid search combining both.
 > - ELSER v2 achieves an 18% NDCG@10 improvement over BM25 across BEIR benchmarks with no fine-tuning required ([ELSER docs](https://www.elastic.co/docs/explore-analyze/machine-learning/nlp/ml-nlp-elser); [Thakur et al., 2021](https://arxiv.org/abs/2104.08663)).
-> - Jina multilingual models (`jina-embeddings-v5-text-small`, `jina-reranker-v3`) are now available via Elastic Inference Service — no ML node, no JinaAI API key, billed per token ([Jina models on EIS](https://www.elastic.co/docs/explore-analyze/machine-learning/nlp/ml-nlp-jina)).
+> - Jina multilingual models (`jina-embeddings-v5-text-small`, `jina-reranker-v3`) are now available via Elastic Inference Service, with no ML node, no JinaAI API key, billed per token ([Jina models on EIS](https://www.elastic.co/docs/explore-analyze/machine-learning/nlp/ml-nlp-jina)).
 > - GPU-accelerated HNSW indexing is available in Preview (Stack 9.3) via NVIDIA cuVS, reducing CPU pressure during large dense vector ingest ([GPU vector indexing](https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/gpu-vector-indexing)).
 > - Elastic Agent Builder + Workflows chains Elasticsearch query results directly into LLM reasoning via the `ai.agent` step, with no custom glue code ([Agent Builder + Workflows](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agents-and-workflows)).
 
@@ -32,7 +32,7 @@ This post covers the full picture: sparse vs dense vector storage, built-in mode
 
 ## Elasticsearch as a Vector Database
 
-Elasticsearch is not a dedicated vector database — it's a general-purpose data platform that added native vector support because semantic search needed it. Bolting on a second system just for embeddings is operational debt most teams don't want.
+Elasticsearch is not a dedicated vector database: it's a general-purpose data platform that added native vector support because semantic search needed it. Bolting on a second system just for embeddings is operational debt most teams don't want.
 
 The three vector field types cover distinct use cases ([Vector search in Elasticsearch](https://www.elastic.co/docs/solutions/search/vector)):
 
@@ -49,11 +49,11 @@ The three vector field types cover distinct use cases ([Vector search in Elastic
 
 ### Sparse vs Dense Vectors — What Actually Differs
 
-Dense vectors are fixed-length float arrays — 768 to 3,072 dimensions depending on the model. Every document maps to a point in a continuous semantic space. Cosine similarity between points determines relevance. This works well for natural language questions where intent matters more than exact wording.
+Dense vectors are fixed-length float arrays of 768 to 3,072 dimensions, depending on the model. Every document maps to a point in a continuous semantic space. Cosine similarity between points determines relevance. This works well for natural language questions where intent matters more than exact wording.
 
 The failure mode is exact-match blindness. A dense embedding compresses all document meaning into a fixed-size float array. Rare terms, model numbers, product codes, and CVE identifiers get diluted in the averaging. A query for a specific product SKU may miss documents that contain it verbatim.
 
-Sparse vectors work differently. ELSER expands documents into weighted token dictionaries at index time — not the original terms, but learned semantic expansions. A document about "horizontal pod autoscaling" might produce weighted entries for "kubernetes scaling", "resource limits", and "HPA controller" — terms semantically related but absent from the original text. At query time, the same expansion applies to the query, and matching happens over the expanded token space. The underlying structure is an inverted index — identical to BM25. No HNSW traversal, no approximate nearest neighbor scan. Exact, fast, and explainable: you can inspect exactly which expanded tokens matched and with what weight.
+Sparse vectors work differently. ELSER expands documents into weighted token dictionaries at index time. These are learned semantic expansions, not the original terms. A document about "horizontal pod autoscaling" might produce weighted entries for "kubernetes scaling", "resource limits", and "HPA controller", terms semantically related but absent from the original text. At query time, the same expansion applies to the query, and matching happens over the expanded token space. The underlying structure is an inverted index, identical to BM25. No HNSW traversal, no approximate nearest neighbor scan. Exact, fast, and explainable: you can inspect exactly which expanded tokens matched and with what weight.
 
 <table>
 <thead>
@@ -69,11 +69,11 @@ Sparse vectors work differently. ELSER expands documents into weighted token dic
 </tbody>
 </table>
 
-**Dense vector storage and quantization.** A 1M-document corpus with 1024-dimension float32 embeddings requires ~4GB of heap per shard before overhead. Elasticsearch supports three quantization modes to reduce this:
+**Dense vector storage and quantization.** A 1M-document corpus with 1024-dimension float32 embeddings requires ~4GB of off-heap RAM per shard before overhead. Elasticsearch supports three quantization modes to reduce this:
 
-- `int8_hnsw` — 4× smaller than float32, minimal precision loss. Default recommendation for production.
-- `int4_hnsw` — 8× smaller, moderate precision loss. Suited for very large datasets where storage dominates.
-- `bbq_hnsw` — Binary quantization. Extreme compression; best for massive corpora where approximate results are acceptable.
+- `int8_hnsw`: 4× smaller than float32, minimal precision loss. Default recommendation for production.
+- `int4_hnsw`: 8× smaller, moderate precision loss. Suited for very large datasets where storage dominates.
+- `bbq_hnsw`: Binary quantization. Extreme compression; best for massive corpora where approximate results are acceptable.
 
 ```json
 PUT /knowledge-base
@@ -94,13 +94,13 @@ PUT /knowledge-base
 
 ### Why Elasticsearch Rather Than a Dedicated Vector Store?
 
-The synchronisation problem is the one that bites hardest. When your primary documents change — updates, deletes, re-chunking — a separate vector store needs a matching update pipeline. With Elasticsearch, the embedding lives in the same document as the source text. Delete the document, both are gone. Update the text, a single reindex call regenerates the embedding. There is no second system to keep in step, no dual-write complexity, and no eventual consistency window between the two representations.
+The synchronisation problem is the one that bites hardest. When your primary documents change (updates, deletes, re-chunking), a separate vector store needs a matching update pipeline. With Elasticsearch, the embedding lives in the same document as the source text. Delete the document, both are gone. Update the text, a single reindex call regenerates the embedding. There is no second system to keep in step, no dual-write complexity, and no eventual consistency window between the two representations.
 
-The security model also transfers without extra work. Document-level RBAC applies to kNN queries the same way it governs full-text retrieval — no separate auth layer to build or maintain. Retention policies, data tiers, and snapshot repositories work on embedding fields without additional configuration.
+The security model also transfers without extra work. Document-level RBAC applies to kNN queries the same way it governs full-text retrieval. There is no separate auth layer to build or maintain. Retention policies, data tiers, and snapshot repositories work on embedding fields without additional configuration.
 
 ### Getting Started with `semantic_text`
 
-`semantic_text` is the right starting point. Configure an inference endpoint once (ELSER, OpenAI, Jina, Cohere — anything), and Elasticsearch generates embeddings at index time without ingest pipeline configuration.
+`semantic_text` is the right starting point. Configure an inference endpoint once (ELSER, OpenAI, Jina, Cohere, or any other), and Elasticsearch generates embeddings at index time without ingest pipeline configuration.
 
 ```json
 PUT /knowledge-base
@@ -118,7 +118,7 @@ PUT /knowledge-base
 ```
 
 <!-- [UNIQUE INSIGHT] -->
-The reindex requirement is the sharp edge most teams hit late: if you swap the inference endpoint (ELSER to OpenAI, or model version upgrade), you must reindex. `semantic_text` ties stored vectors to the model that generated them. Plan your model selection before ingesting large datasets — changing models is a reindex, not a config change.
+The reindex requirement is a sharp edge that is easy to hit late: if you swap the inference endpoint (ELSER to OpenAI, or model version upgrade), you must reindex. `semantic_text` ties stored vectors to the model that generated them. Plan your model selection before ingesting large datasets. Changing models is a reindex, not a config change.
 
 For ingestion methods including how `semantic_text` fits into ingest pipelines, see [Getting Data into Elasticsearch](/blog/getting-data-into-elasticsearch).
 
@@ -128,9 +128,9 @@ For ingestion methods including how `semantic_text` fits into ingest pipelines, 
 
 ### Is ELSER the Right Starting Point for Semantic Search?
 
-Yes — for English-language workloads. ELSER is the path of least resistance: it ships with every deployment, needs no external API call, and doesn't require you to choose a dense embedding model before you have query data to test against. The tradeoff is English-only — if your corpus is multilingual, start with Jina instead ([ELSER docs](https://www.elastic.co/docs/explore-analyze/machine-learning/nlp/ml-nlp-elser)).
+Yes, for English-language workloads. ELSER is the path of least resistance: it ships with every deployment, needs no external API call, and doesn't require you to choose a dense embedding model before you have query data to test against. The tradeoff is English-only, so if your corpus is multilingual, start with Jina instead ([ELSER docs](https://www.elastic.co/docs/explore-analyze/machine-learning/nlp/ml-nlp-elser)).
 
-ELSER v2 is GA. Rather than producing a dense float array, it maps each document to a weighted token dictionary — a sparse representation that mirrors the structure of an inverted index. The scoring is transparent: you can inspect which expanded terms contributed to a match and at what weight. Across the BEIR evaluation suite ([Thakur et al., 2021](https://arxiv.org/abs/2104.08663)), the model achieves an average 18% NDCG@10 gain over BM25, with 10 wins, 1 draw, and 1 loss across 12 heterogeneous retrieval tasks. The optimised x86-64 Linux build reaches 26 documents per second — a 90% throughput gain over v1.
+ELSER v2 is GA. Rather than producing a dense float array, it maps each document to a weighted token dictionary, a sparse representation that mirrors the structure of an inverted index. The scoring is transparent: you can inspect which expanded terms contributed to a match and at what weight. Across the BEIR evaluation suite ([Thakur et al., 2021](https://arxiv.org/abs/2104.08663)), the model achieves an average 18% NDCG@10 gain over BM25, with 10 wins, 1 draw, and 1 loss across 12 heterogeneous retrieval tasks. The optimised x86-64 Linux build reaches 26 documents per second, a 90% throughput gain over v1.
 
 Deploy via inference API with `adaptive_allocations` (recommended for production):
 
@@ -155,7 +155,7 @@ Set `min_number_of_allocations: 0` in non-critical environments to reduce cost. 
 ### Jina: Multilingual Dense Embeddings and Reranking via EIS
 
 <!-- [UNIQUE INSIGHT] -->
-Jina models are now available natively through Elastic Inference Service — no JinaAI API key, no ML node management, billed per token through your Elastic subscription ([Jina models docs](https://www.elastic.co/docs/explore-analyze/machine-learning/nlp/ml-nlp-jina)). This is the path for multilingual workloads where ELSER (English-only) isn't the right fit.
+Jina models are now available natively through Elastic Inference Service, with no JinaAI API key and no ML node management, billed per token through your Elastic subscription ([Jina models docs](https://www.elastic.co/docs/explore-analyze/machine-learning/nlp/ml-nlp-jina)). This is the path for multilingual workloads where ELSER (English-only) isn't the right fit.
 
 Available models through EIS (GA in Stack 9.3):
 
@@ -194,7 +194,7 @@ PUT _inference/rerank/jina-reranker
 }
 ```
 
-Use `jina-reranker-v3` after hybrid or semantic search to push the most relevant results to the top before passing context to an LLM. It processes up to 64 candidates per inference call — well-suited for RAG pipelines where you retrieve 20-50 candidates and want to trim to the top 5-10.
+Use `jina-reranker-v3` after hybrid or semantic search to push the most relevant results to the top before passing context to an LLM. Its listwise design processes documents in batches of up to 64 per forward pass ([Jina reranker v3 paper](https://arxiv.org/abs/2509.25085)), which suits RAG pipelines where you retrieve 20-50 candidates and want to trim to the top 5-10.
 
 Alternatively, use the direct JinaAI API service if you have an existing JinaAI account:
 
@@ -215,18 +215,18 @@ The EIS path is simpler operationally; the direct API path gives you access to m
 
 ## The Inference Endpoint — One API for Every Model
 
-The `/_inference` API is the abstraction layer that makes Elasticsearch model-agnostic. Every embedding provider, reranking service, or generation model registers under a named endpoint with a declared task type. Field mappings and ingest processors reference that name — not the underlying provider. To rotate models, provision a new endpoint and update the reference. Application queries and indexing logic stay unchanged ([Inference endpoint API](https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-put)).
+The `/_inference` API is the abstraction layer that makes Elasticsearch model-agnostic. Every embedding provider, reranking service, or generation model registers under a named endpoint with a declared task type. Field mappings and ingest processors reference that name, not the underlying provider. To rotate models, provision a new endpoint and update the reference. Application queries and indexing logic stay unchanged ([Inference endpoint API](https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-put)).
 
 Supported task types:
-- `text_embedding` — dense vectors: OpenAI, Cohere, Vertex, Mistral, Jina, Bedrock, E5…
-- `sparse_embedding` — sparse vectors: ELSER
-- `rerank` — cross-encoder reranking: Cohere, Jina, VoyageAI, Contextual AI…
-- `chat_completion` / `completion` — generation: OpenAI, Anthropic, Azure OpenAI, DeepSeek, Groq…
+- `text_embedding`: dense vectors: OpenAI, Cohere, Vertex, Mistral, Jina, Bedrock, E5…
+- `sparse_embedding`: sparse vectors: ELSER
+- `rerank`: cross-encoder reranking: Cohere, Jina, VoyageAI, Contextual AI…
+- `chat_completion` / `completion`: generation: OpenAI, Anthropic, Azure OpenAI, DeepSeek, Groq…
 
-Coverage includes the major cloud providers (AWS Bedrock, Azure OpenAI, Vertex AI), independent inference providers (Mistral, Groq, DeepSeek, Fireworks), and Elastic's own EIS. The full list is in the [inference endpoint docs](https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-put) — it updates with each release, so checking there is more reliable than any list I could write here.
+Coverage includes the major cloud providers (AWS Bedrock, Azure OpenAI, Vertex AI), independent inference providers (Mistral, Groq, DeepSeek, Fireworks), and Elastic's own EIS. The full list is in the [inference endpoint docs](https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-put), as it updates with each release, so checking there is more reliable than any list I could write here.
 
 <!-- [UNIQUE INSIGHT] -->
-The practical value here is that model selection becomes an infrastructure concern, not an application concern. When a provider reprices, a newer model outperforms the current one, or a compliance requirement mandates a switch, you provision a new endpoint and update a single reference. No query rewrites, no mapping migrations, no application deploys. At scale — across dozens of indices and multiple services consuming the same inference layer — that decoupling is worth designing for from the start.
+The practical value here is that model selection becomes an infrastructure concern, not an application concern. When a provider reprices, a newer model outperforms the current one, or a compliance requirement mandates a switch, you provision a new endpoint and update a single reference. No query rewrites, no mapping migrations, no application deploys. At scale (across dozens of indices and multiple services consuming the same inference layer), that decoupling is worth designing for from the start.
 
 ---
 
@@ -239,13 +239,13 @@ Models available through EIS: ELSER, Jina embeddings (v3, v5-nano, v5-small), Ji
 <!-- [UNIQUE INSIGHT] -->
 ELSER on EIS specifically shows better ingest throughput than self-managed ML nodes, with equivalent search latency. If you're already on Elastic Cloud and your bottleneck is embedding generation speed during large ingest runs, EIS is worth benchmarking against your current ML node setup before provisioning more nodes.
 
-Rate limits on EIS: 6,000 requests/min and 6,000,000 tokens/min for ELSER and Jina embeddings; 600 requests/min for rerankers. Inference requests route to the nearest region (AWS `us-east-1` or GCP `us-east4`). ELSER and Jina requests process entirely within Elastic infrastructure — no third-party routing.
+Rate limits on EIS: 6,000 requests/min and 6,000,000 tokens/min for ELSER and Jina embeddings; 600 requests/min for rerankers. Inference requests route to the nearest region (AWS `us-east-1` or GCP `us-east4`). ELSER and Jina requests process entirely within Elastic infrastructure, with no third-party routing.
 
 ---
 
 ## GPU-Accelerated Vector Indexing
 
-GPU-accelerated HNSW index construction is available in Preview in Stack 9.3, powered by the NVIDIA cuVS library ([GPU vector indexing](https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/gpu-vector-indexing)). It targets large-scale dense vector ingest — particularly batch loads where index build time is the bottleneck and you want to free up CPU for search and other tasks.
+GPU-accelerated HNSW index construction is available in Preview in Stack 9.3, powered by the NVIDIA cuVS library ([GPU vector indexing](https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/gpu-vector-indexing)). It targets large-scale dense vector ingest, particularly batch loads where index build time is the bottleneck and you want to free up CPU for search and other tasks.
 
 Requirements: NVIDIA GPU with Ampere architecture (compute capability ≥ 8.0), minimum 8GB GPU memory, CUDA runtime and cuVS libraries, Linux x86_64, Java 22+, Enterprise subscription. Supports `hnsw` and `int8_hnsw` index types with `float` element type.
 
@@ -278,7 +278,7 @@ Response:
 }
 ```
 
-Two performance notes from the docs worth knowing: first, use base64-encoded vectors rather than JSON arrays — JSON parsing can become the bottleneck when the GPU can process data faster than it can be parsed. Second, avoid network-attached storage; NVMe is necessary to keep pace with GPU index build rates.
+Two performance notes from the docs worth knowing: first, use base64-encoded vectors rather than JSON arrays, because JSON parsing can become the bottleneck when the GPU can process data faster than it can be parsed. Second, avoid network-attached storage; NVMe is necessary to keep pace with GPU index build rates.
 
 For autoscaling patterns relevant to GPU node sizing, see [Kubernetes Autoscaling: HPA vs KEDA](/blog/kubernetes-autoscaling-hpa-vs-keda).
 
@@ -286,11 +286,11 @@ For autoscaling patterns relevant to GPU node sizing, see [Kubernetes Autoscalin
 
 ## RAG, Workflows, and Agentic Pipelines
 
-RAG with Elasticsearch pairs semantic or hybrid retrieval with LLM generation. Fetch relevant passages, inject them into the model's context window, and receive a grounded answer with traceable source attribution ([RAG with Elasticsearch](https://www.elastic.co/docs/solutions/search/rag)). Because retrieval passes through the same query engine as the rest of your data, access controls apply at the document level automatically. A user can only receive context from documents they are authorised to read — no enforcement code required at the application layer.
+RAG with Elasticsearch pairs semantic or hybrid retrieval with LLM generation. Fetch relevant passages, inject them into the model's context window, and receive a grounded answer with traceable source attribution ([RAG with Elasticsearch](https://www.elastic.co/docs/solutions/search/rag)). Because retrieval passes through the same query engine as the rest of your data, access controls apply at the document level automatically. A user can only receive context from documents they are authorised to read, with no enforcement code required at the application layer.
 
 ### Three RAG Paths
 
-**Path 1: ES|QL `COMPLETION`** — retrieval and LLM generation in a single ES|QL query. Minimal setup; useful for quick prototypes, dashboards, and ad-hoc question answering over structured data.
+**Path 1: ES|QL `COMPLETION`**: retrieval and LLM generation in a single ES|QL query. Minimal setup; useful for quick prototypes, dashboards, and ad-hoc question answering over structured data.
 
 ```json
 POST /_query
@@ -313,7 +313,7 @@ The `COMPLETION` command passes the retrieved rows to the specified inference en
 
 ---
 
-**Path 2: Custom implementation** — full control over chunking, context window assembly, and prompt engineering. The recommended pattern for production applications that need deterministic retrieval logic or multi-step RAG.
+**Path 2: Custom implementation**: full control over chunking, context window assembly, and prompt engineering. The recommended pattern for production applications that need deterministic retrieval logic or multi-step RAG.
 
 ```python
 from elasticsearch import Elasticsearch
@@ -366,17 +366,17 @@ response = es.inference.inference(
 print(response["completion"][0]["result"])
 ```
 
-Because retrieval goes through Elasticsearch, document-level RBAC applies automatically. Users only retrieve documents they have read access to — no custom enforcement needed at the application layer.
+Because retrieval goes through Elasticsearch, document-level RBAC applies automatically. Users only retrieve documents they have read access to. No custom enforcement is needed at the application layer.
 
 ---
 
-**Path 3: Elastic Agent Builder** — Elastic's native agentic framework. Configured in Kibana, connects directly to Elasticsearch knowledge bases, supports tool use, and composes with Elastic Workflows for multi-step automation. The right choice when you need session memory, tool orchestration, and auditability without building an agent framework from scratch.
+**Path 3: Elastic Agent Builder**: Elastic's native agentic framework. Configured in Kibana, connects directly to Elasticsearch knowledge bases, supports tool use, and composes with Elastic Workflows for multi-step automation. The right choice when you need session memory, tool orchestration, and auditability without building an agent framework from scratch.
 
 ### Agent Builder + Elastic Workflows
 
 Agent Builder and Elastic Workflows compose bidirectionally: agents can trigger workflows via workflow tools, and workflows can invoke agents as reasoning steps via the `ai.agent` step ([Agent Builder + Workflows](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agents-and-workflows)). The `ai.agent` step treats the agent as a reasoning engine that summarizes data, classifies events, or makes decisions before passing results to the next automation step.
 
-A concrete example — query Elasticsearch for delayed flights, summarize with an agent, print the result:
+A concrete example: query Elasticsearch for delayed flights, summarize with an agent, print the result:
 
 ```yaml
 version: "1"
@@ -409,7 +409,7 @@ steps:
       message: "{{ steps.summarize_delays.output }}"
 ```
 
-The `{{ steps.get_delayed_flights.output }}` template variable injects the raw Elasticsearch response directly into the agent prompt. No custom API code. The Elastic Workflows GitHub repo (`elastic/workflows`) contains 50+ examples using this pattern — incident summarization, anomaly classification, alert triage.
+The `{{ steps.get_delayed_flights.output }}` template variable injects the raw Elasticsearch response directly into the agent prompt. No custom API code. The Elastic Workflows GitHub repo (`elastic/workflows`) contains 50+ examples using this pattern: incident summarization, anomaly classification, alert triage.
 
 For the broader patterns behind multi-step agentic systems, see [Agentic AI Workflows](/blog/agentic-ai-workflows). For how Elasticsearch fits into AI search architectures, see [Search and AI](/blog/search-and-ai).
 
@@ -417,7 +417,7 @@ For the broader patterns behind multi-step agentic systems, see [Agentic AI Work
 
 ## Hybrid Search — Combining BM25 and Vectors
 
-Hybrid search consistently outperforms pure BM25 or pure vector search on mixed query types, particularly where domain terminology, model numbers, or proper nouns matter — Elastic's own benchmarks ([Elastic hybrid search benchmarks](https://www.elastic.co/search-labs/blog/hybrid-search-elastic-relevance), 2024) and independent BEIR evaluations both show this pattern. The `rrf` retriever applies reciprocal rank fusion — ranking by position across both result sets, not by normalizing raw scores, which makes it robust to mismatched score distributions.
+Hybrid search runs full-text and vector search in one request and returns one ranked list that balances exact keyword matches with similarity-based matches ([Elastic docs](https://www.elastic.co/docs/solutions/search/hybrid-search)). In Elastic's own BEIR benchmark ([Elastic Search Labs](https://www.elastic.co/search-labs/blog/improving-information-retrieval-elastic-stack-hybrid); BEIR: [Thakur et al., 2021](https://arxiv.org/abs/2104.08663)), reciprocal rank fusion increased average NDCG@10 by 1.4% over Elastic Learned Sparse Encoder alone and 18% over BM25 alone. The `rrf` retriever applies reciprocal rank fusion, ranking by position across both result sets rather than normalizing raw scores, which makes it tolerant of mismatched score distributions.
 
 ```json
 GET /knowledge-base/_search
@@ -447,7 +447,7 @@ For RAG pipelines, pair hybrid retrieval with the `jina-reranker-v3` endpoint as
 
 ### When Should You Use Hybrid Search Over Pure Semantic?
 
-Use hybrid when queries contain exact-match terms — model numbers, product codes, proper nouns — where pure semantic search can miss obvious hits. Use pure semantic when queries are natural language questions against prose content. Layer in reranking when precision at position 1-5 matters more than recall.
+Use hybrid when queries contain exact-match terms (model numbers, product codes, proper nouns) where pure semantic search can miss obvious hits. Use pure semantic when queries are natural language questions against prose content. Layer in reranking when precision at position 1-5 matters more than recall.
 
 ---
 

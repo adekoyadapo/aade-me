@@ -12,24 +12,24 @@ imageAlt: "Abstract data visualization showing glowing teal particle streams con
 
 # Elasticsearch Data Ingestion: Every Method from curl to Petabyte Pipelines
 
-Pick the wrong ingestion method and you pay for it continuously — in pipeline complexity, in transformation logic you have to maintain, and in failure modes you discover at 2am rather than during testing. Elasticsearch supports five distinct ingestion paths, and each one is the right answer for a different set of conditions.
+Pick the wrong ingestion method and you pay for it continuously: in pipeline complexity, in transformation logic you have to maintain, and in failure modes you discover at 2am rather than during testing. Elasticsearch supports five distinct ingestion paths, and each one is the right answer for a different set of conditions.
 
-This guide covers all five paths — with working code for each — and maps them to the use cases where they belong: search, observability, security, and AI/ML. Two newer additions — EDOT (Elastic Distributions of OpenTelemetry) and Elastic Streams — are covered separately after the core paths.
+This guide covers all five paths, with working code for each, and maps them to the use cases where they belong: search, observability, security, and AI/ML. Two newer additions, EDOT (Elastic Distributions of OpenTelemetry) and Elastic Streams, are covered separately after the core paths.
 
 > **Key Takeaways**
-> - Elasticsearch supports two data categories: general content (no timestamp) and time-series data — your ingestion method should match ([Elastic data ingestion overview](https://www.elastic.co/docs/manage-data/ingest)).
+> - Elasticsearch supports two data categories: general content (no timestamp) and time-series data, and your ingestion method should match ([Elastic data ingestion overview](https://www.elastic.co/docs/manage-data/ingest)).
 > - The Bulk API caps HTTP requests at 100MB by default and uses NDJSON format; it's the right choice for any batch or high-volume indexing scenario ([Bulk API reference](https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-bulk)).
-> - Elastic Agent has been GA since v7.14 and is the recommended replacement for standalone Beats — Fleet auto-generates per-agent API keys with minimal permissions ([Beats vs Elastic Agent comparison](https://www.elastic.co/docs/reference/fleet/beats-agent-comparison)).
+> - Elastic Agent has been GA since v7.14 and is the recommended replacement for standalone Beats. Fleet auto-generates per-agent API keys with minimal permissions ([Beats vs Elastic Agent comparison](https://www.elastic.co/docs/reference/fleet/beats-agent-comparison)).
 > - EDOT (Elastic Distributions of OpenTelemetry) provides production-ready OTel distributions with zero-code instrumentation, central config via OpAMP, and EDOT Collector as a drop-in APM Server replacement ([EDOT overview](https://www.elastic.co/docs/reference/opentelemetry)).
-> - Elastic Streams is a Kibana UI for managing data streams centrally — field extraction, retention, routing, and AI-assisted partitioning in one place ([Elastic Streams docs](https://www.elastic.co/docs/solutions/observability/streams/streams)).
+> - Elastic Streams is a Kibana UI for managing data streams centrally: field extraction, retention, routing, and AI-assisted partitioning in one place ([Elastic Streams docs](https://www.elastic.co/docs/solutions/observability/streams/streams)).
 
-> **TL;DR** — Five ingestion paths: direct APIs for app events, Bulk API for batch imports, Elastic Agent for logs/metrics/traces, Logstash for Kafka/databases, connectors for SaaS content. EDOT adds production-ready OpenTelemetry distributions. Elastic Streams centralises data stream management in Kibana. Add ingest pipelines for field transformation at any level.
+> **TL;DR**: Five ingestion paths: direct APIs for app events, Bulk API for batch imports, Elastic Agent for logs/metrics/traces, Logstash for Kafka/databases, connectors for SaaS content. EDOT adds production-ready OpenTelemetry distributions. Elastic Streams centralises data stream management in Kibana. Add ingest pipelines for field transformation at any level.
 
 ---
 
 ## The Elasticsearch Ingestion Decision Tree
 
-Four factors determine which path to take: data type, volume, transformation requirements, and whether Elastic already has an integration for your source. If an integration exists, use it — you're not going to write a better Filebeat module than the people who maintain Filebeat. Pick the simplest option that meets all four; complexity beyond that is a daily maintenance tax.
+Four factors determine which path to take: data type, volume, transformation requirements, and whether Elastic already has an integration for your source. If an integration exists, use it. You're not going to write a better Filebeat module than the people who maintain Filebeat. Pick the simplest option that meets all four; complexity beyond that is a daily maintenance tax.
 
 <table>
 <thead>
@@ -109,7 +109,7 @@ Four factors determine which path to take: data type, volume, transformation req
 
 ## Level 1 — Direct Elasticsearch APIs: One Document or Millions
 
-When Elastic Agent or Logstash misbehaves, the Bulk API is where you trace the problem. Every higher-level tool eventually calls it — knowing its error responses, size limits, and partial failure behavior is what lets you tell a client retry bug from a cluster throughput issue.
+When Elastic Agent or Logstash misbehaves, the Bulk API is where you trace the problem. Every higher-level tool eventually calls it. Knowing its error responses, size limits, and partial failure behavior is what lets you tell a client retry bug from a cluster throughput issue.
 
 ### The Index API — Single Documents
 
@@ -128,11 +128,11 @@ curl -X POST "http://localhost:9200/products/_doc" \
 ```
 
 <!-- [UNIQUE INSIGHT] -->
-One thing worth knowing: each `PUT /{index}/_doc/{id}` call targeting an existing document increments the version number and rewrites the document in full — it's not an update. Use `POST /{index}/_update/{id}` with a partial doc if you only want to touch specific fields. Overwriting unnecessarily burns write amplification budget on the primary and all replicas.
+One thing worth knowing: each `PUT /{index}/_doc/{id}` call targeting an existing document increments the version number and rewrites the document in full. It's not an update. Use `POST /{index}/_update/{id}` with a partial doc if you only want to touch specific fields. Overwriting unnecessarily burns write amplification budget on the primary and all replicas.
 
 ### The Bulk API — The Real Workhorse
 
-The Bulk API performs multiple `index`, `create`, `delete`, and `update` actions in a single HTTP request using NDJSON ([Bulk API reference](https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-bulk)). The default HTTP body size limit is 100MB. In practice, 5MB to 15MB per request is a reasonable starting point — tune from there based on indexing latency and heap pressure.
+The Bulk API performs multiple `index`, `create`, `delete`, and `update` actions in a single HTTP request using NDJSON ([Bulk API reference](https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-bulk)). The default HTTP body size limit is 100MB. In practice, 5MB to 15MB per request is a reasonable starting point. Tune from there based on indexing latency and heap pressure.
 
 ```bash
 curl -X POST "http://localhost:9200/_bulk" \
@@ -164,7 +164,7 @@ For a broader look at how Elasticsearch fits into your stack architecture, see [
 
 ## Level 2 — Ingest Pipelines: Transform Before You Index
 
-Ingest pipelines run inside Elasticsearch — on ingest nodes — before a document is written to a shard. A pipeline is a sequence of processors that modify the document in place ([Ingest pipeline processor reference](https://www.elastic.co/docs/manage-data/ingest/transform-enrich/ingest-pipelines)). Geo lookups, reference index joins, and ML model inference all resolve here — before the document touches a shard — because ingest nodes have access to cluster state. That's what makes ingest pipelines the right layer for enrichment and embedding generation rather than handling it in the application or in Logstash.
+Ingest pipelines run inside Elasticsearch, on ingest nodes, before a document is written to a shard. A pipeline is a sequence of processors that modify the document in place ([Ingest pipeline processor reference](https://www.elastic.co/docs/manage-data/ingest/transform-enrich/ingest-pipelines)). Geo lookups, reference index joins, and ML model inference all resolve here, before the document touches a shard, because ingest nodes have access to cluster state. That's what makes ingest pipelines the right layer for enrichment and embedding generation rather than handling it in the application or in Logstash.
 
 ### Common Processors
 
@@ -184,16 +184,16 @@ PUT _ingest/pipeline/web-log-parser
 
 Key processors worth knowing:
 
-- **`grok`** — Pattern-based text extraction for nginx, apache, syslog. Uses Logstash-compatible patterns.
-- **`dissect`** — Faster than grok for predictable delimiters; no regex backtracking cost.
-- **`geoip`** — IP to geo lookup using the Maxmind database bundled in Elasticsearch.
-- **`enrich`** — Join against an Elasticsearch index at ingest time for metadata lookups.
-- **`inference`** — Run a deployed ML model at ingest time for embedding generation.
-- **`drop`** — Discard documents before they hit storage. Use for health checks, debug events, high-cardinality noise.
+- **`grok`**: Pattern-based text extraction for nginx, apache, syslog. Uses Logstash-compatible patterns.
+- **`dissect`**: Faster than grok for predictable delimiters; no regex backtracking cost.
+- **`geoip`**: IP to geo lookup using the Maxmind database bundled in Elasticsearch.
+- **`enrich`**: Join against an Elasticsearch index at ingest time for metadata lookups.
+- **`inference`**: Run a deployed ML model at ingest time for embedding generation.
+- **`drop`**: Discard documents before they hit storage. Use for health checks, debug events, high-cardinality noise.
 
 ### Testing Pipelines with the Simulate API
 
-Never deploy a pipeline without testing it first. The simulate API runs your pipeline against sample documents without writing anything to an index — catches grok mismatches and processor ordering issues before they touch production data.
+Never deploy a pipeline without testing it first. The simulate API runs your pipeline against sample documents without writing anything to an index, which catches grok mismatches and processor ordering issues before they touch production data.
 
 ```bash
 POST _ingest/pipeline/web-log-parser/_simulate
@@ -222,13 +222,13 @@ PUT _index_template/web-logs-template
 }
 ```
 
-`index.default_pipeline` runs first. `index.final_pipeline` runs last — even if the request specified a different pipeline. Use the final pipeline for audit fields that should always be set regardless of caller. Fleet-managed Elastic Agent integrations ship with default ingest pipelines and expose a `*@custom` pipeline hook as your extension point.
+`index.default_pipeline` runs first. `index.final_pipeline` runs last, even if the request specified a different pipeline. Use the final pipeline for audit fields that should always be set regardless of caller. Fleet-managed Elastic Agent integrations ship with default ingest pipelines and expose a `*@custom` pipeline hook as your extension point.
 
 ---
 
 ## Level 3 — Beats, Elastic Agent, and EDOT: Time-Series Data at Scale
 
-For logs, metrics, uptime data, and security events — data with a `@timestamp` — the right path is Elastic Agent or Beats, not direct API calls ([Beats vs Elastic Agent comparison](https://www.elastic.co/docs/reference/fleet/beats-agent-comparison)). Writing raw time-series data through the Bulk API means you're responsible for index management, rollover, and ILM policy assignment. Elastic Agent and the data stream model handle all of that automatically.
+For logs, metrics, uptime data, and security events (data with a `@timestamp`), the right path is Elastic Agent or Beats, not direct API calls ([Beats vs Elastic Agent comparison](https://www.elastic.co/docs/reference/fleet/beats-agent-comparison)). Writing raw time-series data through the Bulk API means you're responsible for index management, rollover, and ILM policy assignment. Elastic Agent and the data stream model handle all of that automatically.
 
 ### Beats — Lightweight Shippers
 
@@ -254,7 +254,7 @@ output.elasticsearch:
 
 Elastic Agent is a single binary that replaces all the individual Beats. GA since v7.14.0. Install one agent per host, configure via Fleet in Kibana, manage centrally.
 
-Fleet auto-generates per-agent API keys with minimal permissions — a meaningful security improvement over sharing a single credential across all Beats instances.
+Fleet auto-generates per-agent API keys with minimal permissions, a meaningful security improvement over sharing a single credential across all Beats instances.
 
 ```bash
 # Download and install
@@ -278,10 +278,10 @@ EDOT is Elastic's production-ready distribution of OpenTelemetry, and it's the r
 
 What EDOT adds over upstream OpenTelemetry:
 
-- **Zero-code instrumentation** — preselected instrumentations enabled by default; no code changes needed for most frameworks
-- **Central configuration via OpAMP** — manage all EDOT agents from Kibana Fleet without redeploying
-- **Inferred spans** — EDOT derives spans from profiling data, improving trace coverage without code changes
-- **EDOT Collector as APM Server replacement** — the EDOT Collector ships `elasticsearchexporter` for native Elasticsearch ingestion and `elasticapmintakereceiver` for backward-compatible APM intake
+- **Zero-code instrumentation**: preselected instrumentations enabled by default; no code changes needed for most frameworks
+- **Central configuration via OpAMP**: manage all EDOT agents from Kibana Fleet without redeploying
+- **Inferred spans**: EDOT derives spans from profiling data, improving trace coverage without code changes
+- **EDOT Collector as APM Server replacement**: the EDOT Collector ships `elasticsearchexporter` for native Elasticsearch ingestion and `elasticapmintakereceiver` for backward-compatible APM intake
 
 A minimal EDOT Collector config routing OTel data to Elasticsearch:
 
@@ -312,13 +312,13 @@ service:
       exporters: [elasticsearch]
 ```
 
-If you're already on upstream OTel, EDOT is a drop-in replacement — same wire protocol, same SDKs, with Elastic-specific extras layered on top. The [EDOT vs upstream comparison](https://www.elastic.co/docs/reference/opentelemetry/compatibility/edot-vs-upstream) documents exactly what differs.
+If you're already on upstream OTel, EDOT is a drop-in replacement: same wire protocol, same SDKs, with Elastic-specific extras layered on top. The [EDOT vs upstream comparison](https://www.elastic.co/docs/reference/opentelemetry/compatibility/edot-vs-upstream) documents exactly what differs.
 
 ---
 
 ## Level 4 — Logstash: Non-Standard Sources and Heavy Transformation
 
-Logstash is the right tool when Elastic Agent doesn't have an integration for your data source ([Logstash as input architecture guide](https://www.elastic.co/docs/manage-data/ingest/ingest-reference-architectures/ls-for-input)). The primary documented cases are AWS Kinesis, databases via JDBC, and Kafka. Check the [Integrations quick reference](https://docs.elastic.co/en/integrations/all_integrations) before reaching for Logstash — if the integration exists, Elastic Agent handles it with less overhead: no JVM to tune, no pipeline worker configuration, centralized management through Fleet.
+Logstash is the right tool when Elastic Agent doesn't have an integration for your data source ([Logstash as input architecture guide](https://www.elastic.co/docs/manage-data/ingest/ingest-reference-architectures/ls-for-input)). The primary documented cases are AWS Kinesis, databases via JDBC, and Kafka. Check the [Integrations quick reference](https://docs.elastic.co/en/integrations/all_integrations) before reaching for Logstash. If the integration exists, Elastic Agent handles it with less overhead: no JVM to tune, no pipeline worker configuration, centralized management through Fleet.
 
 ```ruby
 # logstash.conf
@@ -353,26 +353,26 @@ output {
 ```
 
 <!-- [UNIQUE INSIGHT] -->
-Keep Logstash filters lean and push transformation into Elasticsearch ingest pipelines. Ingest pipelines run on Elasticsearch nodes with access to cluster state — geo lookups, reference index enrichment, ML model inference. Logstash filters don't have that. Let Logstash handle transport and protocol; let Elasticsearch do the field-level work.
+Keep Logstash filters lean and push transformation into Elasticsearch ingest pipelines. Ingest pipelines run on Elasticsearch nodes with access to cluster state: geo lookups, reference index enrichment, ML model inference. Logstash filters don't have that. Let Logstash handle transport and protocol; let Elasticsearch do the field-level work.
 
 ---
 
 ## Level 5 — Connectors and the Web Crawler: Content for Search
 
-When your data lives in SharePoint, Confluence, Jira, MongoDB, or PostgreSQL, use a connector or the Elastic Web Crawler instead of custom ingestion code ([Connectors and crawler ingest for search](https://www.elastic.co/docs/solutions/search/ingest-for-search)). Connectors sync read-only replicas of external content into Elasticsearch indices, handling incremental syncs, deletion detection, and schema mapping. Configure them in Kibana — no pipeline to maintain, no agent on the source system.
+When your data lives in SharePoint, Confluence, Jira, MongoDB, or PostgreSQL, use a connector or the Elastic Web Crawler instead of custom ingestion code ([Connectors and crawler ingest for search](https://www.elastic.co/docs/solutions/search/ingest-for-search)). Connectors sync read-only replicas of external content into Elasticsearch indices, handling incremental syncs, deletion detection, and schema mapping. Configure them in Kibana: no pipeline to maintain, no agent on the source system.
 
 Available connector types include: S3, GCS, Azure Blob, SharePoint Online, Confluence, Jira, Notion, MongoDB, PostgreSQL, MySQL, Oracle, Slack, Salesforce, and a Python connector framework for custom sources.
 
 ### Connector Sync Modes — Full vs Incremental
 
-Full sync re-indexes all documents from the source on each run. Incremental sync only fetches documents modified since the last successful run. For incremental to work, the source must expose a reliable `last_modified` timestamp or equivalent. Without it, full sync is your only option — schedule during low-traffic windows. Incremental syncs can run hourly or more frequently without meaningful cluster impact.
+Full sync re-indexes all documents from the source on each run. Incremental sync only fetches documents modified since the last successful run. For incremental to work, the source must expose a reliable `last_modified` timestamp or equivalent. Without it, full sync is your only option. Schedule during low-traffic windows. Incremental syncs can run hourly or more frequently without meaningful cluster impact.
 
 ---
 
 ## Elastic Streams: Centralized Data Stream Management
 
 <!-- [UNIQUE INSIGHT] -->
-Elastic Streams is a relatively new Kibana UI that brings field extraction, data retention, routing, and processing configuration into one place — without needing to manage index templates or ingest pipelines directly ([Elastic Streams docs](https://www.elastic.co/docs/solutions/observability/streams/streams)). GA on Elastic serverless; GA on Stack since 9.3.
+Elastic Streams is a relatively new Kibana UI that brings field extraction, data retention, routing, and processing configuration into one place, without needing to manage index templates or ingest pipelines directly ([Elastic Streams docs](https://www.elastic.co/docs/solutions/observability/streams/streams)). GA on Elastic serverless; GA on Stack since 9.3.
 
 Streams operates in two modes:
 
@@ -382,11 +382,11 @@ Streams operates in two modes:
 - Route incoming data to different streams based on field values
 - Add processing rules with a visual editor
 
-**Wired streams** (Preview since 9.2 on Stack) add a parent-child hierarchy. Child streams automatically inherit mappings, lifecycle settings, and processors from their parent. An AI-assisted partitioning feature suggests how to split a stream based on field cardinality — useful when a single high-volume stream needs to be split by environment, region, or service. Changes to the parent propagate to all children automatically.
+**Wired streams** (Preview since 9.2 on Stack) add a parent-child hierarchy. Child streams automatically inherit mappings, lifecycle settings, and processors from their parent. An AI-assisted partitioning feature suggests how to split a stream based on field cardinality, which is useful when a single high-volume stream needs to be split by environment, region, or service. Changes to the parent propagate to all children automatically.
 
 Access Streams via the Kibana nav or directly from a document detail panel in Discover. It's designed for operations teams who need to manage data routing without writing API calls or touching index templates.
 
-For teams already using data streams heavily, Streams doesn't replace the underlying primitives — it wraps them with a UI and adds AI-assisted tooling. The underlying data stream, ILM policy, and ingest pipeline are still there and still manageable directly.
+For teams already using data streams heavily, Streams doesn't replace the underlying primitives; it wraps them with a UI and adds AI-assisted tooling. The underlying data stream, ILM policy, and ingest pipeline are still there and still manageable directly.
 
 ---
 
@@ -394,7 +394,7 @@ For teams already using data streams heavily, Streams doesn't replace the underl
 
 ### Search
 
-The core ingestion pattern for search: direct API or connector → index with explicit mappings → query with relevance tuning. Define your mappings before you index — Elasticsearch does dynamic mapping by default, but the inferred types are rarely optimal. A `keyword` field won't be analysed; a `text` field runs through the analyser but can't aggregate efficiently. Multi-field solves this:
+The core ingestion pattern for search: direct API or connector → index with explicit mappings → query with relevance tuning. Define your mappings before you index. Elasticsearch does dynamic mapping by default, but the inferred types are rarely optimal. A `keyword` field won't be analysed; a `text` field runs through the analyser but can't aggregate efficiently. Multi-field solves this:
 
 ```json
 PUT /product-catalog
@@ -415,7 +415,7 @@ PUT /product-catalog
 
 ### Observability: Logs, Metrics, Traces
 
-Observability data is always time-series. Use Elastic Agent with the system, APM, or infrastructure integrations. Data goes into data streams following the `logs-{dataset}-{namespace}`, `metrics-{dataset}-{namespace}`, and `traces-{dataset}-{namespace}` naming scheme — each mapping to pre-built ILM policies and Kibana dashboards.
+Observability data is always time-series. Use Elastic Agent with the system, APM, or infrastructure integrations. Data goes into data streams following the `logs-{dataset}-{namespace}`, `metrics-{dataset}-{namespace}`, and `traces-{dataset}-{namespace}` naming scheme, each mapping to pre-built ILM policies and Kibana dashboards.
 
 For custom application tracing, instrument via the APM agent or EDOT SDK (see Level 3). Both route data to the same APM data streams and surface in Kibana Service maps, error rates, and latency histograms without any custom ingest code.
 
@@ -427,7 +427,7 @@ For the broader context on observability strategy and AI-powered monitoring, see
 
 ### Security: SIEM
 
-Elastic Security uses the Elastic Common Schema (ECS) — a standardized field naming convention that makes data from different sources comparable in the same index. Elastic Agent security integrations handle ECS mapping automatically. For custom log sources, use a grok ingest pipeline that maps your fields to ECS names. The fields that matter most: `source.ip`, `destination.ip`, `process.name`, `user.name`, `event.action`, `event.outcome`.
+Elastic Security uses the Elastic Common Schema (ECS), a standardized field naming convention that makes data from different sources comparable in the same index. Elastic Agent security integrations handle ECS mapping automatically. For custom log sources, use a grok ingest pipeline that maps your fields to ECS names. The fields that matter most: `source.ip`, `destination.ip`, `process.name`, `user.name`, `event.action`, `event.outcome`.
 
 ```json
 PUT _ingest/pipeline/custom-firewall-to-ecs
@@ -449,7 +449,7 @@ ECS compliance is what enables Kibana's pre-built detection rules to work agains
 
 ### AI/ML with Vectors: ELSER and Semantic Text
 
-For most semantic search use cases, `semantic_text` is the recommended field type. It handles embedding generation automatically via an inference endpoint — you configure the endpoint once and Elasticsearch generates embeddings at index time ([Vector search overview](https://www.elastic.co/docs/solutions/search/vector)).
+For most semantic search use cases, `semantic_text` is the recommended field type. It handles embedding generation automatically via an inference endpoint. You configure the endpoint once and Elasticsearch generates embeddings at index time ([Vector search overview](https://www.elastic.co/docs/solutions/search/vector)).
 
 ```json
 PUT /knowledge-base
@@ -467,7 +467,7 @@ PUT /knowledge-base
 }
 ```
 
-For more control — or for cases requiring a custom model — use an ingest pipeline with an inference processor ([Dense vs sparse vector ingest pipelines](https://www.elastic.co/docs/solutions/search/vector/dense-versus-sparse-ingest-pipelines)):
+For more control, or for cases requiring a custom model, use an ingest pipeline with an inference processor ([Dense vs sparse vector ingest pipelines](https://www.elastic.co/docs/solutions/search/vector/dense-versus-sparse-ingest-pipelines)):
 
 ```json
 PUT _ingest/pipeline/elser-embedding-pipeline
@@ -484,7 +484,7 @@ PUT _ingest/pipeline/elser-embedding-pipeline
 }
 ```
 
-ELSER (`.elser_model_2`) generates sparse vectors — token-weight pairs — with no model tuning required. For most teams without an ML engineering function, start with `semantic_text` or ELSER. Dense models (sentence transformers) offer more control but need domain-specific selection and potentially fine-tuning.
+ELSER (`.elser_model_2`) generates sparse vectors (token-weight pairs) with no model tuning required. For most teams without an ML engineering function, start with `semantic_text` or ELSER. Dense models (sentence transformers) offer more control but need domain-specific selection and potentially fine-tuning.
 
 For how this fits into broader AI search patterns, see [Agentic AI Workflows](/blog/agentic-ai-workflows).
 
@@ -505,10 +505,10 @@ At multi-TB daily ingest volumes, the architecture decisions become as important
 
 **Refresh interval tuning.** The default refresh interval is 1 second. During high-throughput bulk indexing, setting `index.refresh_interval` to `30s` significantly reduces indexing overhead. Re-enable after the load completes.
 
-**Shard sizing.** Target 20–50GB per shard. Oversharding is the most common performance mistake — 100 shards for a 500GB index means 100 coordination points responding to every search. 15–25 shards is more appropriate at that size.
+**Shard sizing.** Elastic's guidance is to [aim for shards between 10GB and 50GB and keep each shard below 200 million documents](https://www.elastic.co/docs/deploy-manage/production-guidance/optimize-performance/size-shards). Oversharding degrades search performance and cluster stability: 100 shards for a 500GB index means 100 coordination points responding to every search, and 10 to 50 shards is the range the docs' sizing guidance implies at that size.
 
 <!-- [UNIQUE INSIGHT] -->
-The ingest pipeline layer is often where cost optimisation lives at scale. Dropping events at ingest — filtering health checks, debug logs, and internal noise with a `drop` processor — can reduce index volume by 20–40% on typical application log workloads. Profile what you're actually ingesting before deciding how many nodes you need.
+The ingest pipeline layer is often where cost optimisation lives at scale. Dropping events at ingest (filtering health checks, debug logs, and internal noise with a `drop` processor) can meaningfully reduce index volume, depending on how much of your traffic is noise. Profile what you're actually ingesting before deciding how many nodes you need.
 
 For the architectural principles around distributed systems failure isolation that apply here, see [Distributed Computing Fundamentals](/blog/distributed-computing-fundamentals).
 
@@ -518,27 +518,27 @@ For the architectural principles around distributed systems failure isolation th
 
 ### What's the difference between the Index API and the Bulk API?
 
-The Index API writes one document per HTTP request. The Bulk API writes many operations in a single request using NDJSON format, with a 100MB default size limit ([Bulk API reference](https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-bulk)). Use the Index API for individual application events. Use Bulk for any batch or high-volume scenario — significantly more efficient in terms of network overhead and indexing throughput.
+The Index API writes one document per HTTP request. The Bulk API writes many operations in a single request using NDJSON format, with a 100MB default size limit ([Bulk API reference](https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-bulk)). Use the Index API for individual application events. Use Bulk for any batch or high-volume scenario: significantly more efficient in terms of network overhead and indexing throughput.
 
 ### When should I use Logstash instead of Elastic Agent?
 
-Logstash is the right choice when Elastic Agent doesn't have an integration for your data source — primarily AWS Kinesis, databases, and Kafka ([Logstash as input architecture guide](https://www.elastic.co/docs/manage-data/ingest/ingest-reference-architectures/ls-for-input)). Check the [Integrations quick reference](https://docs.elastic.co/en/integrations/all_integrations) first. If an integration exists, use Elastic Agent. Logstash adds JVM process overhead that isn't justified when an agent integration can do the same job.
+Logstash is the right choice when Elastic Agent doesn't have an integration for your data source, primarily AWS Kinesis, databases, and Kafka ([Logstash as input architecture guide](https://www.elastic.co/docs/manage-data/ingest/ingest-reference-architectures/ls-for-input)). Check the [Integrations quick reference](https://docs.elastic.co/en/integrations/all_integrations) first. If an integration exists, use Elastic Agent. Logstash adds JVM process overhead that isn't justified when an agent integration can do the same job.
 
 ### What is EDOT and when should I use it instead of Elastic Agent?
 
-EDOT (Elastic Distributions of OpenTelemetry) is Elastic's production-ready OTel distribution — GA SDKs for Java, Python, .NET, Node.js, PHP, Android, and iOS, plus the EDOT Collector ([EDOT overview](https://www.elastic.co/docs/reference/opentelemetry)). Use EDOT when you're building new observability instrumentation and want OTel standards: it gives you zero-code instrumentation, OpAMP-based central config from Kibana Fleet, and EDOT Collector as a drop-in APM Server replacement. Elastic Agent is still the right choice for host-level logs and metrics from existing integrations. Both can coexist.
+EDOT (Elastic Distributions of OpenTelemetry) is Elastic's production-ready OTel distribution: GA SDKs for Java, Python, .NET, Node.js, PHP, Android, and iOS, plus the EDOT Collector ([EDOT overview](https://www.elastic.co/docs/reference/opentelemetry)). Use EDOT when you're building new observability instrumentation and want OTel standards: it gives you zero-code instrumentation, OpAMP-based central config from Kibana Fleet, and EDOT Collector as a drop-in APM Server replacement. Elastic Agent is still the right choice for host-level logs and metrics from existing integrations. Both can coexist.
 
 ### What is Elastic Streams and how does it relate to data streams?
 
-Elastic Streams is a Kibana UI for managing data streams — field extraction, retention settings, routing, and processing rules in one place without direct API calls ([Elastic Streams docs](https://www.elastic.co/docs/solutions/observability/streams/streams)). It doesn't replace data streams; it wraps them with a management interface. Classic streams (GA) work with existing data streams. Wired streams (Preview) add parent-child inheritance for mappings and lifecycle settings. It's most useful for operations teams managing many streams who want a visual alternative to index templates.
+Elastic Streams is a Kibana UI for managing data streams: field extraction, retention settings, routing, and processing rules in one place without direct API calls ([Elastic Streams docs](https://www.elastic.co/docs/solutions/observability/streams/streams)). It doesn't replace data streams; it wraps them with a management interface. Classic streams (GA) work with existing data streams. Wired streams (Preview) add parent-child inheritance for mappings and lifecycle settings. It's most useful for operations teams managing many streams who want a visual alternative to index templates.
 
 ### What's the difference between ELSER and dense vector embeddings?
 
-ELSER (`.elser_model_2`) generates sparse vectors — token-weight pairs from a ~30,000 term vocabulary — with no model tuning required. Dense vector models (e.g., sentence transformers) generate fixed-dimension float arrays (384 or 1536 dims typically) and may need fine-tuning for your domain. For most teams without an ML function, start with ELSER or the `semantic_text` field type ([Dense vs sparse vector ingest pipelines](https://www.elastic.co/docs/solutions/search/vector/dense-versus-sparse-ingest-pipelines)).
+ELSER (`.elser_model_2`) generates sparse vectors (token-weight pairs from a ~30,000 term vocabulary) with no model tuning required. Dense vector models (e.g., sentence transformers) generate fixed-dimension float arrays (384 or 1536 dims typically) and may need fine-tuning for your domain. For most teams without an ML function, start with ELSER or the `semantic_text` field type ([Dense vs sparse vector ingest pipelines](https://www.elastic.co/docs/solutions/search/vector/dense-versus-sparse-ingest-pipelines)).
 
 ### Should I use data streams or regular indices?
 
-Data streams for any time-series data (logs, metrics, traces). Regular indices for general content without a timestamp — product catalogs, knowledge bases, user profiles. Data streams enforce the `@timestamp` field, manage backing indices automatically, and integrate with ILM for tier-based storage management.
+Data streams for any time-series data (logs, metrics, traces). Regular indices for general content without a timestamp: product catalogs, knowledge bases, user profiles. Data streams enforce the `@timestamp` field, manage backing indices automatically, and integrate with ILM for tier-based storage management.
 
 ---
 

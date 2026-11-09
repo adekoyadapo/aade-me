@@ -1,7 +1,7 @@
 ---
 slug: "kubernetes-autoscaling-hpa-vs-keda"
 title: "Kubernetes Autoscaling: HPA vs KEDA — A Platform Engineer's Guide"
-excerpt: "Kubernetes autoscaling with HPA covers CPU-bound services well. KEDA extends it with 72+ scalers and scale-to-zero. Here's when to use each in production."
+excerpt: "Kubernetes autoscaling with HPA covers CPU-bound services well. KEDA extends it with 70+ scalers and scale-to-zero. Here's when to use each in production."
 date: "2026-02-20"
 tags: ["Kubernetes", "Platform Engineering"]
 author: "Ade A."
@@ -18,9 +18,9 @@ That's where KEDA comes in. But it's not a replacement. KEDA wraps HPA. When you
 This post covers how each tool works, what changed in recent Kubernetes releases, and which patterns to reach for in production. All YAML here is deployable. No placeholder configs.
 
 > **Key Takeaways**
-> - HPA polls every 15 seconds and scales on CPU, memory, or custom metrics — but can't scale to zero, and sidecars corrupt pod-level averages (K8s docs, 2026).
+> - HPA polls every 15 seconds and scales on CPU, memory, or custom metrics. It can't scale to zero, and sidecars corrupt pod-level averages (K8s docs, 2026).
 > - ContainerResource metrics (stable in K8s 1.30) let HPA target a specific container, fixing the sidecar problem without KEDA.
-> - KEDA acts as both a scale-to-zero agent and a metrics adapter for HPA — it doesn't replace HPA, it extends it with 72+ event source scalers (KEDA docs, 2026).
+> - KEDA is both a scale-to-zero agent and a metrics adapter for HPA. It doesn't replace HPA, it extends it with 70+ event source scalers ([KEDA](https://keda.sh/), 2026).
 > - Use HPA for predictable HTTP workloads. Use KEDA for queue consumers, scheduled jobs, and anything that should hit zero replicas.
 
 ---
@@ -29,7 +29,7 @@ This post covers how each tool works, what changed in recent Kubernetes releases
 
 HPA is a control loop in `kube-controller-manager` that runs every 15 seconds. The formula is simple: `desiredReplicas = ceil(currentReplicas × currentMetric / targetMetric)`. It reads from three metric APIs: `metrics.k8s.io` (CPU/memory via metrics-server), `custom.metrics.k8s.io`, and `external.metrics.k8s.io` ([Kubernetes HPA docs](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/), 2026).
 
-The `autoscaling/v2` API — which has been stable since Kubernetes 1.23 — gives you all three metric types in one resource. This is the version you should be using. `autoscaling/v1` only supports CPU.
+The `autoscaling/v2` API has been stable since Kubernetes 1.23 and gives you all three metric types in one resource. This is the version you should be using. `autoscaling/v1` only supports CPU.
 
 ```yaml
 apiVersion: autoscaling/v2
@@ -58,7 +58,7 @@ For background on how resource requests affect scheduling and bin-packing, see [
 
 ### Where HPA Breaks Down
 
-Three scenarios break the CPU-as-load-proxy assumption.
+Three scenarios break the CPU-as-load-proxy assumption:
 
 **Sidecars dilute the average.** If your pod runs a Fluentd log shipper alongside the main app container, HPA measures the blended CPU of both. Fluentd stays near-idle regardless of traffic. The combined average stays low even when the app container is saturated. HPA sees no reason to scale. Your app starves.
 
@@ -72,11 +72,11 @@ Three scenarios break the CPU-as-load-proxy assumption.
 
 ## What Changed in Kubernetes 1.27–1.30?
 
-Two HPA features reached stable in recent releases that solve the sidecar and oscillation problems without adding KEDA. They're underused — probably because they graduated quietly without much ceremony ([Kubernetes autoscaling docs](https://kubernetes.io/docs/concepts/workloads/autoscaling/), 2026). Both address the failure modes above without reaching for KEDA.
+Two HPA features reached stable in recent releases that solve the sidecar and oscillation problems without adding KEDA. Both are documented in the [Kubernetes HPA docs](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/). Both address the failure modes above without reaching for KEDA.
 
 ### ContainerResource Metrics — Stable in 1.30
 
-This feature was introduced in Kubernetes 1.20, moved to beta in 1.27 with `HPAContainerMetrics` enabled by default, and graduated to stable (GA) in 1.30. It lets HPA target the resource usage of a specific named container — not the blended pod average.
+This feature was introduced in Kubernetes 1.20, moved to beta in 1.27 with `HPAContainerMetrics` enabled by default, and graduated to stable (GA) in 1.30. It lets HPA target the resource usage of a specific named container, not the blended pod average.
 
 ```yaml
 apiVersion: autoscaling/v2
@@ -154,15 +154,15 @@ KEDA (Kubernetes Event-Driven Autoscaler) is a CNCF-graduated project that fills
 
 KEDA plays two distinct roles in the cluster:
 
-1. **Agent** — handles 0→1 and 1→0 replica transitions. When events appear, KEDA activates the deployment. When the queue empties, KEDA deactivates it. This is the `keda-operator` container.
-2. **Metrics adapter** — registers as an external metrics server and exposes event source data (queue depth, stream lag, Prometheus query results) to the HPA it creates. The HPA then handles 1→N scaling using those metrics. This is `keda-operator-metrics-apiserver`.
+1. **Agent**: handles 0→1 and 1→0 replica transitions. When events appear, KEDA activates the deployment. When the queue empties, KEDA deactivates it. This is the `keda-operator` container.
+2. **Metrics adapter**: registers as an external metrics server and exposes event source data (queue depth, stream lag, Prometheus query results) to the HPA it creates. The HPA then handles 1→N scaling using those metrics. This is `keda-operator-metrics-apiserver`.
 
 When you create a `ScaledObject`, KEDA installs four custom resources:
 
-- `scaledobjects.keda.sh` — maps an event source to a Deployment or StatefulSet
-- `scaledjobs.keda.sh` — maps an event source to a Kubernetes Job (for batch processing)
-- `triggerauthentications.keda.sh` — namespace-scoped credentials for event sources
-- `clustertriggerauthentications.keda.sh` — cluster-scoped equivalent
+- `scaledobjects.keda.sh`: maps an event source to a Deployment or StatefulSet
+- `scaledjobs.keda.sh`: maps an event source to a Kubernetes Job (for batch processing)
+- `triggerauthentications.keda.sh`: namespace-scoped credentials for event sources
+- `clustertriggerauthentications.keda.sh`: cluster-scoped equivalent
 
 Install via Helm:
 
@@ -185,7 +185,7 @@ kubectl get pods -n keda
 
 The admission webhook (`keda-webhooks`) is the third component. It blocks you from creating multiple ScaledObjects targeting the same workload, which would create conflicting HPAs and unpredictable scaling behavior.
 
-KEDA 2.x ships with 72 built-in scalers. The major ones: Apache Kafka (Microsoft-maintained), AWS SQS, RabbitMQ, Prometheus, Redis, Cron, GCP Pub/Sub, Azure Service Bus, and Predictkube (AI-based predictive scaling, v2.6+). The full list is at [keda.sh/docs/scalers](https://keda.sh/docs/2.16/scalers/).
+KEDA advertises a [catalog of 70+ built-in scalers](https://keda.sh/). The major ones: Apache Kafka (Microsoft-maintained), AWS SQS, RabbitMQ, Prometheus, Redis, Cron, GCP Pub/Sub, Azure Service Bus, and Predictkube (AI-based predictive scaling, v2.6+). The full list is at [keda.sh/docs/scalers](https://keda.sh/docs/2.16/scalers/).
 
 ---
 
@@ -195,7 +195,7 @@ Four patterns cover most of what you'll encounter in production.
 
 ### Kafka Consumer — Scale on Consumer Lag
 
-This is the most common use case. Don't scale on CPU — scale on how far behind the consumer group is. When lag is zero, the deployment should be at zero replicas.
+This is the most common use case. Don't scale on CPU. Scale on how far behind the consumer group is. When lag is zero, the deployment should be at zero replicas.
 
 ```yaml
 apiVersion: keda.sh/v1alpha1
@@ -220,7 +220,7 @@ spec:
       offsetResetPolicy: latest
 ```
 
-With `minReplicaCount: 0`, the consumer sits dormant outside business hours. When orders arrive, KEDA activates it (0→1), then the managed HPA scales it out (1→N) as lag builds. When the queue drains, `cooldownPeriod` prevents immediate scale-down — useful if your producer is bursty.
+With `minReplicaCount: 0`, the consumer sits dormant outside business hours. When orders arrive, KEDA activates it (0→1), then the managed HPA scales it out (1→N) as lag builds. When the queue drains, `cooldownPeriod` prevents immediate scale-down, which is useful if your producer is bursty.
 
 ### AWS SQS with Pod Identity — No Credentials in Secrets
 
@@ -264,7 +264,7 @@ spec:
       queueLength: "5"         # target: 5 messages per active replica
 ```
 
-`queueLength: "5"` means KEDA aims to keep approximately 5 messages per running replica. With 50 messages in the queue, expect 10 replicas. `TriggerAuthentication` with `podIdentity` supports AWS, Azure Workload Identity, GCP Workload Identity, EKS Pod Identity, and Hashicorp Vault — no long-lived static credentials needed for any of them.
+`queueLength: "5"` means KEDA aims to keep approximately 5 messages per running replica. With 50 messages in the queue, expect 10 replicas. `TriggerAuthentication` with `podIdentity` supports AWS, Azure Workload Identity, GCP Workload Identity, EKS Pod Identity, and Hashicorp Vault. None of them needs long-lived static credentials.
 
 <!-- [PERSONAL EXPERIENCE] The sqs-pod-identity pattern is what I'd use by default on EKS. The alternative — a Kubernetes Secret containing ACCESS_KEY_ID and SECRET_ACCESS_KEY — creates key rotation debt and a credential blast radius that's hard to scope. IRSA annotations on the ServiceAccount are two lines and give you full audit trails in CloudTrail. -->
 
@@ -291,7 +291,7 @@ spec:
       threshold: "500"         # one replica per 500 req/s
 ```
 
-The `query` field accepts any PromQL. You can scope by label, filter by status code, subtract internal health checks — whatever makes sense for your workload. This is reactive to actual demand rather than a downstream effect of demand.
+The `query` field accepts any PromQL. You can scope by label, filter by status code, subtract internal health checks, or whatever makes sense for your workload. This is reactive to actual demand rather than a downstream effect of demand.
 
 ### Cron Scaler — Scheduled Workloads
 
@@ -314,7 +314,7 @@ spec:
       desiredReplicas: "10"
 ```
 
-You can combine Cron with another trigger in the same `ScaledObject`. KEDA picks the highest replica count from all active triggers — so if a Cron trigger wants 10 replicas and a Kafka lag trigger wants 15, you get 15.
+You can combine Cron with another trigger in the same `ScaledObject`. KEDA picks the highest replica count from all active triggers, so if a Cron trigger wants 10 replicas and a Kafka lag trigger wants 15, you get 15.
 
 For a broader perspective on how containerised infrastructure has evolved to support these patterns, see [Cloud Computing Over 10 Years: A 2015-2025 Review](/blog/cloud-computing-evolution).
 
@@ -350,13 +350,13 @@ kubectl get validatingwebhookconfigurations | grep keda
 
 Most autoscaling failures in production trace back to four issues.
 
-**Cold start from zero.** Scaling from `minReplicaCount: 0` means KEDA schedules a pod, pulls the image, and waits for the app to start. That gap — often 30-90 seconds depending on image size and init containers — is invisible in local testing and painfully visible in production during the first real burst. Set `minReplicaCount: 1` for anything with a user-facing SLA. Scale-to-zero is for background workers and overnight batch jobs where cold start doesn't matter.
+**Cold start from zero.** Scaling from `minReplicaCount: 0` means KEDA schedules a pod, pulls the image, and waits for the app to start. That gap depends on image size and init containers. It is invisible in local testing and painfully visible in production during the first real burst. Set `minReplicaCount: 1` for anything with a user-facing SLA. Scale-to-zero is for background workers and overnight batch jobs where cold start doesn't matter.
 
 **Polling interval versus cooldown mismatch.** `pollingInterval` controls how often KEDA checks the trigger (default 30s). `cooldownPeriod` controls how long it waits before scaling to zero after events stop (default 300s). Too high a polling interval means you react slowly to bursts. Too low a cooldown means you oscillate: scale to zero, immediately back to one when the next batch arrives, repeat. The oscillation pattern is easy to miss until you look at replica count graphs over a 24-hour window.
 
-**Missing `resources.requests`.** This one is a silent failure. HPA — including the HPA KEDA creates — cannot compute utilization-based metrics if containers don't declare resource requests. It simply won't scale on those metrics and produces no error. Check every container in every pod you're autoscaling. `kubectl describe hpa` will show `<unknown>` in the current metrics column when requests are missing.
+**Missing `resources.requests`.** This one is a silent failure. HPA (including the HPA KEDA creates) cannot compute utilization-based metrics if containers don't declare resource requests. It simply won't scale on those metrics and produces no error. Check every container in every pod you're autoscaling. `kubectl describe hpa` will show `<unknown>` in the current metrics column when requests are missing.
 
-**Noisy metrics and scale-down thrashing.** Without `stabilizationWindowSeconds` in `behavior.scaleDown`, HPA scales down as soon as metrics dip below target — then immediately back up when they spike again. Sixty seconds of stabilization avoids most of this. The conservative 300-second default exists for a reason on high-traffic services; the aggressive default is fine for development environments where you want fast feedback.
+**Noisy metrics and scale-down thrashing.** Without `stabilizationWindowSeconds` in `behavior.scaleDown`, HPA scales down as soon as metrics dip below target, then immediately back up when they spike again. Sixty seconds of stabilization avoids most of this. The conservative 300-second default exists for a reason on high-traffic services; the aggressive default is fine for development environments where you want fast feedback.
 
 Debug flow:
 
@@ -384,9 +384,9 @@ The `describe scaledobject` output includes the current metric value, target, an
 
 Before closing, two things worth watching in the next 12 months.
 
-**Predictkube (KEDA v2.6+)** is an AI-based predictive scaler built on Prometheus metrics and the Dysnix SaaS backend. Instead of reacting to current queue depth, it predicts future demand and pre-scales. It requires their external service, so there's a dependency to evaluate — but the approach is sound for workloads with cyclical patterns where reactive scaling always lags by a control loop interval or two.
+**Predictkube (KEDA v2.6+)** is an AI-based predictive scaler built on Prometheus metrics and the Dysnix SaaS backend. Instead of reacting to current queue depth, it predicts future demand and pre-scales. It requires their external service, so there's a dependency to evaluate, but the approach is sound for workloads with cyclical patterns where reactive scaling always lags by a control loop interval or two.
 
-**InPlacePodVerticalScaling** (alpha since K8s 1.27) changes the equation for stateful services. Currently, if you need more CPU for a StatefulSet member, you restart the pod. In-place resize lets you change container resource limits without a restart. Once this reaches GA, the calculus for single-instance or leader-election workloads shifts significantly — VPA becomes a real option where it previously wasn't.
+**In-place Pod resize** (alpha in K8s 1.27, beta in 1.33, stable in 1.35 per the [Kubernetes blog](https://kubernetes.io/blog/2025/12/19/kubernetes-v1-35-in-place-pod-resize-ga/)) changes the equation for stateful services. Previously, if you needed more CPU for a StatefulSet member, you restarted the pod. In-place resize lets you change container resource limits without a restart. Now that it is stable, the calculus for single-instance or leader-election workloads shifts significantly: VPA becomes a real option where it previously wasn't.
 
 For now, the practical stack: HPA with `ContainerResource` metrics for HTTP services, KEDA for async consumers and scheduled jobs, and `behavior` tuning on both to avoid oscillation.
 
@@ -396,15 +396,15 @@ For now, the practical stack: HPA with `ContainerResource` metrics for HTTP serv
 
 ### Can KEDA and HPA be used together on the same workload?
 
-KEDA creates and manages an HPA internally when you deploy a `ScaledObject`. Don't also manually create an HPA targeting the same Deployment — KEDA's admission webhook will block it. For separate workloads in the same cluster (e.g., HTTP service on HPA, queue consumer on KEDA), there's no conflict.
+KEDA creates and manages an HPA internally when you deploy a `ScaledObject`. Don't also manually create an HPA targeting the same Deployment. KEDA's admission webhook will block it. For separate workloads in the same cluster (e.g., HTTP service on HPA, queue consumer on KEDA), there's no conflict.
 
 ### Does KEDA replace HPA?
 
-No. For 1→N scaling, KEDA delegates to the HPA it creates and registers itself as the external metrics server for that HPA. The main things KEDA adds are: scale-to-zero (0↔1 transitions), 72+ event source scalers, and workload identity-based authentication for external trigger sources.
+No. For 1→N scaling, KEDA delegates to the HPA it creates and registers itself as the external metrics server for that HPA. The main things KEDA adds are: scale-to-zero (0↔1 transitions), 70+ event source scalers, and workload identity-based authentication for external trigger sources.
 
 ### What is the minimum Kubernetes version required for ContainerResource metrics?
 
-The `ContainerResource` metric type was introduced in Kubernetes 1.20, moved to beta in 1.27 (enabled by default via the `HPAContainerMetrics` feature gate), and reached stable/GA in Kubernetes 1.30. If you're on 1.27 or later, it's on by default — you just need to use the `autoscaling/v2` API and set `type: ContainerResource` in the metrics block.
+The `ContainerResource` metric type was introduced in Kubernetes 1.20, moved to beta in 1.27 (enabled by default via the `HPAContainerMetrics` feature gate), and reached stable/GA in Kubernetes 1.30. If you're on 1.27 or later, it's on by default. You just need to use the `autoscaling/v2` API and set `type: ContainerResource` in the metrics block.
 
 ### How do I stop KEDA from scaling a latency-sensitive workload to zero?
 

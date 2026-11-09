@@ -9,12 +9,12 @@
     "lint": "eslint ."
   },
   "engines": {
-    "node": ">=24.9.0"
+    "node": ">=24.22.2"
   },
   "dependencies": {
     "@react-email/components": "^1.0.3",
     "@react-email/tailwind": "^2.0.3",
-    "@types/node": "20.3.2",
+    "@types/node": "^26.6.6",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "@vercel/analytics": "^1.6.1",
@@ -44,5 +44,13 @@
   "devDependencies": {
     "@tailwindcss/typography": "^0.5.19",
     "@types/react-vertical-timeline-component": "^3.3.3"
+  },
+  "overrides": {
+    "@typescript-eslint/typescript-estree": {
+      "minimatch": "^11.0.5"
+    },
+    "@tailwindcss/typography": {
+      "postcss-selector-parser": "6.1.6"
+    }
   }
 }

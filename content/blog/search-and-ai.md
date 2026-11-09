@@ -35,13 +35,13 @@ There is no hard size threshold at which a general-purpose database stops being 
 
 Each targets a distinct primary use case, even though they overlap on core functionality.
 
-**Pinecone** is the lowest operational overhead entry point. Fully managed, serverless tier available, no infrastructure to configure. The trade-off: limited control over ANN index parameters and no self-hosted option. Right for teams that want to ship retrieval quickly without hiring someone to tune HNSW graphs.
+**Pinecone** is a managed service with serverless indexes, so there is no cluster to size or operate ([Pinecone docs](https://docs.pinecone.io/guides/index-data/indexing-overview)). Its bring-your-own-cloud option runs the data plane in your own AWS, GCP or Azure account, still operated by Pinecone ([BYOC docs](https://docs.pinecone.io/guides/production/bring-your-own-cloud)). Check the current docs for which index parameters you can tune.
 
-**Weaviate** bundles vector storage with RAG features. It has built-in module support for calling embedding models and LLMs directly from query time. You can define a schema with object properties and vector indexes in one place. Useful when the retrieval pipeline and the embedding pipeline need to stay tightly coupled.
+**Weaviate** integrates with embedding and generative model providers. When an embedding integration is enabled, Weaviate generates embeddings for objects as they are added ([Weaviate docs](https://docs.weaviate.io/weaviate/model-providers)). That suits teams that want the embedding step and the retrieval step configured in one place.
 
-**Milvus** (and its managed version, Zilliz Cloud) is open-source and optimized for large-scale deployments. DISKANN support means it handles indexes larger than RAM. The query language is more complex than the others, but it supports more ANN index types (IVF_FLAT, IVF_SQ8, HNSW, DISKANN) and gives more tuning knobs. Right for teams with dedicated ML infrastructure engineers.
+**Milvus** (and its managed version, Zilliz Cloud) is open source and offers several index types, including IVF_FLAT, IVF_SQ8 and HNSW ([Milvus docs](https://milvus.io/docs/index.md)). It also supports DISKANN, a disk-based index designed for datasets that exceed available RAM ([Milvus DISKANN docs](https://milvus.io/docs/diskann.md)). More index choices mean more tuning work, so it fits teams with dedicated infrastructure engineers.
 
-**Qdrant** is written in Rust. Payload filtering is applied at the ANN search level rather than post-retrieval, so filtered searches do not degrade to brute-force scans when the filter is selective. For workloads where metadata filtering is the dominant query pattern alongside vector similarity, this matters.
+**Qdrant** supports filtered vector search through payload indexes. Its filterable HNSW approach adds graph edges based on indexed payload values, so filters can be applied while traversing the graph ([Qdrant course](https://qdrant.tech/course/essentials/day-2/filterable-hnsw/)). If metadata filtering dominates your query pattern alongside vector similarity, test this behavior on your own data.
 
 None of these is universally best. The right choice is determined by your scale, operational team, and whether you need tight coupling between embedding generation and retrieval.
 

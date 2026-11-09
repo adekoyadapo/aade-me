@@ -25,7 +25,7 @@ Production-grade semantic search with Jina AI embeddings runs entirely inside yo
 
 ## Why Air-Gapped AI Is Now a Board-Level Requirement
 
-Regulated sectors cannot use public LLM inference APIs. This is a hard compliance constraint, not a preference. Gartner forecasts worldwide sovereign cloud IaaS spending of $80 billion in 2026, a 35.6% increase from 2025 ([Gartner](https://www.gartner.com/en/newsroom/press-releases/2026-02-09-gartner-says-worldwide-sovereign-cloud-iaas-spending-will-total-us-dollars-80-billion-in-2026), February 2026).
+Many regulated organizations restrict or prohibit sending sensitive data to public LLM inference APIs, depending on their policies, sector rules and data residency obligations. For them this is a compliance constraint, not a preference. Gartner forecasts worldwide sovereign cloud IaaS spending of $80 billion in 2026, a 35.6% increase from 2025 ([Gartner](https://www.gartner.com/en/newsroom/press-releases/2026-02-09-gartner-says-worldwide-sovereign-cloud-iaas-spending-will-total-us-dollars-80-billion-in-2026), February 2026).
 
 ### The Compliance Wall Public AI APIs Cannot Cross
 
@@ -53,9 +53,9 @@ Elastic acquired Jina AI on October 9, 2025 ([BusinessWire](https://secure.busin
 
 ### What Elastic Gained
 
-The core asset is open-weight multilingual embedding models. `jina-embeddings-v3` has 570 million parameters, covers 89 languages, produces 1024-dimensional vectors by default (reducible via Matryoshka Representation Learning), and handles an 8,192-token context window with task-specific LoRA adapters ([arXiv 2409.10173](https://arxiv.org/abs/2409.10173)). That combination of multilingual coverage, long context and adapter tuning suits many retrieval use cases. Evaluate it on your own data before deciding whether you need fine-tuning.
+The core asset is open-weight multilingual embedding models. `jina-embeddings-v3` has 570 million parameters, produces 1024-dimensional vectors by default (reducible via Matryoshka Representation Learning), and handles an 8,192-token context window with task-specific LoRA adapters ([arXiv 2409.10173](https://arxiv.org/abs/2409.10173)). Jina's [model page](https://jina.ai/models/jina-embeddings-v3/) describes it as multilingual and cites 89 languages in its overview; it also notes the model is deprecated in favor of the v5 family. That combination of multilingual coverage, long context and adapter tuning suits many retrieval use cases. Evaluate it on your own data before deciding whether you need fine-tuning.
 
-`jina-embeddings-v5-text-nano` is the CPU-deployable variant. It trades some accuracy for a smaller footprint and faster inference on commodity hardware. It is the default model in the air-gap demo and the right starting point for most on-prem deployments.
+`jina-embeddings-v5-text-nano` is the compact model in the v5 text family. Jina's [model page](https://jina.ai/models/jina-embeddings-v5-text-nano/) lists about 239 million parameters, an 8K-token input window and 768-dimensional output, and recommends `jina-embeddings-v5-text-small` for 32K context or higher accuracy. It is licensed CC BY-NC 4.0, so check the terms before commercial use. It is the default model in the air-gap demo and the right starting point for most on-prem deployments.
 
 Jina Reader is a headless browser extraction layer. It fetches a URL and returns clean Markdown. On-prem, it runs as a container. For regulated environments, you point it at internal URLs (documentation, wikis, intranet pages) and it produces indexable text without a separate scraping pipeline.
 
@@ -248,7 +248,7 @@ This stack makes seven operating choices that constrain how you scale and deploy
 
 ### Which Jina model should I use?
 
-The default `jina-embeddings-v5-text-nano` runs on CPU and is the right starting point for most deployments. For multilingual workloads requiring higher accuracy across 89 languages, switch to `jina-embeddings-v3` (570M params, 1024-dimensional vectors), documented in [arXiv 2409.10173](https://arxiv.org/abs/2409.10173). Set `JINA_MODEL` in `.env` and re-run bootstrap.
+The default `jina-embeddings-v5-text-nano` runs on CPU and is the right starting point for most deployments. For multilingual workloads, you can switch to `jina-embeddings-v3` (570M params, 1024-dimensional vectors), documented in [arXiv 2409.10173](https://arxiv.org/abs/2409.10173). Set `JINA_MODEL` in `.env` and re-run bootstrap.
 
 ### Can this run on Elastic Kubernetes Operator (ECK)?
 

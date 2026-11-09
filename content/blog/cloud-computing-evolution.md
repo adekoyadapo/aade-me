@@ -23,7 +23,7 @@ Back then, only a minority of corporate data lived in the cloud. The rest was si
 
 Cloud providers stopped being just infrastructure and started offering services that actually mattered: AI, machine learning, serverless, automation. The cloud became a platform for building things instead of just a place to host them.
 
-OpenAI's GPT-4 integrated with cloud platforms in 2023 and suddenly every startup could access advanced AI without building a supercomputer. That changed the game entirely.
+OpenAI's GPT-4 became available in preview on Microsoft's Azure OpenAI Service in March 2023 ([Microsoft Azure blog](https://azure.microsoft.com/en-us/blog/introducing-gpt4-in-azure-openai-service/)), and startups could reach advanced AI through a cloud API instead of building a supercomputer. That changed the game entirely.
 
 ## The Numbers
 

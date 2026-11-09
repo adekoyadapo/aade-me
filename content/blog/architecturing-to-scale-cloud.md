@@ -23,7 +23,7 @@ Azure's framework emphasizes dynamic scaling. Services like Azure Autoscale and 
 
 AWS built its reputation on elastic scalability. The variety of instance types and services is almost overwhelming, but it's there because different workloads need different things. AWS wins on flexibility. You can usually find a service that fits your exact use case.
 
-GCP dominates in Kubernetes and container orchestration. If your future involves microservices and containers (and it probably does), GCP's native Kubernetes integration makes a lot of things easier. Google invented Kubernetes, and it shows.
+GCP dominates in Kubernetes and container orchestration. If your future involves microservices and containers (and it probably does), GCP's native Kubernetes integration makes a lot of things easier. Kubernetes originated at Google and was released as open source in 2014 ([Google Cloud](https://cloud.google.com/blog/products/containers-kubernetes/from-google-to-the-world-the-kubernetes-origin-story)), and it shows.
 
 ## What Actually Matters When Choosing
 

@@ -92,6 +92,8 @@ LangGraph is the right choice when your workflow has branching logic, requires h
 
 ### AutoGen — Conversational Multi-Agent
 
+**Status check:** the [AutoGen repository](https://github.com/microsoft/autogen) now says the project is archived and no longer maintained by Microsoft, and points new projects to Microsoft Agent Framework as its successor. Treat this comparison as a description of the conversational pattern, and check current status before starting new work on AutoGen.
+
 AutoGen ([Microsoft Research, 2023](https://microsoft.github.io/autogen/)) models multi-agent collaboration as a conversation. Agents are defined with roles and system prompts. They pass messages to each other through a group chat orchestrator that decides who speaks next.
 
 ```python

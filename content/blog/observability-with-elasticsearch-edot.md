@@ -136,7 +136,7 @@ Streams is an AI-assisted log management layer built on top of data streams. Its
 **Failure Store and Data Quality:** Streams monitors ingestion health. Documents that fail parsing land in a failure store rather than being silently dropped. You see the failure count, the reason, and can fix the parsing rule without losing historical data. ([Elastic Streams docs](https://www.elastic.co/docs/solutions/observability/streams/streams))
 
 <!-- [UNIQUE INSIGHT] -->
-The most practical scale benefit of Streams is partition-level retention. Instead of managing ILM policies at the index template level (which applies a single retention schedule to all logs), Streams lets you set different retention periods per child stream. Debug logs from a development namespace can expire in 3 days; payment service audit logs can retain for 90. Previously this required separate data streams with separate ILM policies for each logical group.
+The most practical scale benefit of Streams is partition-level retention. Instead of managing ILM policies at the index template level (which applies a single retention schedule to all logs), Streams lets you set different retention periods per child stream. As an example, debug logs from a development namespace could expire in 3 days while payment service audit logs are kept for 90. Previously this required separate data streams with separate ILM policies for each logical group.
 
 ```bash
 # Enable Streams for the logs signal type (Elasticsearch 9.2+)
@@ -239,7 +239,7 @@ For teams using [KEDA for Kubernetes autoscaling](/blog/kubernetes-autoscaling-h
 
 ## Three Scenarios: EDOT From Signal to Resolution
 
-The following scenarios trace a real class of production incident through the full EDOT stack, from initial signal detection to case creation. Each one would look different without distributed telemetry.
+The following scenarios are illustrative, not measured results: the figures in them (latencies, percentages, resolution times) are example values chosen to show a real class of production incident traced through the full EDOT stack, from initial signal detection to case creation. Each one would look different without distributed telemetry.
 
 ### Scenario 1 — Memory leak in a Java microservice
 

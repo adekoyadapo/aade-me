@@ -1,0 +1,67 @@
+<svg viewBox="0 0 800 360" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="t d">
+  <title id="t">An update writes a new document version and flags the old one; a delete only flags</title>
+  <desc id="d">Segment 7 holds orders 41, 42, 43 and 44. Updating order 42 flags the old copy as deleted and writes a new version into a new segment. Deleting order 44 flags it and leaves a small marker. The flagged bytes stay on disk until a merge.</desc>
+  <style>
+    text { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    .ttl { fill: #e2e8f0; font-size: 17px; font-weight: 700; }
+    .lbl { fill: #94a3b8; font-size: 13px; }
+    .live { fill: #2dd4bf; }
+    .dead { fill: #fb7185; }
+    .cap { fill: #0f172a; font-size: 13px; font-weight: 700; }
+    .flag42 { animation: flag42 10s infinite both; }
+    .flag44 { animation: flag44 10s infinite both; }
+    .new42 { animation: new42 10s infinite both; }
+    .n1 { animation: n1 10s infinite both; }
+    .n2 { animation: n2 10s infinite both; }
+    .n3 { animation: n3 10s infinite both; }
+    @keyframes flag42 { 0%,16% { opacity: 0; } 22%,92% { opacity: 1; } 100% { opacity: 0; } }
+    @keyframes new42 { 0%,16% { opacity: 0; } 24%,92% { opacity: 1; } 100% { opacity: 0; } }
+    @keyframes flag44 { 0%,52% { opacity: 0; } 58%,92% { opacity: 1; } 100% { opacity: 0; } }
+    @keyframes n1 { 0%,6% { opacity: 0; } 10%,12% { opacity: 1; } 16%,100% { opacity: 0; } }
+    @keyframes n2 { 0%,16% { opacity: 0; } 20%,46% { opacity: 1; } 50%,100% { opacity: 0; } }
+    @keyframes n3 { 0%,52% { opacity: 0; } 56%,90% { opacity: 1; } 96%,100% { opacity: 0; } }
+    @media (prefers-reduced-motion: reduce) {
+      .flag42,.flag44,.new42,.n1,.n2,.n3 { animation: none; }
+      .n1,.n2 { opacity: 0; }
+      .flag42,.flag44,.new42,.n3 { opacity: 1; }
+    }
+  </style>
+  <rect width="800" height="360" rx="12" fill="#0f172a"/>
+  <text x="32" y="40" class="ttl">Update and delete: nothing is edited in place</text>
+
+  <text x="40" y="84" class="lbl">segment 7 (immutable)</text>
+  <rect x="40" y="96" width="470" height="70" rx="8" fill="none" stroke="#64748b" stroke-width="2"/>
+  <g>
+    <rect class="live" x="56" y="110" width="96" height="42" rx="5"/><text class="cap" x="104" y="136" text-anchor="middle">order 41</text>
+    <rect class="live" x="164" y="110" width="96" height="42" rx="5"/><text class="cap" x="212" y="136" text-anchor="middle">order 42</text>
+    <rect class="live" x="272" y="110" width="96" height="42" rx="5"/><text class="cap" x="320" y="136" text-anchor="middle">order 43</text>
+    <rect class="live" x="380" y="110" width="96" height="42" rx="5"/><text class="cap" x="428" y="136" text-anchor="middle">order 44</text>
+  </g>
+  <g class="flag42">
+    <rect class="dead" x="164" y="110" width="96" height="42" rx="5"/>
+    <text class="cap" x="212" y="136" text-anchor="middle">order 42</text>
+    <path d="M164 152 L260 110" stroke="#0f172a" stroke-width="3"/>
+  </g>
+  <g class="flag44">
+    <rect class="dead" x="380" y="110" width="96" height="42" rx="5"/>
+    <text class="cap" x="428" y="136" text-anchor="middle">order 44</text>
+    <path d="M380 152 L476 110" stroke="#0f172a" stroke-width="3"/>
+  </g>
+
+  <text x="40" y="214" class="lbl">segment 12 (created by the next refresh)</text>
+  <rect x="40" y="226" width="470" height="70" rx="8" fill="none" stroke="#64748b" stroke-width="2" stroke-dasharray="7 6"/>
+  <g class="new42">
+    <rect class="live" x="56" y="240" width="110" height="42" rx="5"/>
+    <text class="cap" x="111" y="266" text-anchor="middle">order 42 v2</text>
+  </g>
+  <path class="new42" d="M212 160 C 212 190, 111 200, 111 236" stroke="#38bdf8" stroke-width="2.5" fill="none" stroke-dasharray="6 5"/>
+
+  <rect x="540" y="96" width="230" height="200" rx="8" fill="#1e293b"/>
+  <g class="n1"><text x="556" y="130" style="fill:#e2e8f0;font-size:13px">Start</text><text x="556" y="156" class="lbl">4 live documents,</text><text x="556" y="176" class="lbl">nothing flagged.</text></g>
+  <g class="n2"><text x="556" y="130" style="fill:#e2e8f0;font-size:13px">UPDATE order 42</text><text x="556" y="156" class="lbl">A complete new version</text><text x="556" y="176" class="lbl">is written. The old copy</text><text x="556" y="196" class="lbl">is flagged, not erased.</text></g>
+  <g class="n3"><text x="556" y="130" style="fill:#e2e8f0;font-size:13px">DELETE order 44</text><text x="556" y="156" class="lbl">Only a flag and a small</text><text x="556" y="176" class="lbl">marker. Both coral</text><text x="556" y="196" class="lbl">cells keep using disk</text><text x="556" y="216" class="lbl">until a merge runs.</text></g>
+
+  <rect x="32" y="316" width="736" height="30" rx="6" fill="#1e293b"/>
+  <rect x="48" y="326" width="12" height="12" rx="2" fill="#2dd4bf"/><text x="68" y="337" class="lbl">live document</text>
+  <rect x="200" y="326" width="12" height="12" rx="2" fill="#fb7185"/><text x="220" y="337" class="lbl">flagged deleted, still on disk</text>
+</svg>

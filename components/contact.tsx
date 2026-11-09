@@ -10,6 +10,8 @@ import SubmitBtn from "./submit-btn";
 import toast from "react-hot-toast";
 // reCAPTCHA removed; using lightweight anti-bot techniques instead
 
+const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+
 export default function Contact() {
   const { ref } = useSectionInView("Contact");
   // capture when the form rendered to measure human interaction time
@@ -87,14 +89,18 @@ export default function Contact() {
           required
           maxLength={5000}
         />
-        {/* Cloudflare Turnstile */}
-        <Script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer />
-        <div
-          className="cf-turnstile pt-5 pb-5 flex justify-center mx-auto"
-          data-sitekey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
-          data-theme="auto"
-          data-size="flexible"
-        />
+        {/* Cloudflare Turnstile: only render when the site key is configured */}
+        {turnstileSiteKey && (
+          <>
+            <Script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer />
+            <div
+              className="cf-turnstile pt-5 pb-5 flex justify-center mx-auto"
+              data-sitekey={turnstileSiteKey}
+              data-theme="auto"
+              data-size="flexible"
+            />
+          </>
+        )}
         <SubmitBtn />
       </form>
     </motion.section>

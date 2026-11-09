@@ -201,7 +201,7 @@ export default function BlogPostClient({
             headline: post.title,
             description: post.excerpt,
             url: postUrl,
-            image: post.imageUrl,
+            image: post.imageUrl.startsWith("http") ? post.imageUrl : `https://aade.me${post.imageUrl}`,
             author: {
               "@type": "Person",
               name: post.author,

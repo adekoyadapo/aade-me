@@ -5,9 +5,29 @@ import { BlogPost } from "./blog-types";
 
 const CONTENT_DIR = path.join(process.cwd(), "content", "blog");
 
+const READ_WPM = 238; // average adult silent reading speed
+const CODE_WEIGHT = 0.5; // code blocks are skimmed, not read word by word
+
+// Count only tokens that contain a letter or number, so markdown syntax
+// (table pipes, "---", list markers) is not counted as words.
+function countWords(text: string): number {
+  return text.split(/\s+/).filter((w) => /[\p{L}\p{N}]/u.test(w)).length;
+}
+
 function computeReadTime(text: string): string {
-  const words = text.trim().split(/\s+/).filter(Boolean).length;
-  const minutes = Math.max(1, Math.ceil(words / 200));
+  let codeWords = 0;
+  const prose = text
+    .replace(/<svg[\s\S]*?<\/svg>/gi, " ") // inline charts and animations
+    .replace(/<!--[\s\S]*?-->/g, " ")
+    .replace(/`{3}[\s\S]*?`{3}/g, (block) => {
+      codeWords += countWords(block);
+      return " ";
+    })
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, " ") // images
+    .replace(/\[([^\]]+)\]\([^)]*\)/g, "$1") // keep link text, drop the URL
+    .replace(/<[^>]+>/g, " ");
+  const words = countWords(prose) + codeWords * CODE_WEIGHT;
+  const minutes = Math.max(1, Math.ceil(words / READ_WPM));
   return `${minutes} min read`;
 }
 

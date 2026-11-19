@@ -1,0 +1,36 @@
+<svg viewBox="0 0 800 380" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="t d">
+  <title id="t">Merged index size by codec, as a share of the default codec</title>
+  <desc id="d">Bar chart for two sets of Rally log data after a full merge. Kubernetes application logs: default codec 297.0 MB, best_compression 170.9 MB (57.5 percent), logsdb 143.6 MB (48.3 percent). Nginx access logs: default codec 124.7 MB, best_compression 72.2 MB (57.9 percent), logsdb 38.4 MB (30.8 percent).</desc>
+  <style>
+    text { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    .ttl { fill: #e2e8f0; font-size: 17px; font-weight: 700; }
+    .lbl { fill: #94a3b8; font-size: 13px; }
+    .cap { fill: #e2e8f0; font-size: 15px; }
+    .small { fill: #cbd5e1; font-size: 12px; }
+        .b0 { animation: b0 10s infinite both; transform-box: fill-box; transform-origin: left center; } .v0 { animation: v0 10s infinite both; }
+    .b1 { animation: b1 10s infinite both; transform-box: fill-box; transform-origin: left center; } .v1 { animation: v1 10s infinite both; }
+    .b2 { animation: b2 10s infinite both; transform-box: fill-box; transform-origin: left center; } .v2 { animation: v2 10s infinite both; }
+    .b3 { animation: b3 10s infinite both; transform-box: fill-box; transform-origin: left center; } .v3 { animation: v3 10s infinite both; }
+    .b4 { animation: b4 10s infinite both; transform-box: fill-box; transform-origin: left center; } .v4 { animation: v4 10s infinite both; }
+    .b5 { animation: b5 10s infinite both; transform-box: fill-box; transform-origin: left center; } .v5 { animation: v5 10s infinite both; }
+        @keyframes b0 { 0%,6% { transform: scaleX(0); } 20%,92% { transform: scaleX(1); } 100% { transform: scaleX(0); } }
+    @keyframes v0 { 0%,16% { opacity: 0; } 22%,92% { opacity: 1; } 100% { opacity: 0; } }
+    @keyframes b1 { 0%,14% { transform: scaleX(0); } 28%,92% { transform: scaleX(1); } 100% { transform: scaleX(0); } }
+    @keyframes v1 { 0%,24% { opacity: 0; } 30%,92% { opacity: 1; } 100% { opacity: 0; } }
+    @keyframes b2 { 0%,22% { transform: scaleX(0); } 36%,92% { transform: scaleX(1); } 100% { transform: scaleX(0); } }
+    @keyframes v2 { 0%,32% { opacity: 0; } 38%,92% { opacity: 1; } 100% { opacity: 0; } }
+    @keyframes b3 { 0%,6% { transform: scaleX(0); } 20%,92% { transform: scaleX(1); } 100% { transform: scaleX(0); } }
+    @keyframes v3 { 0%,16% { opacity: 0; } 22%,92% { opacity: 1; } 100% { opacity: 0; } }
+    @keyframes b4 { 0%,14% { transform: scaleX(0); } 28%,92% { transform: scaleX(1); } 100% { transform: scaleX(0); } }
+    @keyframes v4 { 0%,24% { opacity: 0; } 30%,92% { opacity: 1; } 100% { opacity: 0; } }
+    @keyframes b5 { 0%,22% { transform: scaleX(0); } 36%,92% { transform: scaleX(1); } 100% { transform: scaleX(0); } }
+    @keyframes v5 { 0%,32% { opacity: 0; } 38%,92% { opacity: 1; } 100% { opacity: 0; } }
+    @media (prefers-reduced-motion: reduce) {
+      .bar,.val { animation: none; transform: none; opacity: 1; }
+    }
+  </style>
+  <rect width="800" height="380" rx="12" fill="#0f172a"/>
+  <text x="20" y="32" class="ttl">Merged size, % of the default codec (shorter is smaller)</text>
+  <text x="20" y="64" fill="#e2e8f0" style="font-size:14px;font-weight:700">Kubernetes application logs (1,315,000 docs)</text><text x="20" y="93" class="lbl">default codec</text><rect class="bar b0" x="170" y="78" width="480" height="20" rx="3" fill="#64748b"/><text class="val v0" x="658" y="93" fill="#e2e8f0" style="font-size:13px;font-weight:700">297.0 MB · 100%</text><text x="20" y="123" class="lbl">best_compression</text><rect class="bar b1" x="170" y="108" width="276" height="20" rx="3" fill="#f04e98"/><text class="val v1" x="454" y="123" fill="#e2e8f0" style="font-size:13px;font-weight:700">170.9 MB · 57.5%</text><text x="20" y="153" class="lbl">logsdb</text><rect class="bar b2" x="170" y="138" width="232" height="20" rx="3" fill="#2dd4bf"/><text class="val v2" x="410" y="153" fill="#e2e8f0" style="font-size:13px;font-weight:700">143.6 MB · 48.3%</text><text x="20" y="204" fill="#e2e8f0" style="font-size:14px;font-weight:700">Nginx access logs (230,000 docs)</text><text x="20" y="233" class="lbl">default codec</text><rect class="bar b3" x="170" y="218" width="480" height="20" rx="3" fill="#64748b"/><text class="val v3" x="658" y="233" fill="#e2e8f0" style="font-size:13px;font-weight:700">124.7 MB · 100%</text><text x="20" y="263" class="lbl">best_compression</text><rect class="bar b4" x="170" y="248" width="278" height="20" rx="3" fill="#f04e98"/><text class="val v4" x="456" y="263" fill="#e2e8f0" style="font-size:13px;font-weight:700">72.2 MB · 57.9%</text><text x="20" y="293" class="lbl">logsdb</text><rect class="bar b5" x="170" y="278" width="148" height="20" rx="3" fill="#2dd4bf"/><text class="val v5" x="326" y="293" fill="#e2e8f0" style="font-size:13px;font-weight:700">38.4 MB · 30.8%</text>
+  <text x="20" y="360" class="small">Source: Rally elastic/logs on Elasticsearch 9.5.6, merged to one segment. Your data will differ.</text>
+</svg>

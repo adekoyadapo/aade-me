@@ -1,0 +1,71 @@
+<svg viewBox="0 0 800 380" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="t d">
+  <title id="t">Template covers new indices, ILM converts the old ones</title>
+  <desc id="d">Six backing indices sit on the default LZ4 codec. A template change to best_compression plus a rollover creates a seventh index on the new codec, and the six old ones stay unchanged. An ILM warm-phase force merge with index_codec then rewrites each old index, which ends smaller on best_compression.</desc>
+  <style>
+    text { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    .ttl { fill: #e2e8f0; font-size: 17px; font-weight: 700; }
+    .lbl { fill: #94a3b8; font-size: 13px; }
+    .cap { fill: #e2e8f0; font-size: 15px; }
+    .small { fill: #cbd5e1; font-size: 12px; }
+    .c1 { animation: c1 14s infinite both; }
+    .c2 { animation: c2 14s infinite both; }
+    .c3 { animation: c3 14s infinite both; }
+    .chip { animation: chip 14s infinite both; }
+    .newidx { animation: newidx 14s infinite both; }
+    .cv0 { animation: cv0 14s infinite both; } .gy0 { animation: gy0 14s infinite both; }
+    .cv1 { animation: cv1 14s infinite both; } .gy1 { animation: gy1 14s infinite both; }
+    .cv2 { animation: cv2 14s infinite both; } .gy2 { animation: gy2 14s infinite both; }
+    .cv3 { animation: cv3 14s infinite both; } .gy3 { animation: gy3 14s infinite both; }
+    .cv4 { animation: cv4 14s infinite both; } .gy4 { animation: gy4 14s infinite both; }
+    .cv5 { animation: cv5 14s infinite both; } .gy5 { animation: gy5 14s infinite both; }
+        @keyframes c1 { 0%,22% { opacity: 1; } 26%,100% { opacity: 0; } }
+    @keyframes c2 { 0%,24% { opacity: 0; } 30%,50% { opacity: 1; } 54%,100% { opacity: 0; } }
+    @keyframes c3 { 0%,52% { opacity: 0; } 58%,94% { opacity: 1; } 100% { opacity: 0; } }
+    @keyframes chip { 0%,6% { opacity: 0; } 12%,94% { opacity: 1; } 100% { opacity: 0; } }
+    @keyframes newidx { 0%,28% { opacity: 0; transform: translateY(8px); } 36%,94% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; } }
+    @keyframes cv0 { 0%,58% { opacity: 0; } 63%,94% { opacity: 1; } 100% { opacity: 0; } }
+    @keyframes gy0 { 0%,58% { opacity: 1; } 63%,94% { opacity: 0; } 100% { opacity: 1; } }
+    @keyframes cv1 { 0%,63% { opacity: 0; } 68%,94% { opacity: 1; } 100% { opacity: 0; } }
+    @keyframes gy1 { 0%,63% { opacity: 1; } 68%,94% { opacity: 0; } 100% { opacity: 1; } }
+    @keyframes cv2 { 0%,68% { opacity: 0; } 73%,94% { opacity: 1; } 100% { opacity: 0; } }
+    @keyframes gy2 { 0%,68% { opacity: 1; } 73%,94% { opacity: 0; } 100% { opacity: 1; } }
+    @keyframes cv3 { 0%,73% { opacity: 0; } 78%,94% { opacity: 1; } 100% { opacity: 0; } }
+    @keyframes gy3 { 0%,73% { opacity: 1; } 78%,94% { opacity: 0; } 100% { opacity: 1; } }
+    @keyframes cv4 { 0%,78% { opacity: 0; } 83%,94% { opacity: 1; } 100% { opacity: 0; } }
+    @keyframes gy4 { 0%,78% { opacity: 1; } 83%,94% { opacity: 0; } 100% { opacity: 1; } }
+    @keyframes cv5 { 0%,83% { opacity: 0; } 88%,94% { opacity: 1; } 100% { opacity: 0; } }
+    @keyframes gy5 { 0%,83% { opacity: 1; } 88%,94% { opacity: 0; } 100% { opacity: 1; } }
+    @media (prefers-reduced-motion: reduce) {
+      .c1,.c2,.chip,.newidx,.cv0,.gy0,.cv1,.gy1,.cv2,.gy2,.cv3,.gy3,.cv4,.gy4,.cv5,.gy5,.c3 { animation: none; }
+      .c1,.c2 { opacity: 0; } .c3,.chip,.newidx { opacity: 1; } .cv0 { opacity: 1; } .gy0 { opacity: 0; } .cv1 { opacity: 1; } .gy1 { opacity: 0; } .cv2 { opacity: 1; } .gy2 { opacity: 0; } .cv3 { opacity: 1; } .gy3 { opacity: 0; } .cv4 { opacity: 1; } .gy4 { opacity: 0; } .cv5 { opacity: 1; } .gy5 { opacity: 0; }
+    }
+  </style>
+  <rect width="800" height="380" rx="12" fill="#0f172a"/>
+  <text x="32" y="40" class="ttl">Template for new data, ILM for existing data</text>
+  <text x="40" y="82" class="lbl">Backing indices of one data stream</text>
+  <g class="chip"><rect x="440" y="62" width="330" height="26" rx="13" fill="none" stroke="#f04e98" stroke-width="1.5"/><text x="605" y="80" text-anchor="middle" class="small">template: index.codec = best_compression</text></g>
+  <rect x="40" y="108" width="14" height="14" rx="3" fill="#64748b"/><text x="62" y="120" class="small">LZ4 (default)</text>
+  <rect x="170" y="108" width="14" height="14" rx="3" fill="#f04e98"/><text x="192" y="120" class="small">best_compression</text>
+    <g class="gy0"><rect x="40" y="150" width="90" height="100" rx="6" fill="#64748b"/></g>
+  <g class="cv0"><rect x="40" y="192" width="90" height="58" rx="6" fill="#f04e98"/></g>
+  <text x="85" y="270" text-anchor="middle" class="small">index 1</text>
+  <g class="gy1"><rect x="148" y="150" width="90" height="100" rx="6" fill="#64748b"/></g>
+  <g class="cv1"><rect x="148" y="192" width="90" height="58" rx="6" fill="#f04e98"/></g>
+  <text x="193" y="270" text-anchor="middle" class="small">index 2</text>
+  <g class="gy2"><rect x="256" y="150" width="90" height="100" rx="6" fill="#64748b"/></g>
+  <g class="cv2"><rect x="256" y="192" width="90" height="58" rx="6" fill="#f04e98"/></g>
+  <text x="301" y="270" text-anchor="middle" class="small">index 3</text>
+  <g class="gy3"><rect x="364" y="150" width="90" height="100" rx="6" fill="#64748b"/></g>
+  <g class="cv3"><rect x="364" y="192" width="90" height="58" rx="6" fill="#f04e98"/></g>
+  <text x="409" y="270" text-anchor="middle" class="small">index 4</text>
+  <g class="gy4"><rect x="472" y="150" width="90" height="100" rx="6" fill="#64748b"/></g>
+  <g class="cv4"><rect x="472" y="192" width="90" height="58" rx="6" fill="#f04e98"/></g>
+  <text x="517" y="270" text-anchor="middle" class="small">index 5</text>
+  <g class="gy5"><rect x="580" y="150" width="90" height="100" rx="6" fill="#64748b"/></g>
+  <g class="cv5"><rect x="580" y="192" width="90" height="58" rx="6" fill="#f04e98"/></g>
+  <text x="625" y="270" text-anchor="middle" class="small">index 6</text>
+  <g class="newidx"><rect x="688" y="192" width="90" height="58" rx="6" fill="#f04e98"/><text x="733" y="270" text-anchor="middle" class="small">index 7 (new)</text></g>
+  <g class="c1"><text x="40" y="330" class="cap">1 · Every index so far uses the default LZ4 codec.</text></g>
+  <g class="c2"><text x="40" y="330" class="cap">2 · Template change + rollover: only the new index changes.</text></g>
+  <g class="c3"><text x="40" y="330" class="cap">3 · ILM warm-phase force merge rewrites the old indices.</text></g>
+</svg>

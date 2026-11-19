@@ -30,7 +30,7 @@ BBQ addresses the memory side. DiskBBQ addresses the graph side. They solve the 
 
 ## How BBQ Works
 
-BBQ compresses each dimension of a float32 vector from 32 bits down to 1 bit: a 32x compression factor. A vector that previously occupied 4KB now occupies 128 bytes plus 14 bytes of corrective metadata.
+BBQ compresses each dimension of a float32 vector from 32 bits down to 1 bit: a 32x compression factor. A vector that previously occupied 4KB now occupies 128 bytes plus 14 bytes of corrective metadata. For the bit-level mechanics and a measured recall sweep on Elasticsearch 9.5.6, see [Elasticsearch BBQ Vector Quantization: The Mona Lisa Test](/blog/elasticsearch-bbq-vector-quantization-explained).
 
 The mechanism is asymmetric quantization:
 - **Indexed vectors**: 1-bit quantization (each dimension becomes a single bit)

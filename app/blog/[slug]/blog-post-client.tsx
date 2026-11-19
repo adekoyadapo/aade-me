@@ -78,9 +78,7 @@ export default function BlogPostClient({
       <article className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Back Button */}
         <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5 }}
+          initial={false}
         >
           <Link
             href="/blog"
@@ -93,9 +91,7 @@ export default function BlogPostClient({
 
         {/* Hero Image */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
+          initial={false}
           className="relative w-full aspect-video rounded-xl overflow-hidden mb-8 bg-zinc-900"
         >
           <Image
@@ -110,9 +106,7 @@ export default function BlogPostClient({
 
         {/* Header */}
         <motion.header
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
+          initial={false}
           className="mb-8"
         >
           <h1 className="text-4xl sm:text-5xl font-bold text-zinc-900 dark:text-zinc-100 mb-6 leading-tight">
@@ -153,9 +147,7 @@ export default function BlogPostClient({
 
         {/* Content */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.3 }}
+          initial={false}
           className="prose prose-zinc dark:prose-invert max-w-none
             prose-headings:font-bold prose-headings:text-zinc-900 dark:prose-headings:text-zinc-100
             prose-h1:text-4xl prose-h1:mb-6 prose-h1:mt-8

@@ -3,13 +3,14 @@ import { getAllPosts } from "@/lib/blog-repo";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = "https://aade.me";
+  const posts = await getAllPosts();
+  const latest = posts.length ? new Date(posts[0].date) : undefined;
   const routes: MetadataRoute.Sitemap = [
-    { url: `${baseUrl}/`, lastModified: new Date(), changeFrequency: "monthly", priority: 1.0 },
-    { url: `${baseUrl}/blog`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.9 },
-    { url: `${baseUrl}/cv`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.7 },
+    { url: `${baseUrl}/`, lastModified: latest, changeFrequency: "monthly", priority: 1.0 },
+    { url: `${baseUrl}/blog`, lastModified: latest, changeFrequency: "weekly", priority: 0.9 },
+    { url: `${baseUrl}/cv`, lastModified: latest, changeFrequency: "monthly", priority: 0.7 },
   ];
 
-  const posts = await getAllPosts();
   for (const post of posts) {
     routes.push({
       url: `${baseUrl}/blog/${post.slug}`,
@@ -24,7 +25,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   for (let p = 2; p <= totalPages; p++) {
     routes.push({
       url: `${baseUrl}/blog/page/${p}`,
-      lastModified: new Date(),
+      lastModified: latest,
       changeFrequency: "weekly",
       priority: 0.6,
     });

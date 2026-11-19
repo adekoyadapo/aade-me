@@ -25,9 +25,32 @@ export const metadata: Metadata = {
   },
 };
 
+const jsonLd = [
+  {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    name: "Ade A.",
+    url: "https://aade.me",
+    jobTitle: "Enterprise Architect",
+    sameAs: [
+      "https://www.linkedin.com/in/adekoya-adedapomola/",
+      "https://github.com/adekoyadapo",
+      "https://twitter.com/Dapo_Ace",
+      "https://blog.360ace.net",
+    ],
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "Ade A.",
+    url: "https://aade.me",
+  },
+];
+
 export default function Home() {
   return (
     <main className="flex flex-col items-center px-4">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <Intro />
       <SectionDivider />
       <About />

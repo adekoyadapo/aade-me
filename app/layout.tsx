@@ -31,20 +31,21 @@ export const metadata = {
     siteName: "Ade A.",
     title: "Ade A. | Enterprise Architect",
     description: "Enterprise Architect specializing in AI/ML platforms, cloud-native infrastructure, Elasticsearch, observability, and large-scale distributed systems.",
-    images: [{ url: "/og-image.jpg", width: 1200, height: 630, alt: "Ade A. — Enterprise Architect" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Ade A. | Enterprise Architect",
     description: "Enterprise Architect specializing in AI/ML platforms, cloud-native infrastructure, Elasticsearch, observability, and large-scale distributed systems.",
-    images: ["/og-image.jpg"],
   },
   robots: {
     index: true,
     follow: true,
     googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1 },
   },
-  alternates: { canonical: "https://aade.me" },
+  alternates: {
+    canonical: "https://aade.me",
+    types: { "application/rss+xml": [{ url: "/feed.xml", title: "Ade A. blog" }] },
+  },
 };
 
 export default function RootLayout({

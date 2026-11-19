@@ -32,7 +32,7 @@ export default function Badges() {
     >
       <SectionHeading>Certification Badges</SectionHeading>
       <ul className="flex flex-wrap justify-center gap-2 text-4xl font-bold tex text-gray-500">
-        {badgesData.map(({ link, imageUrl }, index) => (
+        {badgesData.map(({ name, link, imageUrl }, index) => (
           <motion.li
             className="relative bg-white border-black rounded-xl px-4 py-4 dark:bg-white/10 dark:text-white/80"
             key={index}
@@ -44,10 +44,10 @@ export default function Badges() {
             }}
             custom={index}
           >
-            <a href={link} target="_blank">
+            <a href={link} target="_blank" rel="noopener noreferrer">
               <Image
                 src={imageUrl}
-                alt="Project I worked on"
+                alt={`${name} certification badge`}
                 quality={95}
                 width={120}
                 height={120}

@@ -9,13 +9,13 @@ export const metadata: Metadata = {
     description: "Resume of Ade Adekoya, Enterprise Solutions Architect specialising in AI-powered search, Elasticsearch, cloud-native platforms, and large-scale observability.",
     url: "https://aade.me/cv",
     type: "profile",
-    images: [{ url: "/og-image.jpg", width: 1200, height: 630, alt: "Ade A. — Enterprise Solutions Architect" }],
+    images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "Ade A. — Enterprise Solutions Architect" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Ade A. | Resume — Enterprise Solutions Architect",
     description: "Resume of Ade Adekoya, Enterprise Solutions Architect specialising in AI-powered search, Elasticsearch, cloud-native platforms, and large-scale observability.",
-    images: ["/og-image.jpg"],
+    images: ["/opengraph-image"],
   },
   robots: { index: true, follow: true },
 };

@@ -2,12 +2,6 @@ import React from "react";
 import { CgOrganisation, CgWorkAlt } from "react-icons/cg";
 import { FaGit, FaReact, FaAws, FaGitAlt, FaLinux, FaWindows, FaServer, FaNetworkWired, FaPython, FaNodeJs, FaDev, FaDatabase, FaJava, FaDocker, FaGithub, FaGitlab, FaUbuntu, FaApple, FaJenkins, FaPhp, FaLock, FaCloud, FaTerminal } from "react-icons/fa";
 import { LuGraduationCap } from "react-icons/lu";
-import k8smultitenantImg from "@/public/k8sMultitenant.png";
-import aspirehub from "@/public/aspirehub.png";
-import ragchatbot from "@/public/chatbot.png"
-import llmlocalrag from "@/public/llmlocalrag.png"
-import infraApp from "@/public/infra-app.png"
-import serverless from "@/public/serverless.png"
 import aws_csa from "@/public/badges/aws_csa.png"
 import aws_csp from "@/public/badges/aws_csp.png"
 import aws_dva from "@/public/badges/aws_dva.png"
@@ -27,7 +21,6 @@ import pcne from "@/public/badges/pcne.png"
 import pcde from "@/public/badges/pcde.png"
 import pcsp from "@/public/badges/pcsp.png"
 import ibm from "@/public/badges/ibm.png"
-import archchat from "@/public/archchat.png"
 import eca from "@/public//badges/eca.png"
 import ecp from "@/public//badges/ecp.png"
 import egp from "@/public//badges/egp.png"
@@ -44,40 +37,6 @@ import { SiAnsible, SiApache, SiAqua, SiArtifacthub, SiBuildkite,
   SiTerraform, SiTravisci, SiVagrant, SiVirtualbox, SiVmware, SiWordpress, SiLangchain, SiOllama, SiGooglegemini
 } from "react-icons/si";
 
-export const links = [
-  {
-    name: "Home",
-    hash: "#home",
-  },
-  {
-    name: "About",
-    hash: "#about",
-  },
-  {
-    name: "Projects",
-    hash: "#projects",
-  },
-  {
-    name: "Skills",
-    hash: "#skills",
-  },
-  {
-    name: "Experience",
-    hash: "#experience",
-  },
-  {
-    name: "Certifications",
-    hash: "#certifications",
-  },
-  {
-    name: "Blog",
-    hash: "/blog",
-  },
-  {
-    name: "Contact",
-    hash: "#contact",
-  },
-] as const;
 
 export const experiencesData = [
   {
@@ -185,60 +144,135 @@ export const experiencesData = [
 
 export const projectsData = [
   {
-    title: "Pulumi Infra App",
+    slug: "es-cluster-triage-agent",
+    title: "Elasticsearch Cluster Triage Agent",
     description:
-      "A python based app that allows you to create and destroy storage buckets on AWS and GCP using Pulumi",
-    tags: ["GCP", "AWS", "Pulumi", "Python"],
-    imageUrl: infraApp,
-    projecUrl: "https://github.com/adekoyadapo/python-infra-app",
+      "An AI day-2 operations agent deployed into Kibana Agent Builder. Alerts or schedules trigger an ES|QL workflow, and 19 diagnostic tools across 5 skill groups produce a root-cause report.",
+    tags: ["Elasticsearch", "Agent Builder", "ES|QL", "Python", "TypeScript"],
+    image: "/projects/es-cluster-triage-agent.webp",
+    alt: "Diagram of the cluster triage agent: alert and schedule triggers feed a workflow, an AI agent with five skill groups, and a root-cause report card.",
+    projecUrl: "https://github.com/adekoyadapo/es-cluster-triage-agent",
+    links: [
+      { label: "Repository", href: "https://github.com/adekoyadapo/es-cluster-triage-agent" },
+    ],
   },
   {
-    title: "Demo - AWS Serverless Deployment",
+    slug: "es-jin-airgaped",
+    title: "Air-Gapped Semantic Search",
     description:
-      "Simple terraform deployment for a REST API with AWS serverless infrastructure, API Gateway, s3 and Lambda",
-    tags: ["AWS", "Serverless", "Lambda", "API-Gatewway", "Terraform"],
-    imageUrl: serverless,
-    projecUrl: "https://github.com/adekoyadapo/aws-serverless",
+      "One command runs Elasticsearch, Kibana and Jina's embedding and reader containers locally. semantic_text handles chunking and embedding, with hybrid search through RRF and no outbound API calls.",
+    tags: ["Elasticsearch", "Semantic Search", "Jina AI", "Docker", "RAG"],
+    image: "/projects/es-jin-airgaped.webp",
+    alt: "Diagram of air-gapped semantic search: a dashed boundary with a lock around a reader, embedding model and Elasticsearch, with a struck-out cloud outside.",
+    projecUrl: "https://github.com/adekoyadapo/es-jin-airgaped",
+    links: [
+      { label: "Repository", href: "https://github.com/adekoyadapo/es-jin-airgaped" },
+    ],
   },
   {
-    title: "K8s Multitenant App",
+    slug: "es-app-pwdless",
+    title: "Passwordless SSO for Elasticsearch",
     description:
-      "A simple containerized based application packaged with helm and deployed with kubenetes as a multi-tenant application on kubernetes",
-    tags: ["Python", "Terraform", "Kubernetes", "K3d", "Helm"],
-    imageUrl: k8smultitenantImg,
+      "A disposable k3d and ECK lab where Keycloak brokers OpenLDAP into Kibana over SAML and into Java, Python and Node apps over OIDC client credentials, validated by the Elasticsearch JWT realm.",
+    tags: ["Elasticsearch", "Keycloak", "SAML", "OIDC", "Kubernetes", "ECK"],
+    image: "/projects/es-app-pwdless.webp",
+    alt: "Diagram of passwordless SSO: a directory feeds Keycloak, which signs users into Kibana over SAML and web apps over OIDC, both backed by Elasticsearch.",
+    projecUrl: "https://github.com/adekoyadapo/es-app-pwdless",
+    links: [
+      { label: "Repository", href: "https://github.com/adekoyadapo/es-app-pwdless" },
+    ],
+  },
+  {
+    slug: "es-otel-monitoring",
+    title: "Elasticsearch Monitoring with EDOT",
+    description:
+      "A local ECK lab that compares four ways to collect Elasticsearch monitoring data: EDOT autoops, Elastic Agent with the EDOT runtime, an API-key collector gateway, and upstream collector-contrib.",
+    tags: ["Elasticsearch", "OpenTelemetry", "EDOT", "ECK", "Observability"],
+    image: "/projects/es-otel-monitoring.webp",
+    alt: "Diagram of four monitoring collection paths from a main Elasticsearch cluster, converging on a monitoring cluster and a Kibana dashboard.",
+    projecUrl: "https://github.com/adekoyadapo/es-otel-monitoring",
+    links: [
+      { label: "Repository", href: "https://github.com/adekoyadapo/es-otel-monitoring" },
+    ],
+  },
+  {
+    slug: "tech-writer",
+    title: "Technical Writer for Claude Code",
+    description:
+      "A Claude Code plugin that drafts technical content from your own samples first, researches with the Elastic docs MCP, routes work across Haiku, Sonnet and Opus, and generates SVG figures.",
+    tags: ["Claude Code", "MCP", "AI Agents", "Python"],
+    image: "/projects/tech-writer.webp",
+    alt: "Diagram of the technical writer plugin: three model orbs feed a document with a pen badge, a figure window and an MCP plug to the docs.",
+    projecUrl: "https://github.com/adekoyadapo/tech-writer",
+    links: [
+      { label: "Repository", href: "https://github.com/adekoyadapo/tech-writer" },
+    ],
+  },
+  {
+    slug: "es-uam",
+    title: "User Activity Monitoring",
+    description:
+      "Kibana and Elasticsearch audit logging shipped with Filebeat to a monitoring cluster over a remote cluster link, with a Kibana view of who did what.",
+    tags: ["Elasticsearch", "Audit logs", "Security"],
+    image: "/projects/es-uam.webp",
+    alt: "Diagram of user activity monitoring: users and a shielded main cluster send audit logs through Filebeat to a monitoring cluster and a Kibana activity list.",
+    projecUrl: "https://github.com/adekoyadapo/es-uam",
+    links: [
+      { label: "Repository", href: "https://github.com/adekoyadapo/es-uam" },
+    ],
+  },
+  {
+    slug: "es-deployments",
+    title: "Elastic Deployment Blueprints",
+    description:
+      "Terraform configurations that prototype Elastic on AKS, GKE, EKS, Minikube, k3d and Elastic Cloud, with Istio, tiers, snapshots, stack monitoring and cross-cluster search.",
+    tags: ["Terraform", "ECK", "Kubernetes"],
+    image: "/projects/es-deployments.webp",
+    alt: "Diagram of Elastic deployment blueprints: a Terraform hub surrounded by six platform tiles for AKS, GKE, EKS, Minikube, k3d and Elastic Cloud.",
+    projecUrl: "https://github.com/adekoyadapo/es-deployments",
+    links: [
+      { label: "Repository", href: "https://github.com/adekoyadapo/es-deployments" },
+    ],
+  },
+  {
+    slug: "k8s-multitenant-app",
+    title: "Multitenant Kubernetes App",
+    description:
+      "One application deployed for many tenants with Terraform, k3d and Helm, with a namespace per tenant and ingress routing each tenant by domain.",
+    tags: ["Terraform", "Kubernetes", "Helm"],
+    image: "/projects/k8s-multitenant-app.webp",
+    alt: "Diagram of a multitenant Kubernetes app: Terraform builds a k3d cluster with three tenant namespaces, a Helm chip and ingress routing by domain.",
     projecUrl: "https://github.com/adekoyadapo/k8s-multitenant-app",
+    links: [
+      { label: "Repository", href: "https://github.com/adekoyadapo/k8s-multitenant-app" },
+    ],
   },
   {
-    title: "RAG Local Chat Assistant",
+    slug: "rag-assistants",
+    title: "RAG Chat Assistants",
     description:
-      "Simple Chat interface to implement RAG using a local Vectordb, documents and GPT4AllEmbeddings",
-    tags: ["Python", "AI Chatbot", "LLM", "RAG", "Hugginface", "Embeddings", "VectorDB"],
-    imageUrl: llmlocalrag,
+      "Two chat assistants that answer from your own documents: a local one with LangChain, GPT4All embeddings and a local vector database, and a React chat with an AWS Bedrock agent.",
+    tags: ["RAG", "LangChain", "AWS Bedrock"],
+    image: "/projects/rag-assistants.webp",
+    alt: "Diagram of two RAG chat assistants: a local lane with embeddings and a vector database, and an AWS lane with Bedrock and Lambda actions, both ending in a chat window.",
     projecUrl: "https://github.com/adekoyadapo/llm-rag-local",
+    links: [
+      { label: "Local repository", href: "https://github.com/adekoyadapo/llm-rag-local" },
+      { label: "AWS repository", href: "https://github.com/adekoyadapo/react-bedrock-rag-agent" },
+    ],
   },
-    {
-    title: "Arch Chat Bot",
+  {
+    slug: "arch-gpt",
+    title: "Architecture Diagram Generator",
     description:
-      "A Streamlit Chat interface that uses RAG to create architectural diagrams from python diagram module",
-    tags: ["Python", "AI", "RAG", "OpenAI", "Streamlit"],
-    imageUrl: archchat,
-    projecUrl: "https://github.com/adekoyadapo/arch-gpt.git",
-  },
-    {
-    title: "Rag Chat Bot",
-    description:
-      "React Chat interface to implement RAG using personal documents on AWS Bedrock and perform agent based actions",
-    tags: ["React", "AI", "RAG", "AWS Bedrock", "lambda"],
-    imageUrl: ragchatbot,
-    projecUrl: "https://github.com/adekoyadapo/react-bedrock-rag-agent",
-  },
-    {
-    title: "Aspirehub.org",
-    description:
-      "Web development, management and deployment for Aspirehub.org with the creation of google workspace and best practice for cloud and security adoption",
-    tags: ["Webhosting", "Infrastructure Security", "Security+", "Workspace"],
-    imageUrl: aspirehub,
-    projecUrl: "https://aspirehub.org",
+      "A Streamlit app that turns a plain-language cloud architecture description into Python code for the Diagrams library, runs it and renders the diagram.",
+    tags: ["Streamlit", "LLM", "Diagrams"],
+    image: "/projects/arch-gpt.webp",
+    alt: "Diagram of the architecture generator: a prompt window leads to a generated code window and a rendered architecture diagram, with an LLM badge.",
+    projecUrl: "https://github.com/adekoyadapo/arch-gpt",
+    links: [
+      { label: "Repository", href: "https://github.com/adekoyadapo/arch-gpt" },
+    ],
   },
 ] as const;
 

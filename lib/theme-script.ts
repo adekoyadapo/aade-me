@@ -1,0 +1,2 @@
+/** Inline <head> script: sets data-theme before first paint. Stored "theme" is "light" or "dark" (explicit choice); absent means follow the system, live. */
+export const themeInitScript = `(function(){try{var d=document.documentElement,m=matchMedia("(prefers-color-scheme: dark)");function a(){var p;try{p=localStorage.getItem("theme")}catch(e){}var x=p==="light"||p==="dark";d.dataset.pref=x?p:"system";d.dataset.theme=x?p:(m.matches?"dark":"light")}a();m.addEventListener("change",a)}catch(e){}})()`;

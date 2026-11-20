@@ -1,10 +1,12 @@
-import React, { Suspense } from "react";
-import BlogListClient from "./blog-list-client";
+import { preload } from "react-dom";
+import { ldJson } from "@/lib/jsonld";
+import PageTransition from "@/components/page-transition";
+import WritingIndex from "@/components/blog/writing-index";
 import { getAllPosts } from "@/lib/blog-repo";
 
 export async function generateMetadata() {
   const title = "Blog: Elasticsearch, Cloud and AI Engineering Notes | Ade A.";
-  const description = "Insights on cloud architecture, distributed systems, AI, and modern software engineering practices.";
+  const description = "Practical notes on Elasticsearch, observability, vector search, Kubernetes and cloud architecture, written by Ade A. from real platform and customer work.";
   const base = "https://aade.me";
   const canonical = `${base}/blog`;
 
@@ -17,46 +19,44 @@ export async function generateMetadata() {
       description,
       type: "website",
       url: canonical,
+      images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "Ade A., Enterprise Solutions Architect" }],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
+      images: ["/opengraph-image"],
     },
     robots: { index: true, follow: true },
   } as const;
 }
 
-export default async function BlogPage({ searchParams }: { searchParams: Promise<{ page?: string; q?: string; tag?: string }> }) {
-  const resolvedSearchParams = await searchParams;
-  const initialSearchQuery = resolvedSearchParams?.q ?? "";
-  const initialTag = (resolvedSearchParams?.tag as string | undefined) ?? null;
-  const currentPage = 1;
-
-  const POSTS_PER_PAGE = 6;
+export default async function BlogPage() {
+  preload("/cabinet/drawer-face.webp", { as: "image" }); // the drawer photo is the first thing the cabinet paints
   const posts = await getAllPosts();
-  const sorted = posts;
-  const startIndex = (currentPage - 1) * POSTS_PER_PAGE;
-  const slice = sorted.slice(startIndex, startIndex + POSTS_PER_PAGE);
-  const ldJson = {
+  const ldJsonData = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
     name: "Blog",
-    hasPart: slice.map((p, i) => ({
+    hasPart: posts.map((p, i) => ({
       "@type": "BlogPosting",
       headline: p.title,
       datePublished: p.date,
       url: `https://aade.me/blog/${p.slug}`,
-      position: startIndex + i + 1,
+      position: i + 1,
     })),
   };
 
   return (
-    <>
-      <Suspense fallback={<main className="min-h-screen bg-zinc-50 dark:bg-zinc-900 pt-20 sm:pt-24 pb-16" />}> 
-        <BlogListClient initialSearchQuery={initialSearchQuery} initialTag={initialTag} posts={posts} currentPage={currentPage} />
-      </Suspense>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ldJson) }} />
-    </>
+    <PageTransition>
+      <main className="min-h-svh page-top">
+        <div className="gutter">
+          <div className="writing-col">
+          <WritingIndex posts={posts} />
+          </div>
+        </div>
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: ldJson(ldJsonData) }} />
+      </main>
+    </PageTransition>
   );
 }

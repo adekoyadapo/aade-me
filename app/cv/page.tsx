@@ -1,11 +1,22 @@
-"use client";
-
-import React from "react";
-import { HiDownload } from "react-icons/hi";
+import { statSync } from "node:fs";
+import { ldJson } from "@/lib/jsonld";
+import { join } from "node:path";
 import { BsLinkedin } from "react-icons/bs";
 import { FaGithubSquare } from "react-icons/fa";
 import { FaGlobe } from "react-icons/fa";
 import Link from "next/link";
+import CvReveal, { CvPrintButton, CvReplayButton } from "@/components/cv-reveal";
+import { cvSealScript } from "@/lib/cv-seal-script";
+
+/** Real file facts for the sealed caption: name and size come from public/CV.pdf at build time. */
+function pdfLabel() {
+  try {
+    const bytes = statSync(join(process.cwd(), "public", "CV.pdf")).size;
+    return `CV.pdf :: ${Math.round(bytes / 1000)} KB`;
+  } catch {
+    return "CV.pdf";
+  }
+}
 
 const experiences = [
   {
@@ -128,12 +139,11 @@ const coreSkills = [
 ];
 
 export default function CVPage() {
-  const handlePrint = () => {
-    window.print();
-  };
-
   return (
-    <>
+    <main id="cv-root" className="cv-root" suppressHydrationWarning>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: ldJson({ "@context": "https://schema.org", "@type": "ProfilePage", url: "https://aade.me/cv", name: "CV of Ade A.", mainEntity: { "@id": "https://aade.me/#person" } }) }} />
+      {/* Decides before paint whether the sealed screen shows (JS on, motion allowed, first visit this session). */}
+      <script dangerouslySetInnerHTML={{ __html: cvSealScript }} />
       <style>{`
         @media print {
           .no-print { display: none !important; }
@@ -145,29 +155,24 @@ export default function CVPage() {
         }
       `}</style>
 
-      {/* Toolbar */}
-      <div className="no-print sticky top-0 z-50 bg-zinc-50/90 dark:bg-zinc-900/90 backdrop-blur border-b border-zinc-200 dark:border-zinc-700 px-4 py-3 flex items-center justify-between max-w-5xl mx-auto">
-        <Link href="/" className="text-sm text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200 transition">
-          ← Back to site
-        </Link>
-        <div className="flex items-center gap-3">
-          <button
-            onClick={handlePrint}
-            className="flex items-center gap-2 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 text-sm font-medium px-4 py-2 rounded-full hover:scale-105 transition"
-          >
-            <HiDownload className="text-base" />
-            Save as PDF
-          </button>
-        </div>
-      </div>
+      <CvReveal file={pdfLabel()} />
 
-      {/* CV Content */}
-      <div className="cv-container max-w-4xl mx-auto px-4 py-10 sm:py-14">
+      {/* CV content: always in the DOM; hidden (not removed) only while the sealed screen shows */}
+      <div className="cv-container max-w-4xl mx-auto px-4 pb-10 pt-[calc(var(--header-h)+1.5rem)] sm:pb-14">
+        <div className="no-print mb-5 flex items-center justify-between gap-3">
+          <Link href="/" className="text-sm text-mute transition hover:text-fg">
+            ← Back to site
+          </Link>
+          <CvPrintButton />
+        </div>
         <div className="cv-card bg-white dark:bg-zinc-800/50 rounded-2xl shadow-lg border border-zinc-100 dark:border-zinc-700 overflow-hidden">
 
           {/* Header */}
           <div className="bg-zinc-900 dark:bg-zinc-950 text-white px-8 sm:px-12 py-10">
-            <h1 className="text-4xl font-bold tracking-tight mb-1">Ade Adekoya</h1>
+            <div className="flex items-start justify-between gap-4">
+              <h1 id="cv-title" tabIndex={-1} className="text-4xl font-bold tracking-tight mb-1 outline-none">Ade Adekoya</h1>
+              <CvReplayButton />
+            </div>
             <p className="text-zinc-300 text-lg font-medium mb-4">Enterprise Solutions Architect</p>
             <div className="flex flex-wrap gap-x-5 gap-y-1 text-sm text-zinc-400">
               <span>Alberta, Canada</span>
@@ -278,6 +283,6 @@ export default function CVPage() {
           Use <strong>Save as PDF</strong> above to export, or print via your browser (<kbd className="px-1 py-0.5 rounded bg-zinc-100 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 text-xs">Ctrl/Cmd + P</kbd>).
         </p>
       </div>
-    </>
+    </main>
   );
 }

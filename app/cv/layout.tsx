@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
+import PageTransition from "@/components/page-transition";
 
 export const metadata: Metadata = {
-  title: { absolute: "Ade A. | Resume — Enterprise Solutions Architect" },
+  title: { absolute: "Resume of Ade A. | Enterprise Solutions Architect, Elastic" },
   description: "Resume of Ade Adekoya, Enterprise Solutions Architect specialising in AI-powered search, Elasticsearch, cloud-native platforms, and large-scale observability.",
   alternates: { canonical: "https://aade.me/cv" },
   openGraph: {
-    title: "Ade A. | Resume — Enterprise Solutions Architect",
+    title: "Resume of Ade A. | Enterprise Solutions Architect, Elastic",
     description: "Resume of Ade Adekoya, Enterprise Solutions Architect specialising in AI-powered search, Elasticsearch, cloud-native platforms, and large-scale observability.",
     url: "https://aade.me/cv",
     type: "profile",
@@ -13,7 +14,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Ade A. | Resume — Enterprise Solutions Architect",
+    title: "Resume of Ade A. | Enterprise Solutions Architect, Elastic",
     description: "Resume of Ade Adekoya, Enterprise Solutions Architect specialising in AI-powered search, Elasticsearch, cloud-native platforms, and large-scale observability.",
     images: ["/opengraph-image"],
   },
@@ -21,5 +22,5 @@ export const metadata: Metadata = {
 };
 
 export default function CVLayout({ children }: { children: React.ReactNode }) {
-  return <>{children}</>;
+  return <PageTransition>{children}</PageTransition>;
 }

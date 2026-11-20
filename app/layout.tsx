@@ -1,18 +1,22 @@
 import Header from "@/components/header";
-import MobileMenu from "@/components/mobile-menu";
+import SmoothScroll from "@/components/smooth-scroll";
+import Ripple from "@/components/ripple";
+import BgField from "@/components/bg-field";
+import VtDebug from "@/components/vt-debug";
 import ScrollToTop from "@/components/scroll-to-top";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
 import "./globals.css";
-import ActiveSectionContextProvider from "@/context/active-section-context";
 import Footer from "@/components/footer";
-import ThemeSwitch from "@/components/theme-switch";
-import ThemeContextProvider from "@/context/theme-context";
-import { Toaster } from "react-hot-toast";
+import { themeInitScript } from "@/lib/theme-script";
+import { viewInitScript } from "@/lib/cabinet-ctx";
+import { preloadInitScript, preloadCriticalCss, preloadInertScript } from "@/lib/preload-script";
+import Preloader from "@/components/preloader";
 import { Analytics } from "@vercel/analytics/react"
 import { SpeedInsights } from "@vercel/speed-insights/next"
-import { Inter } from "next/font/google";
+import { Geist, Geist_Mono } from "next/font/google";
 
-const inter = Inter({ subsets: ["latin"], display: "swap" });
+const geist = Geist({ subsets: ["latin"], display: "swap", variable: "--font-geist" });
+const geistMono = Geist_Mono({ subsets: ["latin"], display: "swap", variable: "--font-geist-mono" });
 
 export const metadata = {
   metadataBase: new URL("https://aade.me"),
@@ -54,31 +58,47 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="!scroll-smooth">
-      <body
-        className={`${inter.className} bg-zinc-50 text-zinc-950 relative pt-28 sm:pt-36 dark:bg-zinc-900 dark:text-zinc-50 dark:text-opacity-90`}
-        suppressHydrationWarning
-      >
-        <ThemeContextProvider>
-          <ActiveSectionContextProvider>
+    <html
+      lang="en"
+      className={`${geist.variable} ${geistMono.variable}`}
+      style={{ viewTransitionName: "root" }}
+      suppressHydrationWarning
+    >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+        {/* Writing page view (cabinet or list), decided before first paint; see lib/cabinet-ctx.ts. */}
+        <script dangerouslySetInnerHTML={{ __html: viewInitScript }} />
+        {/* Preloader: first visit of a session on the home route. The cover is display:none unless the script below sets data-preload. */}
+        <style dangerouslySetInnerHTML={{ __html: preloadCriticalCss }} />
+        <noscript><style>{".pl,.pl-status{display:none!important}"}</style></noscript>
+        <script dangerouslySetInnerHTML={{ __html: preloadInitScript }} />
+      </head>
+      <body className="font-sans bg-bg text-fg relative overflow-x-clip">
+          <Preloader />
+          {/* The page shell is inert (not focusable, not clickable) while the preloader shows; it stays in the DOM for crawlers and readers. */}
+          <div id="shell" suppressHydrationWarning>
+            <a href="#content" className="skip-link">Skip to content</a>
             <Header />
-            <MobileMenu />
-            {children}
-            {process.env.NODE_ENV === 'production' && (
-              <>
-                <Analytics />
-                <SpeedInsights />
-                {process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS ? (
-                  <GoogleAnalytics ga_id={process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS} />
-                ) : null}
-              </>
-            )}
+            <div id="content" tabIndex={-1} className="outline-none">
+              {children}
+            </div>
             <Footer />
-            <Toaster position="top-right" />
             <ScrollToTop />
-            <ThemeSwitch />
-          </ActiveSectionContextProvider>
-        </ThemeContextProvider>
+          </div>
+          <script dangerouslySetInnerHTML={{ __html: preloadInertScript }} />
+          <SmoothScroll />
+          <Ripple />
+          <BgField />
+          {process.env.NODE_ENV !== 'production' && <VtDebug />}
+          {process.env.NODE_ENV === 'production' && (
+            <>
+              <Analytics />
+              <SpeedInsights />
+              {process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS ? (
+                <GoogleAnalytics ga_id={process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS} />
+              ) : null}
+            </>
+          )}
       </body>
     </html>
   );

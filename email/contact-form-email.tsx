@@ -32,7 +32,7 @@ export default function ContactFormEmail({
               <Heading className="leading-tight">
                 Contact form message from {senderEmail}!
               </Heading>
-              <Text>{message}</Text>
+              <Text style={{ whiteSpace: "pre-wrap" }}>{message}</Text>
               <Hr />
               <Text>from: {senderEmail}</Text>
             </Section>

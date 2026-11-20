@@ -63,6 +63,13 @@ export async function getAllPosts(): Promise<BlogPost[]> {
     const slug = (data.slug as string) || file.replace(/\.(md|mdx)$/i, "");
     const title = (data.title as string) || slug;
     const date = (data.date as string) || new Date().toISOString().slice(0, 10);
+    const rawUpdated: unknown = data.updated;
+    const updated =
+      rawUpdated instanceof Date
+        ? rawUpdated.toISOString().slice(0, 10)
+        : typeof rawUpdated === "string" && rawUpdated
+          ? rawUpdated
+          : undefined;
     const tags = (data.tags as string[]) || [];
     const author = (data.author as string) || "Ade A.";
     const imageUrl = (data.imageUrl as string) || "/blog/placeholder.jpg";
@@ -75,6 +82,7 @@ export async function getAllPosts(): Promise<BlogPost[]> {
       title,
       excerpt,
       date,
+      updated,
       readTime,
       tags,
       content,

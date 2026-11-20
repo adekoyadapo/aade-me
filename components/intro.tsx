@@ -1,126 +1,102 @@
-"use client";
-
 import React from "react";
-import { motion } from "framer-motion";
 import Link from "next/link";
-import { BsArrowRight, BsLinkedin } from "react-icons/bs";
-import { HiDownload } from "react-icons/hi";
-import { HiOutlineDocumentText } from "react-icons/hi";
-import { FaGithubSquare, FaGlobe, FaTwitterSquare } from "react-icons/fa";
-import { useSectionInView } from "@/lib/hooks";
-import { useActiveSectionContext } from "@/context/active-section-context";
+import Image from "next/image";
+import WireframeBg from "@/components/wireframe-bg";
+import HeroStageControls from "@/components/hero-stage-controls";
+import StageGL from "@/components/stage-gl";
+import { projectsData } from "@/lib/data";
+import { SIZES_FEATURED, SIZES_TILE } from "@/lib/stage";
 
+const pad = (n: number) => String(n).padStart(2, "0");
+
+/**
+ * Home stage: exactly one viewport, flat graphite with grain (the optional wireframe backdrop is off unless ?bg=1).
+ * Server-rendered: the ten artworks as cards, the caption of the featured project, and the identity line. Card i starts in
+ * slot i: slot 0 is the wide featured artwork left of centre, slot 1 the next project as a glass tile right of centre, slots 2-5
+ * the corner tiles, slots 6-9 parked off screen. HeroStageControls rotates the slots (wheel, swipe, arrows, buttons, dots);
+ * CSS does the motion. Without JS project 1 stays featured and the full list sits in "Selected work" below.
+ */
 export default function Intro() {
-  const { ref } = useSectionInView("Home", 0.5);
-  const { setActiveSection, setTimeOfLastClick } = useActiveSectionContext();
-
+  const total = projectsData.length;
   return (
-    <section
-      ref={ref}
-      id="home"
-      className="mb-28 max-w-[50rem] text-center sm:mb-0 scroll-mt-[100rem]"
-    >
-      <div className="flex items-center justify-center">
-        <div className="relative">
-          <motion.div
-            initial={{ opacity: 0, scale: 0 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{
-              type: "tween",
-              duration: 0.2,
-            }}
-          >
-            <span className="text-8xl font-bold">Ade A.</span>
-          </motion.div>
+    <section id="home" data-hero className="hero">
+      <WireframeBg />
+      <h1 className="sr-only">Ade A.</h1>
 
-          <motion.span
-            className="absolute bottom-0 right-0 text-4xl"
-            initial={{ opacity: 0, scale: 0 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{
-              type: "spring",
-              stiffness: 125,
-              delay: 0.1,
-              duration: 0.7,
-            }}
+      <div className="art-field" data-art>
+        {projectsData.map((p, i) => (
+          <figure
+            key={p.slug}
+            data-card
+            data-idx={i}
+            data-slot={i}
+            aria-hidden={i === 0 ? undefined : true}
+            className="art-card"
+            style={{ "--fd": `${-i * 1.1}s` } as React.CSSProperties}
           >
-          </motion.span>
-        </div>
+            <div className="art-float">
+              <div className="art-face">
+                <Image
+                  src={p.image}
+                  alt={p.alt}
+                  width={1400}
+                  height={900}
+                  sizes={i === 0 ? SIZES_FEATURED : SIZES_TILE}
+                  className="art-img"
+                  {...(i === 0 ? { preload: true, fetchPriority: "high" as const } : { loading: "lazy" as const, fetchPriority: "low" as const })}
+                />
+              </div>
+            </div>
+          </figure>
+        ))}
       </div>
 
-      <motion.h1
-        className="mb-10 mt-4 px-4 text-2xl font-medium !leading-[1.5] sm:text-4xl"
-        initial={{ opacity: 0, y: 100 }}
-        animate={{ opacity: 1, y: 0 }}
-      >
-        <span className="font-bold">Hello, I am Ade,{" "}</span>an{" "}
-        <span className="font-bold">Enterprise Solutions Architect</span>{" "}focused on{" "}
-        <span className="italic">AI, Application and Infrastructure solutions.</span>{" "}I design and deliver{" "}
-        <span className="underline">cloud-native platforms, AI/ML systems, and scalable enterprise architectures</span>{" "}
-        that turn complex technical problems into measurable business outcomes.
-      </motion.h1>
-
-      <motion.div
-        className="flex flex-col items-center justify-center gap-3 px-4 text-lg font-medium sm:flex-row sm:flex-wrap"
-        initial={{ opacity: 0, y: 100 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{
-          delay: 0.1,
-        }}
-      >
-        <div className="flex w-full flex-col items-center gap-2 sm:w-auto sm:flex-row">
-          <Link
-            href="#contact"
-            className="group bg-gray-900 text-white px-7 py-3 flex items-center gap-2 rounded-full outline-none focus:scale-110 hover:scale-110 hover:bg-gray-950 active:scale-105 transition"
-            onClick={() => {
-              setActiveSection("Contact");
-              setTimeOfLastClick(Date.now());
-            }}
-          >
-            Contact{" "}
-            <BsArrowRight className="opacity-90 group-hover:translate-x-1 transition" />
-          </Link>
-          <Link
-            className="group bg-white px-7 py-3 flex items-center gap-2 rounded-full outline-none focus:scale-110 hover:scale-110 active:scale-105 transition cursor-pointer borderBlack dark:bg-white/10"
-            href="/cv"
-          >
-            Resume{" "}
-            <HiOutlineDocumentText className="opacity-60 group-hover:scale-110 transition" />
-          </Link>
+      <div data-stage role="region" aria-roledescription="carousel" aria-label="Featured projects" className="stage-wrap">
+        <noscript>
+          <style>{`.stage-ctrl{display:none!important}`}</style>
+        </noscript>
+        <div className="art-cap">
+          <div className="stage-list">
+            {projectsData.map((p, i) => (
+              <div
+                key={p.slug}
+                data-stage-item
+                data-active={i === 0 ? "true" : undefined}
+                role="group"
+                aria-roledescription="slide"
+                aria-label={`${i + 1} of ${total}: ${p.title}`}
+                className="stage-item"
+              >
+                <p className="stage-count">
+                  N&deg;{pad(i + 1)} / {pad(total)}
+                </p>
+                <p data-title className="stage-title">{p.title}</p>
+                <ul className="stage-chips" aria-label="Technologies">
+                  {p.tags.slice(0, 2).map((t) => (
+                    <li key={t} className="chip">
+                      {t}
+                    </li>
+                  ))}
+                </ul>
+                <a href={p.links[0].href} target="_blank" rel="noopener noreferrer" className="ghost-btn">
+                  View project<span className="sr-only">: {p.title} (opens in a new tab)</span>
+                </a>
+              </div>
+            ))}
+          </div>
         </div>
+        <HeroStageControls titles={projectsData.map((p) => p.title)} />
+      </div>
+      <StageGL />
 
-        <div className="flex flex-row flex-wrap items-center justify-center gap-2">
-          <a
-            className="bg-white p-4 text-gray-700 hover:text-gray-950 flex items-center gap-2 rounded-full focus:scale-[1.15] hover:scale-[1.15] active:scale-105 transition cursor-pointer borderBlack dark:bg-white/10 dark:text-white/60"
-            href="https://www.linkedin.com/in/adekoya-adedapomola/"
-            target="_blank" rel="noopener noreferrer"
-          >
-            <BsLinkedin />
-          </a>
-
-          <a
-            className="bg-white p-4 text-gray-700 flex items-center gap-2 text-[1.35rem] rounded-full focus:scale-[1.15] hover:scale-[1.15] hover:text-gray-950 active:scale-105 transition cursor-pointer borderBlack dark:bg-white/10 dark:text-white/60"
-            href="https://github.com/adekoyadapo"
-            target="_blank" rel="noopener noreferrer"
-          >
-            <FaGithubSquare />
-          </a>
-          <a
-            className="bg-white p-4 text-gray-700 flex items-center gap-2 text-[1.35rem] rounded-full focus:scale-[1.15] hover:scale-[1.15] hover:text-gray-950 active:scale-105 transition cursor-pointer borderBlack dark:bg-white/10 dark:text-white/60"
-            href="https://twitter.com/Dapo_Ace"
-            target="_blank" rel="noopener noreferrer"
-          >
-            <FaTwitterSquare />
-          </a>
-          <a
-            className="bg-white p-4 text-gray-700 flex items-center gap-2 text-[1.35rem] rounded-full focus:scale-[1.15] hover:scale-[1.15] hover:text-gray-950 active:scale-105 transition cursor-pointer borderBlack dark:bg-white/10 dark:text-white/60"
-            href="https://blog.360ace.net"
-            target="_blank" rel="noopener noreferrer"
-          >
-            <FaGlobe />
-          </a>
-        </div>
-      </motion.div>
+      <div className="hero-id">
+        <p className="hero-id-name">Ade A.</p>
+        <p className="hero-id-role">Enterprise Solutions Architect<span className="hero-id-more">, Customer Architect at Elastic</span></p>
+        <p className="hero-id-links">
+          <Link href="/blog">Writing</Link>
+          <Link href="/contact">Contact</Link>
+        </p>
+      </div>
     </section>
   );
 }

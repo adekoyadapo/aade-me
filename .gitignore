@@ -27,6 +27,8 @@ yarn-error.log*
 # local env files
 .env
 .env*.local
+.env.*
+!.env.example
 
 # vercel
 .vercel
@@ -48,3 +50,11 @@ skills-lock.json
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Screen recordings from review sessions
+/recordings/
+
+# Local revamp working files (notes, helper scripts, generated agent file)
+/plans/
+/scripts/
+/AGENTS.md

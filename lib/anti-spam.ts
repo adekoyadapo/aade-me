@@ -1,19 +1,19 @@
-export function getClientIpFromHeaders(h: any): string {
-  // Try common proxy headers first
-  const xff = h.get("x-forwarded-for");
-  if (xff) {
-    // may contain multiple, take first non-empty
-    const first = xff
-      .split(",")
-      .map((s: string) => s.trim())
-      .find(Boolean);
-    if (first) return first;
-  }
-  const xri = h.get("x-real-ip");
-  if (xri) return xri;
-  const cf = h.get("cf-connecting-ip");
-  if (cf) return cf;
-  return "unknown";
+type HeaderReader = { get(name: string): string | null };
+
+/**
+ * Best-effort client address. Platform headers set by the edge come first (x-real-ip on Vercel);
+ * x-forwarded-for is client-influenced behind a non-overwriting proxy, so it is only a fallback.
+ */
+export function getClientIpFromHeaders(h: HeaderReader): string {
+  const pick = (v: string | null) => (v ? v.split(",")[0].trim().slice(0, 64) : "");
+  const ip = pick(h.get("x-real-ip")) || pick(h.get("cf-connecting-ip")) || pick(h.get("x-forwarded-for"));
+  return ip || "unknown";
+}
+
+/** Rate-limit key: IPv4 as is, IPv6 reduced to its /64 so one host cannot rotate addresses. */
+export function ipBucket(ip: string): string {
+  if (ip.includes(":")) return ip.split(":").slice(0, 4).join(":");
+  return ip;
 }
 
 export function isSpamContent(message: string, senderEmail: string): boolean {

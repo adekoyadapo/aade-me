@@ -2,13 +2,44 @@
 
 import React from "react";
 import { Resend } from "resend";
-import { validateString, getErrorMessage } from "@/lib/utils";
 import ContactFormEmail from "@/email/contact-form-email";
 import { headers } from "next/headers";
 import { rateLimit } from "@/lib/rate-limit";
-import { getClientIpFromHeaders, isSpamContent } from "@/lib/anti-spam";
+import { getClientIpFromHeaders, ipBucket, isSpamContent } from "@/lib/anti-spam";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
+
+const MAX_EMAIL = 254; // RFC 5321 path limit
+const MAX_MESSAGE = 6000; // client composes reason + name + via + signature + body (body <= 4600)
+const MAX_TOKEN = 2048; // Turnstile tokens are < 2048 chars
+const EMAIL_RE = /^[A-Za-z0-9.!#$%&'*+/=?^_`{|}~-]+@[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)+$/;
+
+const GENERIC = "The message could not be sent. Please try again later.";
+
+async function verifyTurnstile(token: string, ip: string): Promise<boolean> {
+  const secret = process.env.TURNSTILE_SECRET_KEY;
+  if (!secret) {
+    console.error("[contact] TURNSTILE_SECRET_KEY is not set; refusing submissions");
+    return false; // fail closed
+  }
+  try {
+    const body = new URLSearchParams({ secret, response: token });
+    if (ip !== "unknown") body.set("remoteip", ip);
+    const res = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+      method: "POST",
+      headers: { "content-type": "application/x-www-form-urlencoded" },
+      body,
+      cache: "no-store",
+      signal: AbortSignal.timeout(5000),
+    });
+    if (!res.ok) return false;
+    // Cloudflare invalidates a token after one successful verification, so replays fail here.
+    const out = (await res.json()) as { success?: boolean };
+    return out.success === true;
+  } catch {
+    return false;
+  }
+}
 
 export const sendEmail = async (formData: FormData) => {
   const senderEmail = formData.get("senderEmail");
@@ -18,112 +49,58 @@ export const sendEmail = async (formData: FormData) => {
   const formTsRaw = formData.get("form_ts");
   const turnstileToken = formData.get("cf-turnstile-response");
 
-  // Lightweight bot checks (do not disclose granular reasons to client)
-  // 1) Honeypot must be empty
-  if (typeof honeytrap === "string" && honeytrap.trim().length > 0) {
-    // Silently drop to avoid helping bot adaptation
-    console.warn("[contact] dropped submission due to honeypot");
-    return { data: { dropped: true } };
-  }
+  // 1) Honeypot must be empty (silent drop, no hint to bots)
+  if (typeof honeytrap === "string" && honeytrap.trim().length > 0) return { data: { dropped: true } };
 
-  // 2) Require JS set flag (bots without JS won't include this)
-  if (jsOnly !== "1") {
-    console.warn("[contact] dropped submission due to missing js_only flag");
-    return { data: { dropped: true } };
-  }
+  // 2) Script flag
+  if (jsOnly !== "1") return { data: { dropped: true } };
 
-  // 3) Human interaction time: require a minimal delay from render
+  // 3) Time trap: a valid, plausible render timestamp is required (fail closed)
   const now = Date.now();
-  const formTs = typeof formTsRaw === "string" ? parseInt(formTsRaw, 10) : 0;
-  if (!Number.isNaN(formTs) && formTs > 0) {
-    const minDelayMs = 2000; // 2 seconds
-    if (now - formTs < minDelayMs) {
-      console.warn("[contact] dropped submission due to too-fast submit");
-      return { data: { dropped: true } };
-    }
+  const formTs = typeof formTsRaw === "string" ? parseInt(formTsRaw, 10) : NaN;
+  if (!Number.isFinite(formTs) || formTs > now + 60_000 || now - formTs < 2000 || now - formTs > 24 * 3600_000) {
+    return { data: { dropped: true } };
   }
 
-  // 4) Rate limit by client IP
+  // 4) Cheap input validation before any network call
+  if (typeof senderEmail !== "string" || senderEmail.length > MAX_EMAIL || !EMAIL_RE.test(senderEmail)) {
+    return { error: "Please enter a valid email address" };
+  }
+  if (typeof message !== "string" || message.trim().length === 0 || message.length > MAX_MESSAGE) {
+    return { error: "Invalid message" };
+  }
+  if (!turnstileToken || typeof turnstileToken !== "string" || turnstileToken.length > MAX_TOKEN) {
+    return { error: "Verification failed. Please try again." };
+  }
+
+  // 5) Rate limits: per client prefix and a global ceiling (per-instance, see lib/rate-limit.ts)
   const ip = getClientIpFromHeaders(await headers());
-  const { ok: allowed } = rateLimit(`contact:${ip}`, 3, 5 * 60_000); // 3 per 5 minutes
-  if (!allowed) {
-    console.warn(`(rate-limit) blocked submission from ${ip}`);
+  if (!rateLimit(`contact:${ipBucket(ip)}`, 3, 5 * 60_000).ok || !rateLimit("contact:global", 30, 60 * 60_000).ok) {
     return { error: "Too many submissions. Please try again later." };
   }
 
-  // 4b) Cloudflare Turnstile verification
-  const secret = process.env.TURNSTILE_SECRET_KEY;
-  if (!secret) {
-    console.error("Turnstile secret not configured. Set TURNSTILE_SECRET_KEY.");
-    return { error: "Service misconfigured. Please try again later." };
-  }
-  if (!turnstileToken || typeof turnstileToken !== "string") {
-    return { error: "Verification failed. Please try again." };
-  }
+  // 6) Cloudflare Turnstile, server side
+  if (!process.env.TURNSTILE_SECRET_KEY) return { error: "Service misconfigured. Please try again later." };
+  if (!(await verifyTurnstile(turnstileToken, ip))) return { error: "Verification failed. Please try again." };
+
+  // 7) Content heuristics
+  if (isSpamContent(message, senderEmail)) return { data: { dropped: true } };
+
   try {
-    const res = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
-      method: "POST",
-      headers: { "content-type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({
-        secret,
-        response: turnstileToken,
-        remoteip: ip,
-      }),
-      // Avoid caching
-      cache: "no-store",
-    });
-    const out = (await res.json()) as { success: boolean; "error-codes"?: string[] };
-    if (!out.success) {
-      console.warn("[contact] Turnstile verification failed", out["error-codes"]);
-      return { error: "Verification failed. Please try again." };
-    }
-  } catch (e) {
-    console.error("[contact] Turnstile verification error", e);
-    return { error: "Verification failed. Please try again." };
-  }
-
-  // Simple server-side validation
-  if (!validateString(senderEmail, 500)) {
-    return {
-      error: "Invalid sender email",
-    };
-  }
-  // rudimentary email format check
-  const email = String(senderEmail);
-  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
-    return { error: "Please enter a valid email address" };
-  }
-  if (!validateString(message, 5000)) {
-    return {
-      error: "Invalid message",
-    };
-  }
-
-  // 5) Basic spam heuristics
-  if (isSpamContent(String(message), String(senderEmail))) {
-    console.warn("[contact] dropped submission due to spam heuristics");
-    return { data: { dropped: true } };
-  }
-
-  let data;
-  try {
-    data = await resend.emails.send({
+    const result = await resend.emails.send({
       from: "Aade.me <no-reply@aade.me>",
       to: "adekoyadapo@gmail.com",
-      subject: "Message from aade.me",
-      replyTo: String(senderEmail),
-      react: React.createElement(ContactFormEmail, {
-        message: message,
-        senderEmail: senderEmail,
-      }),
+      subject: "Message from aade.me", // constant: user input never reaches a header
+      replyTo: senderEmail, // validated above: no whitespace, CR or LF possible
+      react: React.createElement(ContactFormEmail, { message, senderEmail }),
     });
-  } catch (error: unknown) {
-    return {
-      error: getErrorMessage(error),
-    };
+    if (result.error || !result.data?.id) {
+      console.error("[contact] provider rejected the send", result.error?.name ?? "unknown");
+      return { error: GENERIC };
+    }
+    return { data: { data: { id: result.data.id } } };
+  } catch {
+    console.error("[contact] provider call failed");
+    return { error: GENERIC };
   }
-
-  return {
-    data,
-  };
 };

@@ -2,160 +2,60 @@ import { statSync } from "node:fs";
 import { ldJson } from "@/lib/jsonld";
 import { join } from "node:path";
 import { BsLinkedin } from "react-icons/bs";
-import { FaGithubSquare } from "react-icons/fa";
 import { FaGlobe } from "react-icons/fa";
 import Link from "next/link";
-import CvReveal, { CvPrintButton, CvReplayButton } from "@/components/cv-reveal";
+import CvReveal, { CvReplayButton } from "@/components/cv-reveal";
 import { cvSealScript } from "@/lib/cv-seal-script";
+import { resume } from "@/lib/resume";
 
-/** Real file facts for the sealed caption: name and size come from public/CV.pdf at build time. */
-function pdfLabel() {
+/** Real file facts for the sealed caption and the download button: the size comes from public/CV.pdf at build time. */
+function pdfKb(): string | null {
   try {
-    const bytes = statSync(join(process.cwd(), "public", "CV.pdf")).size;
-    return `CV.pdf :: ${Math.round(bytes / 1000)} KB`;
+    return `${Math.round(statSync(join(process.cwd(), "public", "CV.pdf")).size / 1000)} KB`;
   } catch {
-    return "CV.pdf";
+    return null;
   }
 }
 
-const experiences = [
-  {
-    title: "Customer Architect",
-    company: "Elastic",
-    location: "CA, US",
-    period: "2024 – Present",
-    bullets: [
-      "Serve as Trusted Technical Advisor for enterprise accounts across Search, Observability, and Security use cases.",
-      "Design AI-powered architectures using Elasticsearch vector search, ELSER semantic embeddings, and inference endpoints.",
-      "Architect petabyte-scale log analytics platforms with OpenTelemetry, LogsDB, and OTLP ingestion pipelines.",
-      "Lead SIEM and threat-detection deployments — 1,895+ detection rules, Attack Discovery, and SOAR integrations — for Fortune 500 environments.",
-      "Build Technical Success Plans aligned to measurable business outcomes, translating Elastic capabilities into quantified ROI.",
-    ],
-  },
-  {
-    title: "Lead Cloud Solutions Architect",
-    company: "360ace Tech",
-    location: "AB, Canada",
-    period: "2021 – 2024",
-    bullets: [
-      "Delivered end-to-end cloud adoption, migration, and platform engineering engagements for SMB and enterprise customers.",
-      "Reduced infrastructure provisioning time by 50% via IaC-first delivery on Terraform and Pulumi across AWS, Azure, and GCP.",
-      "Led multi-cloud Kubernetes modernisation — AKS, EKS, GKE, OpenShift — including GitOps pipelines with ArgoCD and FluxCD.",
-      "Designed and implemented AI-based solutions for improved infrastructure delivery and end-user experience.",
-      "Provided cloud security governance: PCI DSS, ISO 27001, SOC 2 compliance posture across multiple customer environments.",
-    ],
-  },
-  {
-    title: "Cloud Architect",
-    company: "SADA Systems",
-    location: "CA, US",
-    period: "2021 – 2023",
-    bullets: [
-      "Led large-scale workload migration and application modernisation for enterprise GCP customers.",
-      "Transformed monolithic applications to cloud-native Kubernetes microservices, improving DevOps efficiency by 40%.",
-      "Delivered internal and external workshops on cloud adoption strategy, landing zone design, and DevSecOps practices.",
-      "Coordinated hybrid network solutions — Direct Connect, VPN, WAN — across multi-cloud topologies.",
-    ],
-  },
-  {
-    title: "Customer Engineer – SRE / Service Mesh",
-    company: "Tetrate.io",
-    location: "Milpitas, CA, US",
-    period: "2021",
-    bullets: [
-      "Trained enterprise DevOps and SRE teams on Istio and Tetrate Service Bridge at scale.",
-      "Guided application telemetry adoption (OpenTelemetry traces, metrics) within service mesh for observability.",
-      "Deployed and upgraded Kubernetes-based workloads with CI/CD tooling across GCP, AWS, and Azure.",
-    ],
-  },
-  {
-    title: "DevOps Specialist",
-    company: "TELUS Communications",
-    location: "Edmonton, AB, Canada",
-    period: "2019 – 2021",
-    bullets: [
-      "Architected highly available containerised infrastructure for CDN workloads on AKS, Tanzu, and OpenShift.",
-      "Implemented CI/CD automation reducing release windows for cloud deployments by 50%.",
-      "Integrated APM and logging solutions (Splunk, New Relic) to improve application performance monitoring.",
-    ],
-  },
-  {
-    title: "Senior Network & Systems Administrator",
-    company: "Calgary Parking Authority",
-    location: "Calgary, AB, Canada",
-    period: "2018 – 2019",
-    bullets: [
-      "Redesigned enterprise IT infrastructure to meet PCI DSS and SOC compliance requirements.",
-      "Implemented SSO (Okta) and VPN solutions; integrated Office 365 and Azure cloud services.",
-    ],
-  },
-  {
-    title: "Manager, Infrastructure & Enterprise Solutions",
-    company: "Web4Africa",
-    location: "Johannesburg, ZA",
-    period: "2016 – 2018",
-    bullets: [
-      "Managed data centre colocation and BGP routing across 4 African data centres including IPv6 adoption.",
-      "Led automation initiatives reducing deployment times by 25%; improved customer retention and business ROI.",
-    ],
-  },
-  {
-    title: "Infrastructure & DevOps Specialist",
-    company: "Konga Online Shopping",
-    location: "Cape Town, ZA",
-    period: "2014 – 2016",
-    bullets: [
-      "Implemented hybrid cloud solutions and CI/CD pipelines for warehouse and logistics infrastructure.",
-      "Developed in-house open-source monitoring tools reducing infrastructure tooling costs by 30%.",
-    ],
-  },
-  {
-    title: "Enterprise Network Infrastructure Engineer",
-    company: "Swift Networks Limited",
-    location: "Lagos, NG",
-    period: "2011 – 2014",
-    bullets: [
-      "Managed 200+ cell sites and LTE deployments; maintained 99.9% network uptime across the metropolis.",
-    ],
-  },
-];
-
-const certifications = [
-  { group: "Elastic", items: ["Elastic Certified Engineer (ECE)", "Elastic Certified Practitioner (ECP)", "Elastic Certified Analyst (ECA)", "Elastic Certified SIEM Analyst (ECS)", "Elastic Certified GenAI Practitioner (EGP)"] },
-  { group: "Google Cloud", items: ["Professional Cloud Solutions Architect", "Professional Cloud DevOps Engineer", "Professional Cloud Network Engineer"] },
-  { group: "AWS", items: ["Solutions Architect Professional", "DevOps Engineer Professional", "Solutions Architect Associate", "Developer Associate"] },
-  { group: "Azure", items: ["Solutions Architect Expert", "Administrator Associate", "DevOps Engineer Expert"] },
-  { group: "Kubernetes", items: ["CKA – Certified Kubernetes Administrator", "CKAD – Certified Kubernetes Application Developer"] },
-  { group: "Other", items: ["VMware VCP-DCV, VCP-NV", "Cisco CCNP Enterprise, CCS-Enterprise", "LPI Linux Essentials", "IBM Cloud Kubernetes"] },
-];
-
-const coreSkills = [
-  "Enterprise Architecture", "AI/ML Platforms", "Elasticsearch & Elastic Stack",
-  "Vector Search & RAG", "Observability (OTel / LogsDB)", "SIEM & Threat Detection",
-  "Kubernetes (AKS / EKS / GKE / OpenShift)", "Platform Engineering",
-  "Cloud Platforms (AWS / GCP / Azure)", "Infrastructure-as-Code (Terraform / Pulumi)",
-  "GitOps (ArgoCD / FluxCD)", "DevSecOps", "Distributed Systems",
-  "Python / Bash / Go", "CI/CD (GitHub Actions / GitLab / ArgoCD)",
-];
+const h2 = "cv-h2 text-xs font-semibold uppercase tracking-widest text-zinc-500 dark:text-zinc-400";
 
 export default function CVPage() {
+  const kb = pdfKb();
   return (
     <main id="cv-root" className="cv-root" suppressHydrationWarning>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: ldJson({ "@context": "https://schema.org", "@type": "ProfilePage", url: "https://aade.me/cv", name: "CV of Ade A.", mainEntity: { "@id": "https://aade.me/#person" } }) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: ldJson({ "@context": "https://schema.org", "@type": "ProfilePage", url: "https://aade.me/cv", name: `Resume of ${resume.name}`, mainEntity: { "@id": "https://aade.me/#person" } }) }} />
       {/* Decides before paint whether the sealed screen shows (JS on, motion allowed, first visit this session). */}
       <script dangerouslySetInnerHTML={{ __html: cvSealScript }} />
       <style>{`
         @media print {
+          @page { margin: 1.1cm; }
+          html, body { background: #fff !important; color: #000 !important; }
+          body::after { display: none !important; }
           .no-print { display: none !important; }
-          body { background: white !important; color: black !important; }
-          .cv-container { max-width: 100% !important; padding: 0 !important; box-shadow: none !important; }
-          .cv-card { box-shadow: none !important; border: none !important; }
-          a { color: inherit !important; text-decoration: none !important; }
-          @page { margin: 1.5cm; }
+          .cv-container { max-width: 100% !important; padding: 0 !important; }
+          .cv-card, .cv-card * { background: transparent !important; color: #000 !important; box-shadow: none !important; animation: none !important; transition: none !important; }
+          .cv-card { border: 0 !important; border-radius: 0 !important; }
+          .cv-head { padding: 0 0 0.4rem !important; border-bottom: 1px solid #000; }
+          .cv-body { padding: 0.5rem 0 0 !important; }
+          .cv-body > * + * { margin-top: 0.5rem !important; }
+          .cv-card { font-size: 9pt; line-height: 1.3; }
+          .cv-card h1 { font-size: 20pt !important; }
+          .cv-card li, .cv-card p { font-size: 9pt !important; line-height: 1.3 !important; }
+          .cv-card .gap-2 { gap: 0.25rem !important; }
+          .cv-card .gap-4 { gap: 0.4rem 1rem !important; }
+          .cv-chip { border: 1px solid #999; padding: 0 0.4rem !important; font-size: 8.5pt !important; border-radius: 4px !important; }
+          .cv-role, .cv-earlier li, .cv-cert { break-inside: avoid; page-break-inside: avoid; }
+          .cv-h2 { break-after: avoid; border-bottom: 1px solid #999; padding-bottom: 2px; }
+          .cv-role { margin-top: 0.35rem !important; }
+          .cv-card .space-y-7 > * + * { margin-top: 0.35rem !important; }
+          .cv-card .space-y-3 > * + * { margin-top: 0.25rem !important; }
+          .cv-card .space-y-1 > * + * { margin-top: 0.1rem !important; }
+          .cv-role ul { margin-top: 0.15rem !important; }
+          .cv-card a { text-decoration: none !important; }
         }
       `}</style>
 
-      <CvReveal file={pdfLabel()} />
+      <CvReveal file={`CV.pdf${kb ? ` :: ${kb}` : ""}`} />
 
       {/* CV content: always in the DOM; hidden (not removed) only while the sealed screen shows */}
       <div className="cv-container max-w-4xl mx-auto px-4 pb-10 pt-[calc(var(--header-h)+1.5rem)] sm:pb-14">
@@ -163,97 +63,79 @@ export default function CVPage() {
           <Link href="/" className="text-sm text-mute transition hover:text-fg">
             ← Back to site
           </Link>
-          <CvPrintButton />
+          <a
+            href="/CV.pdf"
+            download
+            className="flex items-center gap-2 rounded-full bg-fg px-4 py-2 text-sm font-medium text-bg transition hover:scale-105"
+          >
+            <svg viewBox="0 0 20 20" width="16" height="16" fill="currentColor" aria-hidden="true">
+              <path d="M10 13.5 5.5 9l1.1-1.1 2.6 2.6V3h1.6v7.5l2.6-2.6L14.5 9 10 13.5ZM4 15.5h12V17H4v-1.5Z" />
+            </svg>
+            Download PDF{kb ? <span className="font-normal opacity-70"> ({kb})</span> : null}
+          </a>
         </div>
         <div className="cv-card bg-white dark:bg-zinc-800/50 rounded-2xl shadow-lg border border-zinc-100 dark:border-zinc-700 overflow-hidden">
 
           {/* Header */}
-          <div className="bg-zinc-900 dark:bg-zinc-950 text-white px-8 sm:px-12 py-10">
+          <div className="cv-head bg-zinc-900 dark:bg-zinc-950 text-white px-8 sm:px-12 py-10">
             <div className="flex items-start justify-between gap-4">
-              <h1 id="cv-title" tabIndex={-1} className="text-4xl font-bold tracking-tight mb-1 outline-none">Ade Adekoya</h1>
+              <h1 id="cv-title" tabIndex={-1} className="text-4xl font-bold tracking-tight mb-1 outline-none">{resume.name}</h1>
               <CvReplayButton />
             </div>
-            <p className="text-zinc-300 text-lg font-medium mb-4">Enterprise Solutions Architect</p>
-            <div className="flex flex-wrap gap-x-5 gap-y-1 text-sm text-zinc-400">
-              <span>Alberta, Canada</span>
-              <a href="mailto:adekoyadapo@gmail.com" className="hover:text-white transition">adekoyadapo@gmail.com</a>
-              <a href="https://aade.me" className="hover:text-white transition flex items-center gap-1">
-                <FaGlobe className="text-xs" /> aade.me
+            <p className="text-zinc-300 text-lg font-medium mb-4">{resume.headline}</p>
+            <div className="flex flex-wrap gap-x-5 gap-y-1 text-sm text-zinc-300">
+              <a href={`mailto:${resume.email}`} className="hover:text-white transition">{resume.email}</a>
+              <a href={resume.websiteHref} className="hover:text-white transition flex items-center gap-1">
+                <FaGlobe className="text-xs" aria-hidden="true" /> {resume.website}
               </a>
-              <a href="https://linkedin.com/in/adekoya-adedapomola" target="_blank" rel="noopener noreferrer" className="hover:text-white transition flex items-center gap-1">
-                <BsLinkedin className="text-xs" /> LinkedIn
-              </a>
-              <a href="https://github.com/adekoyadapo" target="_blank" rel="noopener noreferrer" className="hover:text-white transition flex items-center gap-1">
-                <FaGithubSquare className="text-xs" /> GitHub
+              <a href={resume.linkedinHref} target="_blank" rel="noopener noreferrer" className="hover:text-white transition flex items-center gap-1">
+                <BsLinkedin className="text-xs" aria-hidden="true" /> {resume.linkedin}
+                <span className="sr-only"> (opens in a new tab)</span>
               </a>
             </div>
           </div>
 
-          <div className="px-8 sm:px-12 py-8 space-y-8">
+          <div className="cv-body px-8 sm:px-12 py-8 space-y-8">
 
-            {/* Summary */}
-            <section>
-              <h2 className="text-xs font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 mb-3">Summary</h2>
-              <p className="text-zinc-700 dark:text-zinc-300 leading-relaxed">
-                Enterprise Solutions Architect with 15+ years across infrastructure, cloud, and platform engineering. Currently at Elastic as a Customer Architect, designing AI-powered search, petabyte-scale observability, and enterprise SIEM architectures for Fortune 500 clients. Proven track record across AWS, GCP, and Azure — from data centre foundations to cloud-native Kubernetes platforms to intelligent AI/ML inference pipelines.
-              </p>
+            <section aria-labelledby="cv-profile">
+              <h2 id="cv-profile" className={`${h2} mb-3`}>Executive Profile</h2>
+              <div className="space-y-3 text-zinc-700 dark:text-zinc-300 leading-relaxed">
+                {resume.profile.map((p) => (
+                  <p key={p.slice(0, 24)}>{p}</p>
+                ))}
+              </div>
             </section>
 
-            <hr className="border-zinc-100 dark:border-zinc-700" />
+            <hr className="no-print border-zinc-100 dark:border-zinc-700" />
 
-            {/* Core Skills */}
-            <section>
-              <h2 className="text-xs font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 mb-3">Core Competencies</h2>
-              <div className="flex flex-wrap gap-2">
-                {coreSkills.map((skill) => (
-                  <span key={skill} className="text-sm bg-zinc-100 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-200 px-3 py-1 rounded-full">
+            <section aria-labelledby="cv-scope">
+              <h2 id="cv-scope" className={`${h2} mb-3`}>Technical and Leadership Scope</h2>
+              <ul className="flex flex-wrap gap-2">
+                {resume.scope.map((skill) => (
+                  <li key={skill} className="cv-chip text-sm bg-zinc-100 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-200 px-3 py-1 rounded-full">
                     {skill}
-                  </span>
+                  </li>
                 ))}
-              </div>
+              </ul>
             </section>
 
-            <hr className="border-zinc-100 dark:border-zinc-700" />
+            <hr className="no-print border-zinc-100 dark:border-zinc-700" />
 
-            {/* Experience */}
-            <section>
-              <h2 className="text-xs font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 mb-5">Experience</h2>
+            <section aria-labelledby="cv-experience">
+              <h2 id="cv-experience" className={`${h2} mb-5`}>Professional Experience</h2>
               <div className="space-y-7">
-                {experiences.map((exp) => (
-                  <div key={`${exp.company}-${exp.period}`} className="grid sm:grid-cols-[1fr_auto] gap-1 sm:gap-4">
-                    <div>
-                      <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 mb-1">
-                        <h3 className="font-semibold text-zinc-900 dark:text-zinc-100">{exp.title}</h3>
-                        <span className="text-zinc-500 dark:text-zinc-400 text-sm">— {exp.company}, {exp.location}</span>
-                      </div>
-                      <ul className="mt-1.5 space-y-1">
-                        {exp.bullets.map((b, i) => (
-                          <li key={i} className="text-sm text-zinc-600 dark:text-zinc-300 leading-relaxed pl-3 border-l-2 border-zinc-200 dark:border-zinc-600">
-                            {b}
-                          </li>
-                        ))}
-                      </ul>
+                {resume.roles.map((exp) => (
+                  <div key={`${exp.company}-${exp.dates}`} className="cv-role">
+                    <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-0.5">
+                      <h3 className="font-semibold text-zinc-900 dark:text-zinc-100">{exp.company} — {exp.title}</h3>
+                      <p className="text-xs text-zinc-500 dark:text-zinc-400 sm:text-right">{exp.dates}</p>
                     </div>
-                    <span className="text-xs text-zinc-400 dark:text-zinc-500 whitespace-nowrap sm:text-right mt-0.5 sm:mt-1">
-                      {exp.period}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </section>
-
-            <hr className="border-zinc-100 dark:border-zinc-700" />
-
-            {/* Certifications */}
-            <section>
-              <h2 className="text-xs font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 mb-4">Certifications</h2>
-              <div className="grid sm:grid-cols-2 gap-4">
-                {certifications.map((group) => (
-                  <div key={group.group}>
-                    <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide mb-1.5">{group.group}</p>
-                    <ul className="space-y-0.5">
-                      {group.items.map((cert) => (
-                        <li key={cert} className="text-sm text-zinc-600 dark:text-zinc-300">{cert}</li>
+                    <p className="text-sm text-zinc-500 dark:text-zinc-400">{exp.place}</p>
+                    <ul className="mt-1.5 space-y-1">
+                      {exp.bullets.map((b) => (
+                        <li key={b.slice(0, 32)} className="text-sm text-zinc-600 dark:text-zinc-300 leading-relaxed pl-3 border-l-2 border-zinc-200 dark:border-zinc-600">
+                          {b}
+                        </li>
                       ))}
                     </ul>
                   </div>
@@ -261,17 +143,44 @@ export default function CVPage() {
               </div>
             </section>
 
-            <hr className="border-zinc-100 dark:border-zinc-700" />
+            <hr className="no-print border-zinc-100 dark:border-zinc-700" />
 
-            {/* Education */}
-            <section>
-              <h2 className="text-xs font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 mb-3">Education</h2>
+            <section aria-labelledby="cv-earlier">
+              <h2 id="cv-earlier" className={`${h2} mb-4`}>Earlier Experience</h2>
+              <ul className="cv-earlier space-y-3">
+                {resume.earlier.map((e) => (
+                  <li key={`${e.company}-${e.dates}`} className="text-sm text-zinc-600 dark:text-zinc-300 leading-relaxed">
+                    <strong className="font-semibold text-zinc-900 dark:text-zinc-100">{e.company} — {e.title}.</strong>{" "}
+                    <span className="text-zinc-500 dark:text-zinc-400">{e.place} | {e.dates}.</span> {e.text}
+                  </li>
+                ))}
+              </ul>
+            </section>
+
+            <hr className="no-print border-zinc-100 dark:border-zinc-700" />
+
+            <section aria-labelledby="cv-certs">
+              <h2 id="cv-certs" className={`${h2} mb-4`}>Certifications</h2>
+              <ul className="grid sm:grid-cols-2 gap-4">
+                {resume.certs.map((group) => (
+                  <li key={group.group} className="cv-cert">
+                    <p className="text-xs font-semibold text-zinc-600 dark:text-zinc-400 uppercase tracking-wide mb-1.5">{group.group}</p>
+                    <p className="text-sm text-zinc-600 dark:text-zinc-300">{group.items.join(" | ")}</p>
+                  </li>
+                ))}
+              </ul>
+            </section>
+
+            <hr className="no-print border-zinc-100 dark:border-zinc-700" />
+
+            <section aria-labelledby="cv-education">
+              <h2 id="cv-education" className={`${h2} mb-3`}>Education</h2>
               <div className="flex flex-wrap items-baseline justify-between gap-2">
                 <div>
-                  <p className="font-medium text-zinc-800 dark:text-zinc-200">B.Eng, Electrical &amp; Electronics Engineering</p>
-                  <p className="text-sm text-zinc-500">Federal University of Technology, Akure (FUTA) — Nigeria</p>
+                  <p className="font-medium text-zinc-800 dark:text-zinc-200">{resume.education.degree}</p>
+                  <p className="text-sm text-zinc-500 dark:text-zinc-400">{resume.education.school}</p>
                 </div>
-                <span className="text-xs text-zinc-400">2010</span>
+                <span className="text-xs text-zinc-500 dark:text-zinc-400">{resume.education.year}</span>
               </div>
             </section>
 
@@ -279,8 +188,8 @@ export default function CVPage() {
         </div>
 
         {/* Footer note */}
-        <p className="no-print text-center text-xs text-zinc-400 mt-6">
-          Use <strong>Save as PDF</strong> above to export, or print via your browser (<kbd className="px-1 py-0.5 rounded bg-zinc-100 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 text-xs">Ctrl/Cmd + P</kbd>).
+        <p className="no-print text-center text-xs text-zinc-500 mt-6">
+          Download the PDF above, or print this page from your browser (<kbd className="px-1 py-0.5 rounded bg-zinc-100 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 text-xs">Ctrl/Cmd + P</kbd>).
         </p>
       </div>
     </main>

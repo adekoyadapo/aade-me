@@ -2,13 +2,13 @@ import React from "react";
 import { CgOrganisation, CgWorkAlt } from "react-icons/cg";
 import { FaGit, FaReact, FaAws, FaGitAlt, FaLinux, FaWindows, FaServer, FaNetworkWired, FaPython, FaNodeJs, FaDev, FaDatabase, FaJava, FaDocker, FaGithub, FaGitlab, FaUbuntu, FaApple, FaJenkins, FaPhp, FaLock, FaCloud, FaTerminal } from "react-icons/fa";
 import { LuGraduationCap } from "react-icons/lu";
+import { resume } from "@/lib/resume";
 import aws_csa from "@/public/badges/aws_csa.png"
 import aws_csp from "@/public/badges/aws_csp.png"
 import aws_dva from "@/public/badges/aws_dva.png"
 import aws_dve from "@/public/badges/aws_dve.png"
 import ccnpe from "@/public/badges/ccnpe.png"
 import ccsec from "@/public/badges/ccsec.png"
-import lpi from "@/public/badges/lpi.png"
 import mcaa from "@/public/badges/mcaa.png"
 import mcasa from "@/public/badges/mcasa.png"
 import mcde from "@/public/badges/mcde.png"
@@ -16,11 +16,9 @@ import vcpdc from "@/public/badges/vcpdc.png"
 import vcpnv from "@/public/badges/vcpnv.png"
 import cka from "@/public/badges/cka.png"
 import ckad from "@/public/badges/ckad.png"
-import vcp from "@/public/badges/vcp.png"
 import pcne from "@/public/badges/pcne.png"
 import pcde from "@/public/badges/pcde.png"
 import pcsp from "@/public/badges/pcsp.png"
-import ibm from "@/public/badges/ibm.png"
 import eca from "@/public//badges/eca.png"
 import ecp from "@/public//badges/ecp.png"
 import egp from "@/public//badges/egp.png"
@@ -38,109 +36,30 @@ import { SiAnsible, SiApache, SiAqua, SiArtifacthub, SiBuildkite,
 } from "react-icons/si";
 
 
+/** Work record for /about, derived from lib/resume.ts (the single source). Newest first, then earlier roles, then education. */
 export const experiencesData = [
-  {
-    title: "Customer Architect",
-    location: "Elastic, CA, US",
-    description:
-      "Serve as a Trusted Technical Advisor, driving adoption and expansion of Elastic solutions across Search, Observability, and Security. \
-      Design and deliver AI-powered architectures leveraging Elasticsearch enterprise-grade features. \
-      Architect enterprise-grade observability platforms using defined solutions for petabyte-scale log analytics. \
-      Lead Security use-case deployments integrating SIEM, threat detection, and Attack Discovery for Fortune 500 customers. \
-      Define Technical Success Plans aligned to customer business outcomes, translating complex Elastic capabilities into measurable ROI.",
+  ...resume.roles.map((r) => ({
+    title: r.title,
+    location: `${r.company}, ${r.place}`,
+    bullets: [...r.bullets] as string[],
     icon: React.createElement(CgOrganisation),
-    date: "2024 - Present",
-  },
-  {
-    title: "Lead Cloud Solutions Architect",
-    location: "360ace Tech, AB, CA",
-    description:
-      "As a consultant and owner of 360ace Tech, I helped multiple small and large-scale customers in their cloud adoption journey, \
-      implementing foundation, migration, security, and integration solutions based on their business requirements.",
-    icon: React.createElement(CgOrganisation),
-    date: "2021 - 2024",
-  },
-  {
-    title: "Cloud Architect",
-    location: "SADA, CA, US",
-    description:
-      "Designed and implemented large-scale foundational cloud architectural solutions for enterprise customers. \
-      Performed large-scale workload migration, implementing infrastructure and application modernization requirements for customers. \
-      Performed training and workshops for internal and external stakeholders with an emphasis on cloud adoption strategies.",
+    date: r.dates.replace(" – ", " - "),
+  })),
+  ...resume.earlier.map((r) => ({
+    title: r.title,
+    location: `${r.company}, ${r.place}`,
+    bullets: [r.text] as string[],
     icon: React.createElement(CgWorkAlt),
-    date: "2021 - 2023",
-  },
+    date: r.dates.replace(" – ", " - "),
+  })),
   {
-    title: "Customer Engineer, Reliability Engineer",
-    location: "Tetrate, Milpitas, US",
-    description:
-      "Implemented application modernization solutions with dockerized workloads and Kubernetes across large scale enterprise, \
-      leveraging istio service mesh for network security and traffic management, with Otel, for trace visibility and logging, and Elasticsearch for search and analytics.\
-      Implemented SRE solutions for customers across multiple cloud platforms for day-2 operations of Tetrate service bridge and Istio solutions.",
-    icon: React.createElement(CgWorkAlt),
-    date: "2021 - 2021",
-  },
-  {
-    title: "DevOps Specialist",
-    location: "Telus, Edmonton, CA",
-    description:
-      "Designed and implemented application modernization, CI/CD, and platform engineering for workloads across multiple frameworks. \
-      Architected and implemented containerized workloads across various Kubernetes platforms - AKS, GKE, EKS, and OpenShift. \
-      Designed, implemented, and managed SDDC (virtualization, storage, networking) solutions for CDN workloads required for content delivery.\
-      Leveraged IaC for automated deployments across the enterprise.",
-    icon: React.createElement(CgWorkAlt),
-    date: "2019 - 2021",
-  },
-  {
-    title: "Senior Network and Systems Administrator",
-    location: "Calgary Parking Authority, Calgary, CA",
-    description:
-      "Redesigned the enterprise IT infrastructure and implemented key security solutions to meet PCI and SOC standards. \
-      Implemented Office 365 integrations and migration of internal services to cloud platforms on AWS and Azure. \
-      Designed, implemented and managed SDDC (virtualization, storage, networking) solutions. \
-      Implemented application modernization solutions with dockerized workloads and Kubernetes accross the enterprise",
-    icon: React.createElement(CgWorkAlt),
-    date: "2018 - 2019",
-  },
-  {
-    title: "Manager Infrastructure and Enterprise Solution ",
-    location: "Web4Africa, Johannesburg, ZA",
-    description:
-      "Implemented data center collocation across multiple regions in Africa. \
-      Designed and implemented IPv6 adoption across the enterprise with internet (BGP) and internet exchange integration across multiple data centers. \
-      Designed and implemented large-scale infrastructure automation and proactive management across the web hosting platform improving customer retention and overall business revenue",
-    icon: React.createElement(CgWorkAlt),
-    date: "2016 - 2018",
-  },
-    {
-    title: "Infrastructure and DevOps Specialist",
-    location: "Konga Online, Capetown, ZA",
-    description:
-      "Implemented campus area infrastructure solution for the company warehouse. \
-      Developed and implemented hybrid cloud solutions for VPN, authentication, database and ETL solutions across on-premise end-users and the cloud infrastructure. \
-      Developed and implemented CICD solutions, monitoring and management of local and cloud-based infrastructure and application.",
-    icon: React.createElement(CgWorkAlt),
-    date: "2014 - 2016",
-  },
-  {
-    title: "Enterprise Network Infrastructure Engineer",
-    location: "Swift Networks, Lagos, NG",
-    description:
-      "Expanded Data Center Infrastructure, integrating new Servers, networking devices and WAN connectivity. \
-      Managed over 200 cell sites and integrated LTE solutions across the metropolis and other regions in the country. \
-      Coordinated and managed 5 - 10 engineers providing training, mentorship and guidance for improving their work efficiently",
-    icon: React.createElement(CgWorkAlt),
-    date: "2011 - 2014",
-  },
-    {
-    title: "B.Eng, Electronics Engineering",
-    location: "FUTA - Akure, NG",
-    description:
-      "Graduated as an Eletrical and Eletronics Engineer with a major in Embedded systems.",
+    title: resume.education.degree,
+    location: resume.education.school,
+    bullets: [] as string[],
     icon: React.createElement(LuGraduationCap),
-    date: "2010",
+    date: resume.education.year,
   },
-] as const;
+];
 
 export const projectsData = [
   {
@@ -279,122 +198,107 @@ export const projectsData = [
 
 export const badgesData = [
   {
-    name: 'Google',
+    name: 'Google Cloud Professional Cloud Architect',
     imageUrl: pcsp,
     link: 'https://www.credly.com/badges/e9cc1482-4ce4-4612-ae49-57a4274a187f/public_url'
   },
   {
-    name: 'Google',
+    name: 'Google Cloud Professional Cloud DevOps Engineer',
     imageUrl: pcde,
     link: 'https://www.credly.com/badges/4655d6b3-45de-4240-b250-2a5256c57ece/public_url'
   },
   {
-    name: 'Google',
+    name: 'Google Cloud Professional Cloud Network Engineer',
     imageUrl: pcne,
     link: 'https://www.credly.com/badges/2faa9cc1-8f7b-4e79-aaf5-ed1c336dc816/public_url'
   },
   {
-    name: 'AWS',
+    name: 'AWS Certified Solutions Architect Associate',
     imageUrl: aws_csa,
     link: 'https://www.credly.com/badges/0b76c83a-764c-45d7-af6d-fd988a71d75b/public_url'
   },
   {
-    name: 'AWS',
+    name: 'AWS Certified Solutions Architect Professional',
     imageUrl: aws_csp,
     link: 'https://www.credly.com/badges/6c7b373a-99b9-4f03-a5d9-7d0bf7bee7ea/public_url'
   },
   {
-    name: 'AWS',
+    name: 'AWS Certified Developer Associate',
     imageUrl: aws_dva,
     link: 'https://www.credly.com/badges/4715ed76-850e-4888-a10b-7494b0192631/public_url'
   },
   {
-    name: 'AWS',
+    name: 'AWS Certified DevOps Engineer Professional',
     imageUrl: aws_dve,
     link: 'https://www.credly.com/badges/4b23e5a4-5c6f-48f1-bd4f-a2b200b69aeb/public_url'
   },
   {
-    name: 'Cisco',
+    name: 'Cisco CCNP Enterprise',
     imageUrl: ccnpe,
     link: 'https://www.credly.com/badges/76f85025-c770-44ce-b9bf-1da6a88721a4/public_url'
   },
     {
-    name: 'Cisco',
+    name: 'Cisco CCS-Enterprise',
     imageUrl: ccsec,
     link: 'https://www.credly.com/badges/359c27ab-1ffc-49a0-99e4-bc2ebfda2611/public_url'
   },
   {
-    name: 'cka',
+    name: 'Certified Kubernetes Administrator (CKA)',
     imageUrl: cka,
     link: 'https://www.credly.com/badges/d3242df6-9f0c-4d8b-8635-de0f6109c3cf/public_url'
   },
   {
-    name: 'ckad',
+    name: 'Certified Kubernetes Application Developer (CKAD)',
     imageUrl: ckad,
     link: 'https://www.credly.com/badges/8302e9f7-271a-4759-8360-a39d8b591e7f/public_url'
   },
     {
-    name: 'Azure',
+    name: 'Microsoft Azure Administrator Associate',
     imageUrl: mcaa,
     link: 'https://www.credly.com/badges/d9fab1cf-6ed8-4cb4-b17d-c228576a15a4/public_url'
   },
   {
-    name: 'Azure',
+    name: 'Microsoft Azure Solutions Architect Expert',
     imageUrl: mcasa,
     link: 'https://www.credly.com/badges/cc01feb8-cc75-4a1b-b7e9-3de58ae4e5e3/public_url'
   },
   {
-    name: 'Azure',
+    name: 'Microsoft Azure DevOps Engineer Expert',
     imageUrl: mcde,
     link: 'https://www.credly.com/badges/b972e9c9-2692-46a5-8d5e-ea438e83db8e/public_url'
   },
   {
-    name: 'Vmware',
+    name: 'VMware VCP-DCV',
     imageUrl: vcpdc,
     link: 'https://www.credly.com/badges/3ba15641-57ee-4450-8f36-165b15be3b33/public_url'
   },
   {
-    name: 'Vmware',
+    name: 'VMware VCP-NV',
     imageUrl: vcpnv,
     link: 'https://www.credly.com/badges/b0722524-88fb-4609-85d1-10885aed4316/public_url'
   },
   {
-    name: 'Vmware',
-    imageUrl: vcp,
-    link: 'https://www.credly.com/badges/b44d184a-b5fe-42bc-ab76-5fbbfc9ca162/public_url'
-  },
-  {
-    name: 'LPI',
-    imageUrl: lpi,
-    link: 'https://www.credly.com/badges/189800d9-c526-454c-842a-737cbf6241a6/public_url'
-  },
-  {
-    name: 'IBM',
-    imageUrl: ibm,
-    link: 'https://www.credly.com/badges/a7c4be24-c6f8-4b92-98fe-adac902bb53d/public_url'
-  },
-  {
-    name: 'ECA',
+    name: 'Elastic Certified Analyst',
     imageUrl: eca,
     link: 'https://api.accredible.com/v1/frontend/credential_website_embed_image/certificate/112635855'
   },
   {
-    name: 'ECP',
+    name: 'Elastic Certified Observability Professional',
     imageUrl: ecp,
     link: 'https://api.accredible.com/v1/frontend/credential_website_embed_image/certificate/112843115'
   },
   {
-    name: 'EGP',
+    name: 'Elastic Certified GenAI Associate',
     imageUrl: egp,
     link: 'https://api.accredible.com/v1/frontend/credential_website_embed_image/certificate/117018699'
   },
   {
-    name: 'ECS',
+    name: 'Elastic Certified SIEM Analyst',
     imageUrl: ecs,
     link: 'https://api.accredible.com/v1/frontend/credential_website_embed_image/certificate/173915287'
   },
   {
-    name: 'ECE',
+    name: 'Elastic Certified Engineer',
     imageUrl: ece,
     link: 'https://api.accredible.com/v1/frontend/credential_website_embed_image/certificate/157686572'
   },

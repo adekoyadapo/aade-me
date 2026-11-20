@@ -21,7 +21,7 @@ export default function Intro() {
   return (
     <section id="home" data-hero className="hero">
       <WireframeBg />
-      <h1 className="sr-only">Ade A.</h1>
+      <h1 className="sr-only">Ade A., Lead Architect, Enterprise Solutions Architecture</h1>
 
       <div className="art-field" data-art>
         {projectsData.map((p, i) => (
@@ -91,7 +91,8 @@ export default function Intro() {
 
       <div className="hero-id">
         <p className="hero-id-name">Ade A.</p>
-        <p className="hero-id-role">Enterprise Solutions Architect<span className="hero-id-more">, Customer Architect at Elastic</span></p>
+        <p className="hero-id-role">Lead Architect, Enterprise Solutions Architecture<span className="hero-id-more">Agentic AI Programs &middot; Multi-Cloud Platforms</span></p>
+        <p className="hero-id-org">Customer Architect at Elastic</p>
         <p className="hero-id-links">
           <Link href="/blog">Writing</Link>
           <Link href="/contact">Contact</Link>

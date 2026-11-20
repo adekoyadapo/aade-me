@@ -13,21 +13,21 @@ const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v
 
 export function slotLayout(W: number, H: number): Slot[] {
   const wide = W >= 1024;
-  const fw = wide ? Math.min(W * 0.35, H <= 700 ? Math.min(W * 0.35, H * 0.8) : 736) : W * 0.86;
+  const fw = wide ? Math.min(W * 0.35, H <= 700 ? Math.min(W * 0.35, H * 0.8) : 736) : W * 0.66;
   const far = wide ? 1.72 : 1.62;
   const tile1 = wide ? clamp(W * 0.125, 120, 230) : W * 0.27;
   const tile = wide ? clamp(W * 0.118, 110, 215) : W * 0.22;
   // [x%, y%, r, ry]
   const t = wide
-    ? [[66.5, 54, 1], [91.5, 17, 33], [94, 89, -33], [3.5, 83, 25], [4.5, 19, -30], [-8, -10, -40], [-12, 40, -10], [-12, 70, 20]]
+    ? [[66.5, 54, 1], [91.5, 17, 33], [94, 89, -33], [3.5, 83, 25], [3.5, 44, -30], [-8, -10, -40], [-12, 40, -10], [-12, 70, 20]]
     : [[76, 72, 1], [96, 17, 30], [98, 88, -32], [2, 80, 26], [3, 18, -28], [-14, 4, -40], [-22, 40, -10], [-24, 62, 20]];
   const ry = wide ? 10 : 7;
-  const out: Slot[] = [{ x: (wide ? 22.6 : 50) * W / 100, y: (wide ? 53.5 : 28) * H / 100, w: fw, h: fw / far, r: 0, ry, feat: true, z: 6, k: 8, a: 1 }];
+  const out: Slot[] = [{ x: (wide ? 22.6 : 50) * W / 100, y: (wide ? 53.5 : 38) * H / 100, w: fw, h: fw / far, r: 0, ry, feat: true, z: 6, k: 8, a: 1 }];
   t.forEach(([x, y, r], i) => {
     const w = i === 0 ? tile1 : tile;
     out.push({ x: x * W / 100, y: y * H / 100, w, h: w, r, ry: 0, feat: false, z: i === 0 ? 5 : 3, k: i === 0 ? 16 : 12, a: i < 4 ? 1 : 0 });
   });
-  out.push({ x: (wide ? -16 : -30) * W / 100, y: (wide ? 53.5 : 28) * H / 100, w: fw, h: fw / far, r: wide ? -3 : -4, ry, feat: true, z: 3, k: 8, a: 0 });
+  out.push({ x: (wide ? -16 : -30) * W / 100, y: (wide ? 53.5 : 38) * H / 100, w: fw, h: fw / far, r: wide ? -3 : -4, ry, feat: true, z: 3, k: 8, a: 0 });
   return out;
 }
 

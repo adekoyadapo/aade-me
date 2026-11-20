@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   title: { absolute: title },
   description,
   alternates: { canonical: "https://aade.me/contact" },
-  openGraph: { title, description, url: "https://aade.me/contact", type: "website", images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "Ade A., Enterprise Solutions Architect" }] },
+  openGraph: { title, description, url: "https://aade.me/contact", type: "website", images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "Ade A., Lead Architect, Enterprise Solutions Architecture" }] },
   twitter: { card: "summary_large_image", title, description, images: ["/opengraph-image"] },
   robots: { index: true, follow: true },
 };

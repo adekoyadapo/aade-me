@@ -24,21 +24,6 @@ const mark = () => {
   } catch {}
 };
 
-export function CvPrintButton() {
-  return (
-    <button
-      type="button"
-      onClick={() => window.print()}
-      className="flex items-center gap-2 rounded-full bg-fg px-4 py-2 text-sm font-medium text-bg transition hover:scale-105"
-    >
-      <svg viewBox="0 0 20 20" width="16" height="16" fill="currentColor" aria-hidden="true">
-        <path d="M10 13.5 5.5 9l1.1-1.1 2.6 2.6V3h1.6v7.5l2.6-2.6L14.5 9 10 13.5ZM4 15.5h12V17H4v-1.5Z" />
-      </svg>
-      Save as PDF
-    </button>
-  );
-}
-
 export function CvReplayButton() {
   return (
     <button type="button" className="cv-replay" onClick={() => window.dispatchEvent(new Event("cv-replay"))}>

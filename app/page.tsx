@@ -7,19 +7,19 @@ import { ldJson } from "@/lib/jsonld";
 import PageTransition from "@/components/page-transition";
 
 export const metadata: Metadata = {
-  title: { absolute: "Ade A. | Enterprise Architect for Elasticsearch, Cloud, AI" },
-  description: "Enterprise Architect specializing in AI/ML platforms, cloud-native infrastructure, Elasticsearch, observability, and large-scale distributed systems.",
+  title: { absolute: "Ade A. | Lead Architect, Enterprise Solutions Architecture" },
+  description: "Lead Architect for enterprise solutions, agentic AI programs and multi-cloud platforms, with deep Elasticsearch, AI search, observability and security experience.",
   alternates: { canonical: "https://aade.me" },
   openGraph: {
-    title: "Ade A. | Enterprise Architect for Elasticsearch, Cloud, AI",
-    description: "Enterprise Architect specializing in AI/ML platforms, cloud-native infrastructure, Elasticsearch, observability, and large-scale distributed systems.",
+    title: "Ade A. | Lead Architect, Enterprise Solutions Architecture",
+    description: "Lead Architect for enterprise solutions, agentic AI programs and multi-cloud platforms, with deep Elasticsearch, AI search, observability and security experience.",
     url: "https://aade.me",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Ade A. | Enterprise Architect for Elasticsearch, Cloud, AI",
-    description: "Enterprise Architect specializing in AI/ML platforms, cloud-native infrastructure, Elasticsearch, observability, and large-scale distributed systems.",
+    title: "Ade A. | Lead Architect, Enterprise Solutions Architecture",
+    description: "Lead Architect for enterprise solutions, agentic AI programs and multi-cloud platforms, with deep Elasticsearch, AI search, observability and security experience.",
   },
 };
 
@@ -30,7 +30,11 @@ const jsonLd = [
     "@id": "https://aade.me/#person",
     name: "Ade A.",
     url: "https://aade.me",
-    jobTitle: "Enterprise Architect",
+    jobTitle: "Lead Architect, Enterprise Solutions Architecture",
+    description: "Lead Architect, Enterprise Solutions Architecture | Agentic AI Programs | Multi-Cloud Platforms",
+    worksFor: { "@type": "Organization", name: "Elastic", url: "https://www.elastic.co" },
+    alumniOf: { "@type": "CollegeOrUniversity", name: "Federal University of Technology, Akure" },
+    knowsAbout: ["Agentic AI", "AI and ML solution architecture", "RAG and enterprise retrieval", "Model Context Protocol", "Vector and hybrid search", "AI evaluation and observability", "Elasticsearch", "Amazon Bedrock", "Kubernetes", "OpenTelemetry", "DevSecOps", "SIEM", "Infrastructure as Code", "AWS", "Azure", "Google Cloud"],
     sameAs: [
       "https://www.linkedin.com/in/adekoya-adedapomola/",
       "https://github.com/adekoyadapo",

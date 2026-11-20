@@ -21,11 +21,11 @@ const geistMono = Geist_Mono({ subsets: ["latin"], display: "swap", variable: "-
 export const metadata = {
   metadataBase: new URL("https://aade.me"),
   title: {
-    default: "Ade A. | Enterprise Architect",
+    default: "Ade A. | Lead Architect, Enterprise Solutions Architecture",
     template: "%s | Ade A.",
   },
-  description: "Enterprise Architect specializing in AI/ML platforms, cloud-native infrastructure, Elasticsearch, observability, and large-scale distributed systems.",
-  keywords: ["Enterprise Architect", "Cloud Architecture", "AI Platform", "Elasticsearch", "Observability", "Distributed Systems", "DevOps", "Platform Engineering"],
+  description: "Lead Architect for enterprise solutions, agentic AI programs and multi-cloud platforms, with deep Elasticsearch, AI search, observability and security experience.",
+  keywords: ["Lead Architect", "Enterprise Solutions Architecture", "Agentic AI", "Multi-Cloud Platforms", "AI Search", "Elasticsearch", "Observability", "Cloud Architecture"],
   authors: [{ name: "Ade A.", url: "https://aade.me" }],
   creator: "Ade A.",
   openGraph: {
@@ -33,13 +33,13 @@ export const metadata = {
     locale: "en_US",
     url: "https://aade.me",
     siteName: "Ade A.",
-    title: "Ade A. | Enterprise Architect",
-    description: "Enterprise Architect specializing in AI/ML platforms, cloud-native infrastructure, Elasticsearch, observability, and large-scale distributed systems.",
+    title: "Ade A. | Lead Architect, Enterprise Solutions Architecture",
+    description: "Lead Architect for enterprise solutions, agentic AI programs and multi-cloud platforms, with deep Elasticsearch, AI search, observability and security experience.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Ade A. | Enterprise Architect",
-    description: "Enterprise Architect specializing in AI/ML platforms, cloud-native infrastructure, Elasticsearch, observability, and large-scale distributed systems.",
+    title: "Ade A. | Lead Architect, Enterprise Solutions Architecture",
+    description: "Lead Architect for enterprise solutions, agentic AI programs and multi-cloud platforms, with deep Elasticsearch, AI search, observability and security experience.",
   },
   robots: {
     index: true,

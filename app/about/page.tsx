@@ -7,30 +7,31 @@ import PageTransition from "@/components/page-transition";
 import Reveal from "@/components/reveal";
 import LocalTime from "@/components/local-time";
 import { badgesData, experiencesData, skillsData } from "@/lib/data";
+import { resume } from "@/lib/resume";
 import { socialLinks } from "@/lib/links";
 import { getGithubActivity } from "@/lib/github-activity";
 import GithubActivity from "@/components/github-activity";
 
 export const revalidate = 21600;
 
-const title = "About Ade A.: Customer Architect at Elastic, 15 Years";
+const title = "About Ade A.: Lead Architect, Enterprise Solutions Architecture";
 const description =
-  "Fifteen years from data centres in Lagos to Enterprise Solutions Architecture. Career route, skills and certifications of Ade A., Customer Architect.";
+  "15+ years from data centers in Lagos to enterprise AI. Career route, scope and certifications of Ade A., Lead Architect for agentic AI programs and multi-cloud platforms.";
 
 export const metadata: Metadata = {
   title: { absolute: title },
   description,
   alternates: { canonical: "https://aade.me/about" },
-  openGraph: { title, description, url: "https://aade.me/about", type: "profile", images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "Ade A., Enterprise Solutions Architect" }] },
+  openGraph: { title, description, url: "https://aade.me/about", type: "profile", images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "Ade A., Lead Architect, Enterprise Solutions Architecture" }] },
   twitter: { card: "summary_large_image", title, description, images: ["/opengraph-image"] },
   robots: { index: true, follow: true },
 };
 
 /** `**word**` marks bold text. Each word becomes a span that lights up on scroll (CSS only; plain text without it). */
 const letter = [
-  "I have spent 15+ years at the intersection of infrastructure, cloud, and software, starting with physical data centres and routing tables in Lagos, and working my way through DevOps, SRE, platform engineering, and now **Enterprise Solutions Architecture**. Each role taught me that the best technical decisions are the ones grounded in real-world constraints, not just what looks clean on a whiteboard.",
-  "Today I work as a **Customer Architect at Elastic**, helping enterprise teams unlock the full potential of the Elastic Stack across **Search, Observability, and Security**. That means designing AI-powered search pipelines with vector embeddings and ELSER, building petabyte-scale log analytics platforms with OpenTelemetry and LogsDB, and architecting SIEM and threat-detection solutions for Fortune 500 environments.",
-  "The thread running through all of it is the same: I like hard problems. Whether it is cutting Elasticsearch storage costs, wiring up an **AI/ML inference pipeline** in the cloud, or helping a platform team get their first real SLO in place, I get satisfaction from making complex systems simpler and more reliable for the people who depend on them.",
+  "I am an enterprise architect with **15+ years** in infrastructure, cloud, security and AI. I started as a network engineer running data centers and cell sites in Lagos, then moved through DevOps, cloud architecture and engineering leadership into **enterprise AI**.",
+  "At Elastic I lead **agentic AI and AI search architecture** for more than 5 strategic customers, with results that include SOC triage cut from hours to minutes and a three-week vulnerability assessment turned into a weekly automated run.",
+  "Before Elastic I led a 12-person engineering organization at Deloitte through three direct leads, delivering more than 10 applications across seven workstreams on AWS, Google Cloud and Azure. Earlier, I built a 20-person technical organization at Web4Africa, owned a $5M–$10M enterprise portfolio, and supported about $50M in cloud solution opportunities at SADA.",
 ];
 
 function Lit({ text, offset }: { text: string; offset: number }) {
@@ -56,8 +57,7 @@ function Lit({ text, offset }: { text: string; offset: number }) {
 
 const company = (loc: string) => loc.split(",")[0].trim();
 const roles = experiencesData.filter((e) => !/^B\.Eng/.test(e.title));
-const since = Math.min(...experiencesData.map((e) => parseInt(e.date.slice(0, 4), 10)).filter((y) => y > 2010));
-const current = experiencesData[0];
+const since = Math.min(...experiencesData.map((e) => parseInt(e.date.match(/\d{4}/)?.[0] ?? "0", 10)).filter((y) => y > 2010));
 
 const label = "micro";
 
@@ -85,7 +85,7 @@ export default async function AboutPage() {
                 <span aria-hidden="true" className="postmark postmark-b" />
                 <h1 id="who" className="text-[length:var(--fs-h4)] font-medium leading-tight">Ade A.</h1>
                 <p className="mt-1 font-mono text-xs uppercase text-mute">
-                  {current.title} at Elastic <span aria-hidden="true">::</span> {new Date().getFullYear() - since}+ years
+                  {resume.headlineLead} <span aria-hidden="true">::</span> {new Date().getFullYear() - since}+ years
                 </p>
                 <ul className="mt-auto flex flex-wrap gap-x-4 gap-y-1 pt-6 font-mono text-xs uppercase">
                   {socialLinks.map((l) => (
@@ -108,7 +108,7 @@ export default async function AboutPage() {
                 <dt className="uppercase text-mute">Local::</dt>
                 <dd><LocalTime /></dd>
                 <dt className="uppercase text-mute">Role::</dt>
-                <dd>{current.title}, {company(current.location)}</dd>
+                <dd>{resume.headlineLead}</dd>
                 <dt className="uppercase text-mute">Years::</dt>
                 <dd>{new Date().getFullYear() - since}+</dd>
                 <dt className="uppercase text-mute">Roles::</dt>
@@ -151,11 +151,17 @@ export default async function AboutPage() {
                     <tr key={e.title + e.date} style={{ "--i": Math.min(i, 10) } as React.CSSProperties} className="rv-item border-b border-line align-top">
                       <th scope="row" className="py-4 pr-4 font-medium">{company(e.location)}<span className="block text-sm font-normal text-mute">{e.location.split(",").slice(1).join(",").trim()}</span></th>
                       <td className="py-4 pr-4">
-                        <span className="capitalize">{e.title.trim()}</span>
+                        <span>{e.title.trim()}</span>
+                        {e.bullets.length ? (
                         <details className="mt-1 text-sm text-mute">
                           <summary className="cursor-pointer select-none hover:text-fg">Details</summary>
-                          <p className="mt-2 max-w-[70ch]">{e.description.replace(/\s+/g, " ")}</p>
+                          <ul className="mt-2 max-w-[70ch] list-disc space-y-1 pl-4">
+                            {e.bullets.map((b) => (
+                              <li key={b.slice(0, 32)}>{b}</li>
+                            ))}
+                          </ul>
                         </details>
+                        ) : null}
                       </td>
                       <td className="micro whitespace-nowrap py-4 !text-fg">{e.date}</td>
                     </tr>
@@ -163,6 +169,18 @@ export default async function AboutPage() {
                 </tbody>
               </table>
             </div>
+          </section>
+
+          {/* Scope */}
+          <section aria-labelledby="scope" className="mt-16">
+            <h2 id="scope" className={label}>Technical and leadership scope</h2>
+            <ul data-rv-group className="rv-chips mt-6 flex flex-wrap gap-2">
+              {resume.scope.map((name, i) => (
+                <li key={name} style={{ "--i": Math.min(i, 30) } as React.CSSProperties} className="rv-item rounded-md border border-line bg-surface px-3 py-2 text-sm">
+                  {name}
+                </li>
+              ))}
+            </ul>
           </section>
 
           {/* Skills */}
@@ -181,6 +199,14 @@ export default async function AboutPage() {
           {/* Certifications */}
           <section aria-labelledby="certs" className="mt-16">
             <h2 id="certs" className={label}>Certifications on file</h2>
+            <dl className="mt-6 grid gap-x-8 gap-y-3 text-sm sm:grid-cols-[12rem_1fr]">
+              {resume.certs.map((g) => (
+                <React.Fragment key={g.group}>
+                  <dt className="font-mono text-xs uppercase text-mute">{g.group}</dt>
+                  <dd>{g.items.join(" | ")}</dd>
+                </React.Fragment>
+              ))}
+            </dl>
             <ul data-rv-group className="rv-badges mt-6 flex flex-wrap gap-2">
               {badgesData.map(({ name, link, imageUrl }, i) => (
                 <li key={i} style={{ "--i": Math.min(i, 20) } as React.CSSProperties} className="rv-item rounded-lg border border-line bg-surface p-2">
